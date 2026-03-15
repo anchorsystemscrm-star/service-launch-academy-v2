@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 
 import { BusinessCard } from "@/components/BusinessCard";
@@ -33,10 +33,7 @@ export default function DashboardPage() {
   const [query, setQuery] = useState("");
   const [filters, setFilters] = useState<string[]>([]);
 
-  const filteredBusinesses = useMemo(
-    () => filterBusinesses(businesses, query, filters),
-    [filters, query]
-  );
+  const filteredBusinesses = filterBusinesses(businesses, query, filters);
 
   function toggleFilter(filterId: string) {
     setFilters((current) =>

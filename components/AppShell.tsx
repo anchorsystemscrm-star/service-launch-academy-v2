@@ -14,7 +14,8 @@ export function AppShell({ children }: PropsWithChildren) {
   const router = useRouter();
   const { hydrated, profile } = useAccessProfile();
   const [sessionResolved, setSessionResolved] = useState(!isSupabaseConfigured());
-  const isLoginPage = pathname === "/login";
+  const normalizedPathname = pathname ?? "";
+  const isLoginPage = normalizedPathname === "/login";
 
   useEffect(() => {
     if (!isSupabaseConfigured()) {
@@ -69,7 +70,7 @@ export function AppShell({ children }: PropsWithChildren) {
 
       if (event === "SIGNED_IN" || event === "TOKEN_REFRESHED") {
         const nextProfile = readClientAccessProfile();
-        if (pathname === "/login") {
+        if (normalizedPathname === "/login") {
           router.replace(getFirstAvailableAppPath(nextProfile));
         }
       }
@@ -79,17 +80,17 @@ export function AppShell({ children }: PropsWithChildren) {
       active = false;
       subscription.unsubscribe();
     };
-  }, [isLoginPage, pathname, router]);
+  }, [isLoginPage, normalizedPathname, router]);
 
   useEffect(() => {
     if (!sessionResolved || !hydrated || isLoginPage) {
       return;
     }
 
-    if (!canAccessPath(pathname, profile)) {
+    if (!canAccessPath(normalizedPathname, profile)) {
       router.replace(getFirstAvailableAppPath(profile));
     }
-  }, [hydrated, isLoginPage, pathname, profile, router, sessionResolved]);
+  }, [hydrated, isLoginPage, normalizedPathname, profile, router, sessionResolved]);
 
   if (!isLoginPage && (!sessionResolved || !hydrated)) {
     return (

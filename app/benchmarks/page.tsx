@@ -1,7 +1,5 @@
 "use client";
 
-import { useMemo } from "react";
-
 import { KPIInputs } from "@/components/KPIInputs";
 import { LockedFeatureCard } from "@/components/LockedFeatureCard";
 import { businesses } from "@/data/businesses";
@@ -12,7 +10,7 @@ import { useAccessProfile, useBlueprintProgress, useKpiState } from "@/utils/sto
 
 export default function BenchmarksPage() {
   const { profile } = useAccessProfile();
-  const business = useMemo(() => getFallbackBusiness(profile.selectedBusinessId), [profile.selectedBusinessId]);
+  const business = getFallbackBusiness(profile.selectedBusinessId);
   const { progress } = useBlueprintProgress(business.id);
   const { kpis, setKpis } = useKpiState(business.id, defaultKpiData);
   const hasCoreAccess = hasTierAccess(profile.tier, "core");

@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 
@@ -27,14 +27,12 @@ export function Navbar({ profile }: NavbarProps) {
   const router = useRouter();
   const [modalOpen, setModalOpen] = useState(false);
   const [loggingOut, setLoggingOut] = useState(false);
+  const normalizedPathname = pathname ?? "";
 
   const setupComplete = isSetupComplete(profile);
-  const currentLabel = useMemo(() => {
-    if (pathname.startsWith("/start")) {
-      return "Get Started";
-    }
-    return navItems.find((item) => pathname.startsWith(item.href))?.label ?? "Workspace";
-  }, [pathname]);
+  const currentLabel = normalizedPathname.startsWith("/start")
+    ? "Get Started"
+    : navItems.find((item) => normalizedPathname.startsWith(item.href))?.label ?? "Workspace";
 
   async function handleLogout() {
     setLoggingOut(true);
@@ -53,7 +51,7 @@ export function Navbar({ profile }: NavbarProps) {
   }
 
   function renderNavItem(href: string, label: string, minTier: AccessProfile["tier"], compact = false) {
-    const active = pathname.startsWith(href);
+    const active = normalizedPathname.startsWith(href);
     const enabled = setupComplete && hasTierAccess(profile.tier, minTier);
     const baseClass = compact
       ? "rounded-xl px-3 py-2 text-sm font-medium"
@@ -139,7 +137,7 @@ export function Navbar({ profile }: NavbarProps) {
             <Link
               href="/start"
               className={`rounded-2xl px-4 py-3 text-sm font-medium transition ${
-                pathname.startsWith("/start")
+                normalizedPathname.startsWith("/start")
                   ? "border border-accent/60 bg-accent/10 text-white shadow-[inset_0_0_0_1px_rgba(83,180,255,0.18)]"
                   : "border border-transparent text-slate-300 hover:border-white/10 hover:bg-white/5 hover:text-white"
               }`}
@@ -219,7 +217,7 @@ export function Navbar({ profile }: NavbarProps) {
             <Link
               href="/start"
               className={`whitespace-nowrap rounded-xl px-3 py-2 text-sm font-medium transition ${
-                pathname.startsWith("/start")
+                normalizedPathname.startsWith("/start")
                   ? "border border-accent/60 bg-accent/10 text-white"
                   : "border border-white/10 bg-white/5 text-slate-200 hover:border-white/20 hover:bg-white/10"
               }`}

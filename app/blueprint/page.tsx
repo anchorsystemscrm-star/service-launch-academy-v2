@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 
 import { LockedFeatureCard } from "@/components/LockedFeatureCard";
 import { PhaseCard } from "@/components/PhaseCard";
@@ -24,12 +24,12 @@ const tabs = [
 export default function BlueprintPage() {
   const { profile } = useAccessProfile();
   const { activeBlueprintId, setActiveBlueprintId } = useActiveBlueprint();
-  const business = useMemo(() => getFallbackBusiness(profile.selectedBusinessId), [profile.selectedBusinessId]);
+  const business = getFallbackBusiness(profile.selectedBusinessId);
   const { progress, setWeekComplete } = useBlueprintProgress(business.id);
   const [activeTab, setActiveTab] = useState<(typeof tabs)[number]["id"]>("plan");
 
-  const phases = useMemo(() => buildBlueprint(business), [business]);
-  const scripts = useMemo(() => buildScripts(business), [business]);
+  const phases = buildBlueprint(business);
+  const scripts = buildScripts(business);
   const isActive = activeBlueprintId === business.id;
   const hasCoreAccess = hasTierAccess(profile.tier, "core");
   const hasProAccess = hasTierAccess(profile.tier, "pro");

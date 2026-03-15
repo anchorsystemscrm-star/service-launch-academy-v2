@@ -1,7 +1,5 @@
 "use client";
 
-import { useMemo } from "react";
-
 import { ChatWindow } from "@/components/ChatWindow";
 import { LockedFeatureCard } from "@/components/LockedFeatureCard";
 import { businesses } from "@/data/businesses";
@@ -11,13 +9,13 @@ import { useAccessProfile, useBlueprintProgress, useChatHistory } from "@/utils/
 
 export default function AICoachPage() {
   const { profile } = useAccessProfile();
-  const business = useMemo(() => getFallbackBusiness(profile.selectedBusinessId), [profile.selectedBusinessId]);
+  const business = getFallbackBusiness(profile.selectedBusinessId);
   const { progress } = useBlueprintProgress(business.id);
-  const initialMessage = useMemo(() => defaultChatIntro(business), [business]);
+  const initialMessage = defaultChatIntro(business);
   const { history, replaceHistory } = useChatHistory(business.id, initialMessage);
   const hasProAccess = hasTierAccess(profile.tier, "pro");
 
-  const phases = useMemo(() => buildBlueprint(business), [business]);
+  const phases = buildBlueprint(business);
   const currentPhase = phases[getPhaseIndexByProgress(progress)];
   const promptGroups = [
     { title: "Setup", prompts: business.promptSuggestions.setup },

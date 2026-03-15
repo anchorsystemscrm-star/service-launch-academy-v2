@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 
 import { businesses, businessTagLabels } from "@/data/businesses";
@@ -17,10 +17,7 @@ export default function StartPage() {
   const { setActiveBlueprintId } = useActiveBlueprint();
   const [pending, setPending] = useState(false);
 
-  const selectedBusiness = useMemo(
-    () => getFallbackBusiness(profile.selectedBusinessId),
-    [profile.selectedBusinessId]
-  );
+  const selectedBusiness = getFallbackBusiness(profile.selectedBusinessId);
 
   function completeSetup() {
     if (!profile.selectedBusinessId) {
