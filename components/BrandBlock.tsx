@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 
 type BrandBlockSize = "shell" | "login" | "compact";
+const BRAND_LOGO_SRC = "/anchor-systems-logo.png";
 
 interface BrandBlockProps {
   href?: string;
@@ -49,7 +50,7 @@ export function BrandBlock({
     <div className={`flex items-center ${config.gap}`}>
       <div className={`flex shrink-0 items-center justify-center border border-accent/25 bg-white/10 shadow-[0_12px_40px_rgba(4,12,24,0.28)] ${config.frame}`}>
         <Image
-          src="/logo.png"
+          src={BRAND_LOGO_SRC}
           alt="Anchor Systems logo"
           width={config.image}
           height={config.image}
