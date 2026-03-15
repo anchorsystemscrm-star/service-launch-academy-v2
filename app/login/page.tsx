@@ -1,9 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Image from "next/image";
 import { useRouter } from "next/navigation";
 
+import { BrandBlock } from "@/components/BrandBlock";
 import { getSupabaseBrowserClient, isSupabaseConfigured } from "@/lib/supabaseClient";
 import { getFirstAvailableAppPath } from "@/utils/access";
 import { readClientAccessProfile, setAccessCookie, syncTierFromSession } from "@/utils/storage";
@@ -127,27 +127,8 @@ export default function LoginPage() {
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(83,180,255,0.18),transparent_35%),radial-gradient(circle_at_bottom_right,rgba(58,212,166,0.12),transparent_30%)]" />
 
       <div className="relative grid w-full max-w-6xl overflow-hidden rounded-[32px] border border-white/10 bg-slate-950/60 shadow-premium backdrop-blur xl:grid-cols-[1.15fr_0.85fr]">
-        <section className="border-b border-white/10 p-8 sm:p-10 xl:border-b-0 xl:border-r">
-          <div className="flex items-center gap-4">
-            <div className="flex h-14 w-14 items-center justify-center rounded-[20px] border border-accent/30 bg-accent/10">
-              <Image
-                src="/logo.png"
-                alt="Anchor Systems logo"
-                width={34}
-                height={34}
-                className="rounded-2xl"
-              />
-            </div>
-
-            <div>
-              <p className="text-sm font-semibold uppercase tracking-[0.18em] text-accent">
-                Anchor Systems
-              </p>
-              <h1 className="mt-1 text-2xl font-semibold text-white sm:text-3xl">
-                Service Launch Academy
-              </h1>
-            </div>
-          </div>
+        <section className="border-b border-white/10 p-8 sm:p-10 xl:border-b-0 xl:border-r xl:pt-14">
+          <BrandBlock size="login" currentLabel="Premium launch operating system for service businesses" />
 
           <div className="mt-12">
             <p className="text-sm font-semibold uppercase tracking-[0.18em] text-muted">
@@ -176,6 +157,14 @@ export default function LoginPage() {
                 <p className="mt-2 text-sm text-muted">{item.label}</p>
               </div>
             ))}
+          </div>
+
+          <div className="mt-8 rounded-[24px] border border-white/10 bg-white/5 p-5">
+            <p className="text-sm font-semibold text-white">Preview-first access model</p>
+            <p className="mt-2 text-sm leading-6 text-muted">
+              New accounts start on Preview to explore service opportunities first. Core, Pro, and Elite unlock the deeper
+              operating system as account access expands.
+            </p>
           </div>
         </section>
 
@@ -246,6 +235,16 @@ export default function LoginPage() {
                 </button>
               </div>
             </form>
+
+            <div className="mt-6 rounded-[24px] border border-white/10 bg-white/5 p-5">
+              <p className="text-sm font-semibold text-white">Need plan details first?</p>
+              <p className="mt-2 text-sm leading-6 text-muted">
+                Once you sign in, you can compare Preview, Core, Pro, and Elite plans from the in-app pricing page.
+              </p>
+              <div className="mt-4 inline-flex rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm font-semibold text-white">
+                Pricing unlocks after sign-in
+              </div>
+            </div>
 
             {!configured && (
               <div className="mt-8 rounded-[24px] border border-white/10 bg-white/5 p-5">

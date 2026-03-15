@@ -117,6 +117,10 @@ export function getLockedCopy(requiredTier: SubscriptionTier) {
   return `${tierLabels[requiredTier]} tier required`;
 }
 
+export function getPricingHref(plan?: SubscriptionTier) {
+  return plan ? `/pricing?plan=${plan}` : "/pricing";
+}
+
 export function getUpgradeMessage(requiredTier: SubscriptionTier) {
   if (requiredTier === "core") {
     return "Upgrade to Core to unlock the full launch operating system.";

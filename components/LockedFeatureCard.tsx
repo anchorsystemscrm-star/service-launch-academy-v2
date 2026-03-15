@@ -1,7 +1,7 @@
 import Link from "next/link";
 
 import { SubscriptionTier } from "@/types/business";
-import { getUpgradeMessage, tierLabels } from "@/utils/access";
+import { getPricingHref, getUpgradeMessage, tierLabels } from "@/utils/access";
 
 interface LockedFeatureCardProps {
   title: string;
@@ -10,6 +10,8 @@ interface LockedFeatureCardProps {
   bullets: string[];
   ctaHref?: string;
   ctaLabel?: string;
+  secondaryCtaHref?: string;
+  secondaryCtaLabel?: string;
 }
 
 export function LockedFeatureCard({
@@ -17,11 +19,13 @@ export function LockedFeatureCard({
   requiredTier,
   description,
   bullets,
-  ctaHref = "/start",
-  ctaLabel = "View access details"
+  ctaHref = getPricingHref(requiredTier),
+  ctaLabel = requiredTier === "core" ? "Upgrade to Core" : requiredTier === "pro" ? "Upgrade to Pro" : "Upgrade to Elite",
+  secondaryCtaHref = getPricingHref(),
+  secondaryCtaLabel = "Compare Plans"
 }: LockedFeatureCardProps) {
   return (
-    <div className="rounded-[28px] border border-white/10 bg-[linear-gradient(180deg,rgba(19,29,47,0.95),rgba(11,18,31,0.98))] p-6 shadow-card">
+    <div className="rounded-[30px] border border-white/10 bg-[linear-gradient(180deg,rgba(19,29,47,0.98),rgba(9,16,28,0.98))] p-6 shadow-premium">
       <div className="flex flex-wrap items-center gap-3">
         <span className="rounded-full border border-amber-400/30 bg-amber-400/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.16em] text-amber-100">
           Locked
@@ -41,12 +45,20 @@ export function LockedFeatureCard({
         ))}
       </ul>
 
-      <Link
-        href={ctaHref}
-        className="mt-6 inline-flex rounded-2xl border border-accent/40 bg-accent/10 px-4 py-3 text-sm font-semibold text-white transition hover:border-accent/80 hover:bg-accent/15"
-      >
-        {ctaLabel}
-      </Link>
+      <div className="mt-6 flex flex-col gap-3 sm:flex-row">
+        <Link
+          href={ctaHref}
+          className="inline-flex items-center justify-center rounded-2xl border border-accent/40 bg-accent/10 px-4 py-3 text-sm font-semibold text-white transition hover:border-accent/80 hover:bg-accent/20"
+        >
+          {ctaLabel}
+        </Link>
+        <Link
+          href={secondaryCtaHref}
+          className="inline-flex items-center justify-center rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm font-semibold text-white transition hover:border-white/20 hover:bg-white/10"
+        >
+          {secondaryCtaLabel}
+        </Link>
+      </div>
     </div>
   );
 }

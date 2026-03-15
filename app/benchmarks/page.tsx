@@ -5,7 +5,7 @@ import { useMemo } from "react";
 import { KPIInputs } from "@/components/KPIInputs";
 import { LockedFeatureCard } from "@/components/LockedFeatureCard";
 import { businesses } from "@/data/businesses";
-import { hasTierAccess, tierLabels } from "@/utils/access";
+import { getPricingHref, hasTierAccess, tierLabels } from "@/utils/access";
 import { defaultKpiData, getFallbackBusiness, getTrackStatus, milestoneTemplate, buildBlueprint } from "@/utils/benchmarks";
 import { getCompletedWeeks } from "@/utils/benchmarks";
 import { useAccessProfile, useBlueprintProgress, useKpiState } from "@/utils/storage";
@@ -33,6 +33,7 @@ export default function BenchmarksPage() {
             "Phase-aware benchmark targets and on-track status",
             "Timeline visibility to keep launch execution disciplined"
           ]}
+          ctaHref={getPricingHref("core")}
         />
       </div>
     );

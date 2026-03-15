@@ -1,12 +1,13 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 
+import { BrandBlock } from "@/components/BrandBlock";
 import {
   AccessProfile,
+  getPricingHref,
   getLockedCopy,
   hasTierAccess,
   isSetupComplete,
@@ -89,24 +90,18 @@ export function Navbar({ profile }: NavbarProps) {
 
   return (
     <>
-      <aside className="fixed inset-y-0 left-0 z-40 hidden w-[19rem] border-r border-white/10 bg-slate-950/85 backdrop-blur lg:block">
-        <div className="flex h-full flex-col px-5 py-5">
-          <Link
-            href={setupComplete ? "/dashboard" : "/start"}
-            className="rounded-[26px] border border-white/10 bg-white/5 p-4 shadow-card transition hover:border-accent/40 hover:bg-white/10"
-          >
-            <div className="flex items-center gap-3">
-              <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-[20px] border border-accent/30 bg-accent/10">
-                <Image src="/logo.png" alt="Anchor Systems logo" width={34} height={34} className="rounded-xl" />
-              </div>
-              <div className="min-w-0">
-                <p className="truncate text-sm font-semibold text-white">Service Launch Academy</p>
-                <p className="truncate text-xs text-muted">Powered by Anchor Systems</p>
-              </div>
-            </div>
-          </Link>
+      <aside className="fixed inset-y-0 left-0 z-40 hidden w-[20rem] border-r border-white/10 bg-slate-950/88 backdrop-blur lg:block">
+        <div className="flex h-full flex-col px-5 pb-6 pt-8">
+          <div className="px-1">
+            <BrandBlock
+              href={setupComplete ? "/dashboard" : "/start"}
+              size="shell"
+              currentLabel={currentLabel}
+              className="block rounded-[28px] border border-white/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.08),rgba(255,255,255,0.03))] px-5 py-5 shadow-card transition hover:border-accent/40 hover:bg-white/10"
+            />
+          </div>
 
-          <div className="mt-6 rounded-[26px] border border-white/10 bg-white/5 p-4">
+          <div className="mt-7 rounded-[28px] border border-white/10 bg-white/5 p-5">
             <p className="text-xs font-semibold uppercase tracking-[0.16em] text-muted">Access Tier</p>
             <div className="mt-3 flex items-center justify-between gap-3">
               <span className="rounded-full border border-accent/30 bg-accent/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.14em] text-white">
@@ -122,9 +117,25 @@ export function Navbar({ profile }: NavbarProps) {
             <p className="mt-3 text-sm leading-6 text-muted">
               {setupComplete ? tierDescriptions[profile.tier] : "Complete setup to choose a business before entering the workspace."}
             </p>
+            <div className="mt-4 flex flex-col gap-2">
+              <Link
+                href={getPricingHref()}
+                className="inline-flex items-center justify-center rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm font-semibold text-white transition hover:border-white/20 hover:bg-white/10"
+              >
+                Compare Plans
+              </Link>
+              {profile.tier === "preview" && (
+                <Link
+                  href={getPricingHref("core")}
+                  className="inline-flex items-center justify-center rounded-2xl border border-accent/40 bg-accent/10 px-4 py-3 text-sm font-semibold text-white transition hover:border-accent/80 hover:bg-accent/20"
+                >
+                  Upgrade to Core
+                </Link>
+              )}
+            </div>
           </div>
 
-          <nav className="mt-6 grid gap-2">
+          <nav className="mt-7 grid gap-2">
             <Link
               href="/start"
               className={`rounded-2xl px-4 py-3 text-sm font-medium transition ${
@@ -138,7 +149,7 @@ export function Navbar({ profile }: NavbarProps) {
             {navItems.map((item) => renderNavItem(item.href, item.label, item.minTier))}
           </nav>
 
-          <div className="mt-auto rounded-[26px] border border-white/10 bg-white/5 p-4">
+          <div className="mt-auto rounded-[28px] border border-white/10 bg-white/5 p-5">
             <p className="text-sm font-semibold text-white">Anchor Systems</p>
             <p className="mt-2 text-sm leading-6 text-muted">
               Pipeline, follow-up automation, scheduling, invoicing, and review requests in one premium operating layer.
@@ -155,17 +166,17 @@ export function Navbar({ profile }: NavbarProps) {
       </aside>
 
       <header className="fixed inset-x-0 top-0 z-50 border-b border-accent/10 bg-slate-950/88 backdrop-blur">
-        <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-4 sm:px-6 lg:pl-[21rem] lg:pr-8">
+        <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-5 sm:px-6 lg:pl-[22rem] lg:pr-8">
           <div className="flex min-w-0 items-center gap-3">
-            <Link
+            <BrandBlock
               href={setupComplete ? "/dashboard" : "/start"}
-              className="flex h-12 w-12 shrink-0 items-center justify-center rounded-[18px] border border-accent/30 bg-accent/10 lg:hidden"
-            >
-              <Image src="/logo.png" alt="Anchor Systems logo" width={30} height={30} className="rounded-xl" />
-            </Link>
-            <div className="min-w-0">
-              <p className="truncate text-sm font-semibold text-white">Service Launch Academy</p>
-              <p className="text-xs text-muted">{currentLabel}</p>
+              size="compact"
+              currentLabel={currentLabel}
+              className="block lg:hidden"
+            />
+            <div className="hidden min-w-0 lg:block">
+              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-accent">Anchor Systems Workspace</p>
+              <p className="mt-1 truncate text-base font-semibold text-white">{currentLabel}</p>
             </div>
           </div>
 
@@ -173,6 +184,12 @@ export function Navbar({ profile }: NavbarProps) {
             <span className="hidden rounded-full border border-white/10 bg-white/5 px-3 py-2 text-xs font-semibold uppercase tracking-[0.14em] text-slate-200 sm:inline-flex">
               {tierLabels[profile.tier]}
             </span>
+            <Link
+              href={getPricingHref()}
+              className="hidden rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm font-semibold text-white transition hover:border-white/20 hover:bg-white/10 sm:inline-flex"
+            >
+              Pricing
+            </Link>
             <Link
               href="/start"
               className="hidden rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm font-semibold text-white transition hover:border-white/20 hover:bg-white/10 sm:inline-flex"

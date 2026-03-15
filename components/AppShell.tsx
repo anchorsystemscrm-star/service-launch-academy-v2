@@ -108,8 +108,8 @@ export function AppShell({ children }: PropsWithChildren) {
   return (
     <>
       {!isLoginPage && <Navbar profile={profile} />}
-      <main className={isLoginPage ? "min-h-screen" : "min-h-screen lg:pl-[19rem]"}>
-        <div className={isLoginPage ? "" : "px-4 pb-10 pt-36 sm:px-6 lg:px-8 lg:pt-28"}>{children}</div>
+      <main className={isLoginPage ? "min-h-screen" : "min-h-screen lg:pl-[20rem]"}>
+        <div className={isLoginPage ? "" : "px-4 pb-12 pt-40 sm:px-6 lg:px-8 lg:pt-32"}>{children}</div>
       </main>
     </>
   );

@@ -5,7 +5,7 @@ import { useMemo } from "react";
 import { ChatWindow } from "@/components/ChatWindow";
 import { LockedFeatureCard } from "@/components/LockedFeatureCard";
 import { businesses } from "@/data/businesses";
-import { hasTierAccess, tierLabels } from "@/utils/access";
+import { getPricingHref, hasTierAccess, tierLabels } from "@/utils/access";
 import { buildBlueprint, defaultChatIntro, getCoachResponse, getFallbackBusiness, getPhaseIndexByProgress } from "@/utils/benchmarks";
 import { useAccessProfile, useBlueprintProgress, useChatHistory } from "@/utils/storage";
 
@@ -49,6 +49,7 @@ export default function AICoachPage() {
             business.promptSuggestions.pricing[0],
             business.promptSuggestions.sales[0]
           ]}
+          ctaHref={getPricingHref("pro")}
         />
       </div>
     );

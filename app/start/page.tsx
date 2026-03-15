@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 
@@ -7,7 +8,7 @@ import { businesses, businessTagLabels } from "@/data/businesses";
 import { LockedFeatureCard } from "@/components/LockedFeatureCard";
 import { BusinessCard } from "@/components/BusinessCard";
 import { getFallbackBusiness } from "@/utils/benchmarks";
-import { getFirstAvailableAppPath, tierDescriptions, tierLabels } from "@/utils/access";
+import { getFirstAvailableAppPath, getPricingHref, tierDescriptions, tierLabels } from "@/utils/access";
 import { useAccessProfile, useActiveBlueprint } from "@/utils/storage";
 
 export default function StartPage() {
@@ -131,14 +132,32 @@ export default function StartPage() {
             <p className="text-sm font-semibold text-white">Current selection</p>
             <p className="mt-3 text-sm text-slate-200">Business: {profile.selectedBusinessId ? selectedBusiness.name : "Not selected yet"}</p>
             <p className="mt-2 text-sm text-slate-200">Tier: {tierLabels[profile.tier]}</p>
-            <button
-              type="button"
-              onClick={completeSetup}
-              disabled={!profile.selectedBusinessId || pending}
-              className="mt-5 w-full rounded-2xl border border-accent/40 bg-accent/10 px-5 py-3 text-sm font-semibold text-white transition hover:border-accent/80 hover:bg-accent/15 disabled:cursor-not-allowed disabled:opacity-50"
-            >
-              {pending ? "Preparing workspace..." : "Enter workspace"}
-            </button>
+            <p className="mt-4 text-sm leading-6 text-muted">
+              Choose how you want to continue: stay in Preview for service discovery, upgrade to Core for the full operating
+              system, or compare the full value ladder first.
+            </p>
+            <div className="mt-5 grid gap-3">
+              <button
+                type="button"
+                onClick={completeSetup}
+                disabled={!profile.selectedBusinessId || pending}
+                className="w-full rounded-2xl border border-accent/40 bg-accent/10 px-5 py-3 text-sm font-semibold text-white transition hover:border-accent/80 hover:bg-accent/15 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                {pending ? "Preparing workspace..." : "Continue with Preview"}
+              </button>
+              <Link
+                href={getPricingHref("core")}
+                className="inline-flex w-full items-center justify-center rounded-2xl border border-white/10 bg-white/5 px-5 py-3 text-sm font-semibold text-white transition hover:border-white/20 hover:bg-white/10"
+              >
+                Upgrade to Core
+              </Link>
+              <Link
+                href={getPricingHref()}
+                className="inline-flex w-full items-center justify-center rounded-2xl border border-white/10 bg-white/5 px-5 py-3 text-sm font-semibold text-white transition hover:border-white/20 hover:bg-white/10"
+              >
+                Compare Plans
+              </Link>
+            </div>
           </div>
 
           <div className="mt-6">
@@ -151,6 +170,7 @@ export default function StartPage() {
                 "Unlock Core for the full launch playbook and operating setup.",
                 "Unlock Pro for guided AI execution help."
               ]}
+              ctaHref={getPricingHref("core")}
             />
           </div>
         </section>

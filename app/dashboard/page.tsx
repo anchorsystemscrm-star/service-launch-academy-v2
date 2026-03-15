@@ -7,7 +7,7 @@ import { useRouter } from "next/navigation";
 import { BusinessCard } from "@/components/BusinessCard";
 import { LockedFeatureCard } from "@/components/LockedFeatureCard";
 import { businessTagLabels, businesses } from "@/data/businesses";
-import { hasTierAccess, tierLabels } from "@/utils/access";
+import { getPricingHref, hasTierAccess, tierLabels } from "@/utils/access";
 import { filterBusinesses } from "@/utils/benchmarks";
 import { useAccessProfile, useActiveBlueprint } from "@/utils/storage";
 
@@ -88,12 +88,20 @@ export default function DashboardPage() {
             <p className="text-sm font-semibold uppercase tracking-[0.16em] text-muted">Workspace Access</p>
             <h2 className="mt-2 text-2xl font-semibold text-white">Modules unlock by tier.</h2>
           </div>
-          <Link
-            href="/start"
-            className="inline-flex rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm font-semibold text-white transition hover:border-white/20 hover:bg-white/10"
-          >
-            Adjust setup
-          </Link>
+          <div className="flex flex-wrap gap-3">
+            <Link
+              href={getPricingHref()}
+              className="inline-flex rounded-2xl border border-accent/40 bg-accent/10 px-4 py-3 text-sm font-semibold text-white transition hover:border-accent/80 hover:bg-accent/20"
+            >
+              Compare Plans
+            </Link>
+            <Link
+              href="/start"
+              className="inline-flex rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm font-semibold text-white transition hover:border-white/20 hover:bg-white/10"
+            >
+              Adjust setup
+            </Link>
+          </div>
         </div>
 
         <div className="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
@@ -190,6 +198,7 @@ export default function DashboardPage() {
               "Licensing, insurance, pricing, and operating guidance",
               "Weekly launch execution and process design"
             ]}
+            ctaHref={getPricingHref("core")}
           />
           <LockedFeatureCard
             title="Pro unlocks AI-guided execution"
@@ -200,6 +209,7 @@ export default function DashboardPage() {
               "Service-specific responses based on the selected business",
               "Execution help for objections, follow-up, and lead handling"
             ]}
+            ctaHref={getPricingHref("pro")}
           />
         </section>
       )}

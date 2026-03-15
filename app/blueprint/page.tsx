@@ -1,12 +1,13 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 
 import { LockedFeatureCard } from "@/components/LockedFeatureCard";
 import { PhaseCard } from "@/components/PhaseCard";
 import { ProgressTracker } from "@/components/ProgressTracker";
 import { ScriptCard } from "@/components/ScriptCard";
-import { getUpgradeMessage, hasTierAccess, tierLabels } from "@/utils/access";
+import { getPricingHref, getUpgradeMessage, hasTierAccess, tierLabels } from "@/utils/access";
 import { getFallbackBusiness, buildBlueprint, buildScripts } from "@/utils/benchmarks";
 import { useAccessProfile, useActiveBlueprint, useBlueprintProgress } from "@/utils/storage";
 
@@ -93,6 +94,7 @@ export default function BlueprintPage() {
               requiredTier={teaser.title.includes("Pro") ? "pro" : "core"}
               description={teaser.description}
               bullets={teaser.items}
+              ctaHref={getPricingHref(teaser.title.includes("Pro") ? "pro" : "core")}
             />
           ))}
 
@@ -108,6 +110,20 @@ export default function BlueprintPage() {
                   {item}
                 </div>
               ))}
+            </div>
+            <div className="mt-6 flex flex-col gap-3 sm:flex-row">
+              <Link
+                href={getPricingHref("core")}
+                className="inline-flex items-center justify-center rounded-2xl border border-accent/40 bg-accent/10 px-4 py-3 text-sm font-semibold text-white transition hover:border-accent/80 hover:bg-accent/20"
+              >
+                Upgrade to Core
+              </Link>
+              <Link
+                href={getPricingHref()}
+                className="inline-flex items-center justify-center rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm font-semibold text-white transition hover:border-white/20 hover:bg-white/10"
+              >
+                Compare Plans
+              </Link>
             </div>
           </section>
         </div>
@@ -536,6 +552,7 @@ export default function BlueprintPage() {
                   "Pricing prompts for package design and objection handling",
                   "Marketing and sales prompts for posts, scripts, and follow-up"
                 ]}
+                ctaHref={getPricingHref("pro")}
               />
             </div>
           )}
@@ -602,12 +619,18 @@ export default function BlueprintPage() {
           )}
 
           {!canAccessAnchor && (
-            <div className="mt-6 rounded-[24px] border border-white/10 bg-white/5 p-5">
-              <p className="text-lg font-semibold text-white">Elite access unlocks advanced Anchor setup.</p>
-              <p className="mt-3 text-sm leading-6 text-muted">
-                The launch plan, cost model, and scripts remain available at your current tier. Upgrade to Elite to unlock
-                advanced automation previews and system setup details.
-              </p>
+            <div className="mt-6">
+              <LockedFeatureCard
+                title="Elite access unlocks advanced Anchor setup"
+                requiredTier="elite"
+                description="The launch plan, cost model, and scripts remain available at your current tier. Elite unlocks advanced automation previews and system setup details."
+                bullets={[
+                  "Advanced Anchor Systems integration previews",
+                  "Automation and systemization content for scaling operators",
+                  "Premium CRM and operating-system visibility"
+                ]}
+                ctaHref={getPricingHref("elite")}
+              />
             </div>
           )}
         </section>
