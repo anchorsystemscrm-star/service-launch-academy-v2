@@ -4,12 +4,13 @@ import { useMemo } from "react";
 
 import { ChatWindow } from "@/components/ChatWindow";
 import { businesses } from "@/data/businesses";
+import { tierLabels } from "@/utils/access";
 import { buildBlueprint, defaultChatIntro, getCoachResponse, getFallbackBusiness, getPhaseIndexByProgress } from "@/utils/benchmarks";
-import { useBlueprintProgress, useChatHistory, useSelectedBusiness } from "@/utils/storage";
+import { useAccessProfile, useBlueprintProgress, useChatHistory } from "@/utils/storage";
 
 export default function AICoachPage() {
-  const { selectedBusinessId } = useSelectedBusiness(businesses[0].id);
-  const business = useMemo(() => getFallbackBusiness(selectedBusinessId), [selectedBusinessId]);
+  const { profile } = useAccessProfile();
+  const business = useMemo(() => getFallbackBusiness(profile.selectedBusinessId), [profile.selectedBusinessId]);
   const { progress } = useBlueprintProgress(business.id);
   const initialMessage = useMemo(() => defaultChatIntro(business), [business]);
   const { history, replaceHistory } = useChatHistory(business.id, initialMessage);
@@ -45,6 +46,11 @@ export default function AICoachPage() {
           <h2 className="text-xl font-semibold text-white">Context</h2>
 
           <div className="mt-5 grid gap-4">
+            <div className="rounded-[20px] border border-white/10 bg-white/5 p-4">
+              <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted">Access Tier</p>
+              <p className="mt-2 text-sm text-white">{tierLabels[profile.tier]}</p>
+            </div>
+
             <div className="rounded-[20px] border border-white/10 bg-white/5 p-4">
               <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted">Selected Business</p>
               <p className="mt-2 text-sm text-white">{business.name}</p>

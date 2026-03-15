@@ -1,4 +1,5 @@
 export type BusinessTag = "low2k" | "low5k" | "solo" | "high" | "indoor" | "outdoor";
+export type SubscriptionTier = "preview" | "core" | "pro" | "elite";
 
 export interface Benchmark {
   leads: [number, number];

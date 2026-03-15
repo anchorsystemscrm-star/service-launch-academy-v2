@@ -5,7 +5,8 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 
 import { getSupabaseBrowserClient, isSupabaseConfigured } from "@/lib/supabaseClient";
-import { setAccessCookie } from "@/utils/storage";
+import { getFirstAvailableAppPath } from "@/utils/access";
+import { readClientAccessProfile, setAccessCookie } from "@/utils/storage";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -26,7 +27,7 @@ export default function LoginPage() {
     supabase.auth.getSession().then(({ data }) => {
       if (data.session?.access_token) {
         setAccessCookie(data.session.access_token, data.session.expires_at);
-        router.replace("/dashboard");
+        router.replace(getFirstAvailableAppPath(readClientAccessProfile()));
       }
     });
   }, [configured, router]);
@@ -60,7 +61,7 @@ export default function LoginPage() {
         setAccessCookie(data.session.access_token, data.session.expires_at);
       }
 
-      router.push("/dashboard");
+      router.replace(getFirstAvailableAppPath(readClientAccessProfile()));
       router.refresh();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Unable to sign in.");
@@ -100,7 +101,7 @@ export default function LoginPage() {
 
       if (data.session?.access_token) {
         setAccessCookie(data.session.access_token, data.session.expires_at);
-        router.push("/dashboard");
+        router.replace(getFirstAvailableAppPath(readClientAccessProfile()));
         router.refresh();
         return;
       }
@@ -115,7 +116,7 @@ export default function LoginPage() {
 
   return (
     <div className="relative flex min-h-screen items-center justify-center overflow-hidden px-4 py-10">
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(83,180,255,0.18),transparent_35%),radial-gradient(circle_at_bottom_right,rgba(58,212,166,0.12),transparent_30%)]" />
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(83,180,255,0.18),transparent_35%),radial-gradient(circle_at_bottom_right,rgba(58,212,166,0.12),transparent_30%)]" />
 
       <div className="relative grid w-full max-w-6xl overflow-hidden rounded-[32px] border border-white/10 bg-slate-950/60 shadow-premium backdrop-blur xl:grid-cols-[1.15fr_0.85fr]">
         <section className="border-b border-white/10 p-8 sm:p-10 xl:border-b-0 xl:border-r">

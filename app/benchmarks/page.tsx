@@ -4,13 +4,14 @@ import { useMemo } from "react";
 
 import { KPIInputs } from "@/components/KPIInputs";
 import { businesses } from "@/data/businesses";
+import { tierLabels } from "@/utils/access";
 import { defaultKpiData, getFallbackBusiness, getTrackStatus, milestoneTemplate, buildBlueprint } from "@/utils/benchmarks";
 import { getCompletedWeeks } from "@/utils/benchmarks";
-import { useBlueprintProgress, useKpiState, useSelectedBusiness } from "@/utils/storage";
+import { useAccessProfile, useBlueprintProgress, useKpiState } from "@/utils/storage";
 
 export default function BenchmarksPage() {
-  const { selectedBusinessId } = useSelectedBusiness(businesses[0].id);
-  const business = useMemo(() => getFallbackBusiness(selectedBusinessId), [selectedBusinessId]);
+  const { profile } = useAccessProfile();
+  const business = useMemo(() => getFallbackBusiness(profile.selectedBusinessId), [profile.selectedBusinessId]);
   const { progress } = useBlueprintProgress(business.id);
   const { kpis, setKpis } = useKpiState(business.id, defaultKpiData);
 
@@ -32,6 +33,7 @@ export default function BenchmarksPage() {
         <div className="flex flex-col gap-2">
           <p className="text-sm text-muted">Selected business: {business.name}</p>
           <p className="text-sm text-slate-200">Current phase: {trackStatus.phaseTitle}</p>
+          <p className="text-sm text-slate-200">Access tier: {tierLabels[profile.tier]}</p>
           <p className="text-xs uppercase tracking-[0.18em] text-muted">Typical ranges; results vary.</p>
         </div>
 

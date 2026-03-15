@@ -5,26 +5,27 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 
+import { AccessProfile, getLockedCopy, hasTierAccess, isSetupComplete, navItems, tierLabels } from "@/utils/access";
 import { getSupabaseBrowserClient, isSupabaseConfigured } from "@/lib/supabaseClient";
 import { clearAccessCookie } from "@/utils/storage";
 
-const navItems = [
-  { href: "/dashboard", label: "Businesses" },
-  { href: "/blueprint", label: "My Blueprint" },
-  { href: "/benchmarks", label: "Benchmarks" },
-  { href: "/ai-coach", label: "AI Coach" }
-];
+interface NavbarProps {
+  profile: AccessProfile;
+}
 
-export function Navbar() {
+export function Navbar({ profile }: NavbarProps) {
   const pathname = usePathname();
   const router = useRouter();
   const [modalOpen, setModalOpen] = useState(false);
   const [loggingOut, setLoggingOut] = useState(false);
 
-  const currentLabel = useMemo(
-    () => navItems.find((item) => pathname.startsWith(item.href))?.label ?? "Workspace",
-    [pathname]
-  );
+  const setupComplete = isSetupComplete(profile);
+  const currentLabel = useMemo(() => {
+    if (pathname.startsWith("/start")) {
+      return "Get Started";
+    }
+    return navItems.find((item) => pathname.startsWith(item.href))?.label ?? "Workspace";
+  }, [pathname]);
 
   async function handleLogout() {
     setLoggingOut(true);
@@ -36,17 +37,56 @@ export function Navbar() {
       }
     } finally {
       clearAccessCookie();
-      router.push("/login");
+      router.replace("/login");
       router.refresh();
       setLoggingOut(false);
     }
   }
 
+  function renderNavItem(href: string, label: string, minTier: AccessProfile["tier"], compact = false) {
+    const active = pathname.startsWith(href);
+    const enabled = setupComplete && hasTierAccess(profile.tier, minTier);
+    const baseClass = compact
+      ? "rounded-xl px-3 py-2 text-sm font-medium"
+      : "rounded-2xl px-4 py-3 text-sm font-medium";
+
+    if (!enabled) {
+      return (
+        <button
+          key={href}
+          type="button"
+          disabled
+          title={!setupComplete ? "Complete setup first" : getLockedCopy(minTier)}
+          className={`${baseClass} cursor-not-allowed border border-white/10 bg-white/5 text-slate-500`}
+        >
+          {label}
+        </button>
+      );
+    }
+
+    return (
+      <Link
+        key={href}
+        href={href}
+        className={`${baseClass} transition ${
+          active
+            ? "border border-accent/60 bg-accent/10 text-white shadow-[inset_0_0_0_1px_rgba(83,180,255,0.18)]"
+            : "border border-transparent text-slate-300 hover:border-white/10 hover:bg-white/5 hover:text-white"
+        }`}
+      >
+        {label}
+      </Link>
+    );
+  }
+
   return (
     <>
-      <aside className="fixed inset-y-0 left-0 z-40 hidden w-72 border-r border-white/10 bg-slate-950/75 backdrop-blur xl:block">
+      <aside className="fixed inset-y-0 left-0 z-40 hidden w-72 border-r border-white/10 bg-slate-950/80 backdrop-blur lg:block">
         <div className="flex h-full flex-col px-5 py-6">
-          <Link href="/dashboard" className="rounded-2xl border border-white/10 bg-white/5 p-4 shadow-card transition hover:border-accent/40 hover:bg-white/10">
+          <Link
+            href={setupComplete ? "/dashboard" : "/start"}
+            className="rounded-2xl border border-white/10 bg-white/5 p-4 shadow-card transition hover:border-accent/40 hover:bg-white/10"
+          >
             <div className="flex items-center gap-3">
               <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-accent/30 bg-accent/10">
                 <Image src="/logo.png" alt="Anchor Systems logo" width={30} height={30} className="rounded-xl" />
@@ -58,23 +98,38 @@ export function Navbar() {
             </div>
           </Link>
 
-          <nav className="mt-8 grid gap-2">
-            {navItems.map((item) => {
-              const active = pathname.startsWith(item.href);
-              return (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  className={`rounded-2xl px-4 py-3 text-sm font-medium transition ${
-                    active
-                      ? "border border-accent/60 bg-accent/10 text-white shadow-[inset_0_0_0_1px_rgba(83,180,255,0.18)]"
-                      : "border border-transparent text-slate-300 hover:border-white/10 hover:bg-white/5 hover:text-white"
-                  }`}
-                >
-                  {item.label}
-                </Link>
-              );
-            })}
+          <div className="mt-6 rounded-[24px] border border-white/10 bg-white/5 p-4">
+            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-muted">Access Tier</p>
+            <div className="mt-3 flex items-center justify-between gap-3">
+              <span className="rounded-full border border-accent/30 bg-accent/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.14em] text-white">
+                {tierLabels[profile.tier]}
+              </span>
+              <Link
+                href="/start"
+                className="rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-xs font-semibold text-white transition hover:border-white/20 hover:bg-white/10"
+              >
+                {setupComplete ? "Adjust setup" : "Finish setup"}
+              </Link>
+            </div>
+            <p className="mt-3 text-sm leading-6 text-muted">
+              {setupComplete
+                ? "Navigation unlocks according to the current tier. Locked modules stay hidden from direct access."
+                : "Complete setup to choose a business before entering the full workspace."}
+            </p>
+          </div>
+
+          <nav className="mt-6 grid gap-2">
+            <Link
+              href="/start"
+              className={`rounded-2xl px-4 py-3 text-sm font-medium transition ${
+                pathname.startsWith("/start")
+                  ? "border border-accent/60 bg-accent/10 text-white shadow-[inset_0_0_0_1px_rgba(83,180,255,0.18)]"
+                  : "border border-transparent text-slate-300 hover:border-white/10 hover:bg-white/5 hover:text-white"
+              }`}
+            >
+              Get Started
+            </Link>
+            {navItems.map((item) => renderNavItem(item.href, item.label, item.minTier))}
           </nav>
 
           <div className="mt-auto rounded-3xl border border-white/10 bg-white/5 p-4">
@@ -93,12 +148,12 @@ export function Navbar() {
         </div>
       </aside>
 
-      <header className="fixed inset-x-0 top-0 z-50 border-b border-accent/10 bg-slate-950/75 backdrop-blur">
-        <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-4 sm:px-6 lg:px-8 xl:pl-80">
+      <header className="fixed inset-x-0 top-0 z-50 border-b border-accent/10 bg-slate-950/80 backdrop-blur">
+        <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-4 sm:px-6 lg:pl-80 lg:pr-8">
           <div className="flex min-w-0 items-center gap-3">
-            <div className="flex h-11 w-11 items-center justify-center rounded-2xl border border-accent/30 bg-accent/10 xl:hidden">
+            <Link href={setupComplete ? "/dashboard" : "/start"} className="flex h-11 w-11 items-center justify-center rounded-2xl border border-accent/30 bg-accent/10 lg:hidden">
               <Image src="/logo.png" alt="Anchor Systems logo" width={28} height={28} className="rounded-xl" />
-            </div>
+            </Link>
             <div className="min-w-0">
               <p className="truncate text-sm font-semibold text-white">Service Launch Academy</p>
               <p className="text-xs text-muted">{currentLabel}</p>
@@ -106,6 +161,15 @@ export function Navbar() {
           </div>
 
           <div className="flex items-center gap-2">
+            <span className="hidden rounded-full border border-white/10 bg-white/5 px-3 py-2 text-xs font-semibold uppercase tracking-[0.14em] text-slate-200 sm:inline-flex">
+              {tierLabels[profile.tier]}
+            </span>
+            <Link
+              href="/start"
+              className="hidden rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm font-semibold text-white transition hover:border-white/20 hover:bg-white/10 sm:inline-flex"
+            >
+              Setup
+            </Link>
             <button
               type="button"
               onClick={() => setModalOpen(true)}
@@ -123,10 +187,29 @@ export function Navbar() {
             </button>
           </div>
         </div>
+
+        <div className="border-t border-white/5 px-4 pb-3 pt-2 lg:hidden">
+          <div className="flex gap-2 overflow-x-auto pb-1">
+            <Link
+              href="/start"
+              className={`whitespace-nowrap rounded-xl px-3 py-2 text-sm font-medium transition ${
+                pathname.startsWith("/start")
+                  ? "border border-accent/60 bg-accent/10 text-white"
+                  : "border border-white/10 bg-white/5 text-slate-200 hover:border-white/20 hover:bg-white/10"
+              }`}
+            >
+              Get Started
+            </Link>
+            {navItems.map((item) => renderNavItem(item.href, item.label, item.minTier, true))}
+          </div>
+        </div>
       </header>
 
       {modalOpen && (
-        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-slate-950/80 p-4 backdrop-blur-sm" onClick={() => setModalOpen(false)}>
+        <div
+          className="fixed inset-0 z-[70] flex items-center justify-center bg-slate-950/80 p-4 backdrop-blur-sm"
+          onClick={() => setModalOpen(false)}
+        >
           <div
             className="w-full max-w-2xl rounded-[28px] border border-accent/30 bg-panel-gradient p-6 shadow-premium"
             onClick={(event) => event.stopPropagation()}

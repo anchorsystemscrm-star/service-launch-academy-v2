@@ -1,25 +1,26 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import { PhaseCard } from "@/components/PhaseCard";
 import { ProgressTracker } from "@/components/ProgressTracker";
 import { ScriptCard } from "@/components/ScriptCard";
 import { businesses } from "@/data/businesses";
+import { getLockedCopy, hasTierAccess, tierLabels } from "@/utils/access";
 import { getFallbackBusiness, buildBlueprint, buildScripts } from "@/utils/benchmarks";
-import { useActiveBlueprint, useBlueprintProgress, useSelectedBusiness } from "@/utils/storage";
+import { useAccessProfile, useActiveBlueprint, useBlueprintProgress } from "@/utils/storage";
 
 const tabs = [
-  { id: "plan", label: "90-Day Plan" },
-  { id: "costs", label: "Costs & Tools" },
-  { id: "scripts", label: "Scripts" },
-  { id: "anchor", label: "Anchor Setup" }
+  { id: "plan", label: "90-Day Plan", minTier: "preview" },
+  { id: "costs", label: "Costs & Tools", minTier: "preview" },
+  { id: "scripts", label: "Scripts", minTier: "preview" },
+  { id: "anchor", label: "Anchor Setup", minTier: "elite" }
 ] as const;
 
 export default function BlueprintPage() {
-  const { selectedBusinessId } = useSelectedBusiness(businesses[0].id);
+  const { profile } = useAccessProfile();
   const { activeBlueprintId, setActiveBlueprintId } = useActiveBlueprint();
-  const business = useMemo(() => getFallbackBusiness(selectedBusinessId), [selectedBusinessId]);
+  const business = useMemo(() => getFallbackBusiness(profile.selectedBusinessId), [profile.selectedBusinessId]);
   const { progress, setWeekComplete } = useBlueprintProgress(business.id);
   const [activeTab, setActiveTab] = useState<(typeof tabs)[number]["id"]>("plan");
 
@@ -33,6 +34,13 @@ export default function BlueprintPage() {
     ["Misc", business.costs.misc]
   ];
   const isActive = activeBlueprintId === business.id;
+  const canAccessAnchor = hasTierAccess(profile.tier, "elite");
+
+  useEffect(() => {
+    if (activeTab === "anchor" && !canAccessAnchor) {
+      setActiveTab("plan");
+    }
+  }, [activeTab, canAccessAnchor]);
 
   return (
     <div className="mx-auto max-w-7xl animate-fade-up">
@@ -65,6 +73,9 @@ export default function BlueprintPage() {
               />
             </button>
           </label>
+        </div>
+        <div className="mt-4 inline-flex rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm text-slate-200">
+          Current tier: {tierLabels[profile.tier]}
         </div>
       </section>
 
@@ -101,18 +112,30 @@ export default function BlueprintPage() {
         <section className="panel-surface p-6 sm:p-8">
           <div className="flex flex-wrap gap-2">
             {tabs.map((tab) => (
-              <button
-                key={tab.id}
-                type="button"
-                onClick={() => setActiveTab(tab.id)}
-                className={`rounded-2xl px-4 py-2.5 text-sm font-semibold transition ${
-                  activeTab === tab.id
-                    ? "border border-accent/60 bg-accent/10 text-white"
-                    : "border border-white/10 bg-white/5 text-slate-200 hover:border-white/20 hover:bg-white/10"
-                }`}
-              >
-                {tab.label}
-              </button>
+              hasTierAccess(profile.tier, tab.minTier) ? (
+                <button
+                  key={tab.id}
+                  type="button"
+                  onClick={() => setActiveTab(tab.id)}
+                  className={`rounded-2xl px-4 py-2.5 text-sm font-semibold transition ${
+                    activeTab === tab.id
+                      ? "border border-accent/60 bg-accent/10 text-white"
+                      : "border border-white/10 bg-white/5 text-slate-200 hover:border-white/20 hover:bg-white/10"
+                  }`}
+                >
+                  {tab.label}
+                </button>
+              ) : (
+                <button
+                  key={tab.id}
+                  type="button"
+                  disabled
+                  title={getLockedCopy(tab.minTier)}
+                  className="cursor-not-allowed rounded-2xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm font-semibold text-slate-500"
+                >
+                  {tab.label}
+                </button>
+              )
             ))}
           </div>
 
@@ -164,7 +187,7 @@ export default function BlueprintPage() {
             </div>
           )}
 
-          {activeTab === "anchor" && (
+          {activeTab === "anchor" && canAccessAnchor && (
             <div className="mt-6 grid gap-6">
               <p className="section-copy">
                 Anchor Systems keeps your launch simple: track leads in a pipeline, send missed-call text-back, automate
@@ -222,6 +245,16 @@ export default function BlueprintPage() {
                   </details>
                 ))}
               </div>
+            </div>
+          )}
+
+          {!canAccessAnchor && (
+            <div className="mt-6 rounded-[24px] border border-white/10 bg-white/5 p-5">
+              <p className="text-lg font-semibold text-white">Elite access unlocks advanced Anchor setup.</p>
+              <p className="mt-3 text-sm leading-6 text-muted">
+                The launch plan, cost model, and scripts remain available at your current tier. Upgrade to Elite to unlock
+                advanced automation previews and system setup details.
+              </p>
             </div>
           )}
         </section>

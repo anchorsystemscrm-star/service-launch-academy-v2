@@ -1,12 +1,14 @@
 "use client";
 
+import Link from "next/link";
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 
 import { BusinessCard } from "@/components/BusinessCard";
 import { businessTagLabels, businesses } from "@/data/businesses";
+import { hasTierAccess, tierLabels } from "@/utils/access";
 import { filterBusinesses } from "@/utils/benchmarks";
-import { useActiveBlueprint, useSelectedBusiness } from "@/utils/storage";
+import { useAccessProfile, useActiveBlueprint } from "@/utils/storage";
 
 const filterOptions = [
   { id: "low2k", label: "Low Startup (<$2k)" },
@@ -19,7 +21,7 @@ const filterOptions = [
 
 export default function DashboardPage() {
   const router = useRouter();
-  const { selectedBusinessId, setSelectedBusinessId } = useSelectedBusiness(businesses[0].id);
+  const { profile, setSelectedBusinessId } = useAccessProfile();
   const { activeBlueprintId } = useActiveBlueprint();
   const [query, setQuery] = useState("");
   const [filters, setFilters] = useState<string[]>([]);
@@ -66,10 +68,49 @@ export default function DashboardPage() {
               <p className="mt-2 text-sm text-muted">Weeks of guided execution</p>
             </div>
             <div>
-              <p className="text-3xl font-semibold text-white">{activeBlueprintId ? "1" : "0"}</p>
-              <p className="mt-2 text-sm text-muted">Active blueprint selected</p>
+              <p className="text-3xl font-semibold text-white">{tierLabels[profile.tier]}</p>
+              <p className="mt-2 text-sm text-muted">Current access tier</p>
             </div>
           </div>
+        </div>
+      </section>
+
+      <section className="mt-6 panel-surface p-6 sm:p-8">
+        <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
+          <div>
+            <p className="text-sm font-semibold uppercase tracking-[0.16em] text-muted">Workspace Access</p>
+            <h2 className="mt-2 text-2xl font-semibold text-white">Modules unlock by tier.</h2>
+          </div>
+          <Link
+            href="/start"
+            className="inline-flex rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm font-semibold text-white transition hover:border-white/20 hover:bg-white/10"
+          >
+            Adjust setup
+          </Link>
+        </div>
+
+        <div className="mt-6 grid gap-4 md:grid-cols-3">
+          {[
+            { label: "Blueprint", unlocked: hasTierAccess(profile.tier, "preview"), detail: "Launch roadmap and scripts" },
+            { label: "Benchmarks", unlocked: hasTierAccess(profile.tier, "core"), detail: "Weekly KPI tracking and scorecards" },
+            { label: "AI Coach", unlocked: hasTierAccess(profile.tier, "pro"), detail: "Phase-aware coaching and guidance" }
+          ].map((item) => (
+            <div key={item.label} className="rounded-[24px] border border-white/10 bg-white/5 p-5">
+              <div className="flex items-center justify-between gap-3">
+                <p className="text-lg font-semibold text-white">{item.label}</p>
+                <span
+                  className={`rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-[0.14em] ${
+                    item.unlocked
+                      ? "border border-accentSecondary/40 bg-accentSecondary/10 text-white"
+                      : "border border-white/10 bg-black/10 text-slate-400"
+                  }`}
+                >
+                  {item.unlocked ? "Unlocked" : "Locked"}
+                </span>
+              </div>
+              <p className="mt-3 text-sm leading-6 text-muted">{item.detail}</p>
+            </div>
+          ))}
         </div>
       </section>
 
@@ -117,7 +158,7 @@ export default function DashboardPage() {
                 business={business}
                 tagLabels={businessTagLabels}
                 onSelect={handleSelectBusiness}
-                isActiveBlueprint={activeBlueprintId === business.id || selectedBusinessId === business.id}
+                isActiveBlueprint={activeBlueprintId === business.id}
               />
             ))}
           </div>

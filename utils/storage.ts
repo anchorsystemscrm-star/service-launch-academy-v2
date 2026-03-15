@@ -2,17 +2,27 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 
-import { ChatMessage, KPIData } from "@/types/business";
+import { SubscriptionTier, ChatMessage, KPIData } from "@/types/business";
+import { AccessProfile } from "@/utils/access";
 
 export const STORAGE_KEYS = {
   selectedBusiness: "sla_selected_business",
   activeBlueprint: "sla_active_blueprint",
   progressMap: "sla_progress_map",
   kpiMap: "sla_kpi_map",
-  chatMap: "sla_chat_map"
+  chatMap: "sla_chat_map",
+  onboardingComplete: "sla_onboarding_complete",
+  subscriptionTier: "sla_subscription_tier"
 } as const;
 
-const AUTH_COOKIE = "sla-access-token";
+const COOKIE_KEYS = {
+  accessToken: "sla-access-token",
+  selectedBusiness: "sla-selected-business",
+  onboardingComplete: "sla-onboarding",
+  subscriptionTier: "sla-tier"
+} as const;
+
+const STORAGE_EVENT = "sla:storage-change";
 
 function readStorage<T>(key: string, fallback: T): T {
   if (typeof window === "undefined") {
@@ -33,6 +43,23 @@ function writeStorage<T>(key: string, value: T) {
   }
 
   window.localStorage.setItem(key, JSON.stringify(value));
+  window.dispatchEvent(new CustomEvent(STORAGE_EVENT, { detail: { key } }));
+}
+
+function setCookie(name: string, value: string, maxAgeSeconds = 60 * 60 * 24 * 365) {
+  if (typeof document === "undefined") {
+    return;
+  }
+
+  document.cookie = `${name}=${encodeURIComponent(value)}; path=/; max-age=${maxAgeSeconds}; SameSite=Lax`;
+}
+
+function clearCookie(name: string) {
+  if (typeof document === "undefined") {
+    return;
+  }
+
+  document.cookie = `${name}=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; SameSite=Lax`;
 }
 
 export function setAccessCookie(token: string, expiresAt?: number | null) {
@@ -41,15 +68,36 @@ export function setAccessCookie(token: string, expiresAt?: number | null) {
   }
 
   const expires = expiresAt ? `; expires=${new Date(expiresAt * 1000).toUTCString()}` : "";
-  document.cookie = `${AUTH_COOKIE}=${token}; path=/; SameSite=Lax${expires}`;
+  document.cookie = `${COOKIE_KEYS.accessToken}=${encodeURIComponent(token)}; path=/; SameSite=Lax${expires}`;
 }
 
 export function clearAccessCookie() {
-  if (typeof document === "undefined") {
+  clearCookie(COOKIE_KEYS.accessToken);
+}
+
+export function setSelectedBusinessCookie(value: string | null) {
+  if (value) {
+    setCookie(COOKIE_KEYS.selectedBusiness, value);
     return;
   }
 
-  document.cookie = `${AUTH_COOKIE}=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; SameSite=Lax`;
+  clearCookie(COOKIE_KEYS.selectedBusiness);
+}
+
+export function setOnboardingCookie(value: boolean) {
+  setCookie(COOKIE_KEYS.onboardingComplete, value ? "1" : "0");
+}
+
+export function setTierCookie(value: SubscriptionTier) {
+  setCookie(COOKIE_KEYS.subscriptionTier, value);
+}
+
+export function readClientAccessProfile(): AccessProfile {
+  return {
+    onboardingComplete: readStorage<boolean>(STORAGE_KEYS.onboardingComplete, false),
+    selectedBusinessId: readStorage<string | null>(STORAGE_KEYS.selectedBusiness, null),
+    tier: readStorage<SubscriptionTier>(STORAGE_KEYS.subscriptionTier, "preview")
+  };
 }
 
 export function usePersistentState<T>(key: string, fallback: T) {
@@ -57,9 +105,33 @@ export function usePersistentState<T>(key: string, fallback: T) {
   const [hydrated, setHydrated] = useState(false);
 
   useEffect(() => {
-    setValue(readStorage(key, fallback));
-    setHydrated(true);
-  }, [fallback, key]);
+    const syncFromStorage = () => {
+      setValue(readStorage(key, fallback));
+      setHydrated(true);
+    };
+
+    const handleStorage = (event: StorageEvent) => {
+      if (!event.key || event.key === key) {
+        syncFromStorage();
+      }
+    };
+
+    const handleCustomStorage = (event: Event) => {
+      const customEvent = event as CustomEvent<{ key?: string }>;
+      if (!customEvent.detail?.key || customEvent.detail.key === key) {
+        syncFromStorage();
+      }
+    };
+
+    syncFromStorage();
+    window.addEventListener("storage", handleStorage);
+    window.addEventListener(STORAGE_EVENT, handleCustomStorage as EventListener);
+
+    return () => {
+      window.removeEventListener("storage", handleStorage);
+      window.removeEventListener(STORAGE_EVENT, handleCustomStorage as EventListener);
+    };
+  }, [key]);
 
   const updateValue = useCallback(
     (next: T | ((previous: T) => T)) => {
@@ -75,24 +147,83 @@ export function usePersistentState<T>(key: string, fallback: T) {
   return { hydrated, value, setValue: updateValue };
 }
 
-export function useSelectedBusiness(defaultBusinessId: string) {
-  const { hydrated, value, setValue } = usePersistentState<string>(
-    STORAGE_KEYS.selectedBusiness,
-    defaultBusinessId
-  );
+export function useSelectedBusiness() {
+  const state = usePersistentState<string | null>(STORAGE_KEYS.selectedBusiness, null);
 
   useEffect(() => {
-    if (!hydrated || value) {
-      return;
+    if (state.hydrated) {
+      setSelectedBusinessCookie(state.value);
     }
-    setValue(defaultBusinessId);
-  }, [defaultBusinessId, hydrated, setValue, value]);
+  }, [state.hydrated, state.value]);
 
   return {
-    hydrated,
-    selectedBusinessId: value || defaultBusinessId,
-    setSelectedBusinessId: setValue
+    hydrated: state.hydrated,
+    selectedBusinessId: state.value,
+    setSelectedBusinessId: state.setValue
   };
+}
+
+export function useOnboardingState() {
+  const state = usePersistentState<boolean>(STORAGE_KEYS.onboardingComplete, false);
+
+  useEffect(() => {
+    if (state.hydrated) {
+      setOnboardingCookie(state.value);
+    }
+  }, [state.hydrated, state.value]);
+
+  return {
+    hydrated: state.hydrated,
+    onboardingComplete: state.value,
+    setOnboardingComplete: state.setValue
+  };
+}
+
+export function useSubscriptionTier() {
+  const state = usePersistentState<SubscriptionTier>(STORAGE_KEYS.subscriptionTier, "preview");
+
+  useEffect(() => {
+    if (state.hydrated) {
+      setTierCookie(state.value);
+    }
+  }, [state.hydrated, state.value]);
+
+  return {
+    hydrated: state.hydrated,
+    tier: state.value,
+    setTier: state.setValue
+  };
+}
+
+export function useAccessProfile() {
+  const onboardingState = useOnboardingState();
+  const tierState = useSubscriptionTier();
+  const businessState = useSelectedBusiness();
+
+  return useMemo(
+    () => ({
+      hydrated: onboardingState.hydrated && tierState.hydrated && businessState.hydrated,
+      profile: {
+        onboardingComplete: onboardingState.onboardingComplete,
+        selectedBusinessId: businessState.selectedBusinessId,
+        tier: tierState.tier
+      },
+      setOnboardingComplete: onboardingState.setOnboardingComplete,
+      setTier: tierState.setTier,
+      setSelectedBusinessId: businessState.setSelectedBusinessId
+    }),
+    [
+      businessState.hydrated,
+      businessState.selectedBusinessId,
+      businessState.setSelectedBusinessId,
+      onboardingState.hydrated,
+      onboardingState.onboardingComplete,
+      onboardingState.setOnboardingComplete,
+      tierState.hydrated,
+      tierState.setTier,
+      tierState.tier
+    ]
+  );
 }
 
 export function useActiveBlueprint() {
@@ -120,9 +251,10 @@ export function useBlueprintProgress(businessId: string) {
     (weekIndex: number, checked: boolean) => {
       setValue((previous) => {
         const next = { ...previous };
-        const current = Array.isArray(next[businessId]) && next[businessId].length === 13
-          ? [...next[businessId]]
-          : new Array(13).fill(false);
+        const current =
+          Array.isArray(next[businessId]) && next[businessId].length === 13
+            ? [...next[businessId]]
+            : new Array(13).fill(false);
         current[weekIndex] = checked;
         next[businessId] = current;
         return next;
@@ -172,16 +304,6 @@ export function useChatHistory(businessId: string, initialMessage: ChatMessage) 
 
   const history = value[businessId] ?? [initialMessage];
 
-  const appendMessage = useCallback(
-    (message: ChatMessage) => {
-      setValue((previous) => ({
-        ...previous,
-        [businessId]: [...(previous[businessId] ?? [initialMessage]), message]
-      }));
-    },
-    [businessId, initialMessage, setValue]
-  );
-
   const replaceHistory = useCallback(
     (messages: ChatMessage[]) => {
       setValue((previous) => ({
@@ -192,5 +314,5 @@ export function useChatHistory(businessId: string, initialMessage: ChatMessage) 
     [businessId, setValue]
   );
 
-  return { hydrated, history, appendMessage, replaceHistory };
+  return { hydrated, history, replaceHistory };
 }
