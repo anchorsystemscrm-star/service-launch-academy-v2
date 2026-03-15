@@ -1,4 +1,5 @@
 <<<<<<< HEAD
+<<<<<<< HEAD
 .next
 node_modules
 .env
@@ -88,19 +89,21 @@ web_modules/
 .parcel-cache
 
 # Next.js build output
+=======
+node_modules
+>>>>>>> 95b13b8da627a721885c1aefd50de4927f2b5069
 .next
 out
-
-# Nuxt.js build / generate output
-.nuxt
+build
 dist
 
-# Gatsby files
-.cache/
-# Comment in the public line in if your project uses Gatsby and not Next.js
-# https://nextjs.org/blog/next-9-1#public-directory-support
-# public
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
 
+<<<<<<< HEAD
 # vuepress build output
 .vuepress/dist
 
@@ -151,3 +154,7 @@ dist
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
 >>>>>>> ffacc9219f48a6413e0dc6667a3a343920e0e782
+=======
+.DS_Store
+.vercel
+>>>>>>> 95b13b8da627a721885c1aefd50de4927f2b5069
