@@ -1,0 +1,42 @@
+import { Phase } from "@/types/business";
+import { formatCurrencyRange, formatNumberRange } from "@/utils/benchmarks";
+
+interface PhaseCardProps {
+  phase: Phase;
+}
+
+export function PhaseCard({ phase }: PhaseCardProps) {
+  return (
+    <article className="rounded-[24px] border border-white/10 bg-white/5 p-5">
+      <h3 className="text-lg font-semibold text-white">{phase.title}</h3>
+      <p className="mt-3 text-sm leading-6 text-muted">
+        <span className="font-semibold text-slate-100">Goal:</span> {phase.goal}
+      </p>
+
+      <ul className="mt-4 grid gap-2 pl-5 text-sm leading-6 text-slate-200">
+        {phase.tasks.map((task) => (
+          <li key={task}>{task}</li>
+        ))}
+      </ul>
+
+      <div className="mt-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+        <div className="rounded-2xl border border-white/10 bg-slate-950/60 p-3">
+          <p className="text-xs font-semibold uppercase tracking-[0.12em] text-muted">Lead Targets</p>
+          <p className="mt-2 text-sm text-white">{formatNumberRange(phase.benchmarks.leads)}</p>
+        </div>
+        <div className="rounded-2xl border border-white/10 bg-slate-950/60 p-3">
+          <p className="text-xs font-semibold uppercase tracking-[0.12em] text-muted">Quote Targets</p>
+          <p className="mt-2 text-sm text-white">{formatNumberRange(phase.benchmarks.quotes)}</p>
+        </div>
+        <div className="rounded-2xl border border-white/10 bg-slate-950/60 p-3">
+          <p className="text-xs font-semibold uppercase tracking-[0.12em] text-muted">Customer Targets</p>
+          <p className="mt-2 text-sm text-white">{formatNumberRange(phase.benchmarks.jobs)}</p>
+        </div>
+        <div className="rounded-2xl border border-white/10 bg-slate-950/60 p-3">
+          <p className="text-xs font-semibold uppercase tracking-[0.12em] text-muted">Revenue Targets</p>
+          <p className="mt-2 text-sm text-white">{formatCurrencyRange(phase.benchmarks.revenue)}</p>
+        </div>
+      </div>
+    </article>
+  );
+}
