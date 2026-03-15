@@ -5,6 +5,7 @@ import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 
 import { BusinessCard } from "@/components/BusinessCard";
+import { LockedFeatureCard } from "@/components/LockedFeatureCard";
 import { businessTagLabels, businesses } from "@/data/businesses";
 import { hasTierAccess, tierLabels } from "@/utils/access";
 import { filterBusinesses } from "@/utils/benchmarks";
@@ -13,10 +14,16 @@ import { useAccessProfile, useActiveBlueprint } from "@/utils/storage";
 const filterOptions = [
   { id: "low2k", label: "Low Startup (<$2k)" },
   { id: "low5k", label: "Low Startup (<$5k)" },
+  { id: "low10k", label: "Low Startup (<$10k)" },
   { id: "solo", label: "Solo-friendly" },
+  { id: "crew", label: "Crew-based" },
   { id: "high", label: "High Demand" },
   { id: "indoor", label: "Indoor" },
-  { id: "outdoor", label: "Outdoor" }
+  { id: "outdoor", label: "Outdoor" },
+  { id: "mobile", label: "Mobile" },
+  { id: "beginner", label: "Beginner-friendly" },
+  { id: "recurring", label: "Recurring" },
+  { id: "seasonal", label: "Seasonal" }
 ];
 
 export default function DashboardPage() {
@@ -89,9 +96,10 @@ export default function DashboardPage() {
           </Link>
         </div>
 
-        <div className="mt-6 grid gap-4 md:grid-cols-3">
+        <div className="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
           {[
-            { label: "Blueprint", unlocked: hasTierAccess(profile.tier, "preview"), detail: "Launch roadmap and scripts" },
+            { label: "Service Exploration", unlocked: hasTierAccess(profile.tier, "preview"), detail: "Compare opportunities, fit, and economics" },
+            { label: "Blueprint", unlocked: hasTierAccess(profile.tier, "core"), detail: "Full launch roadmap, setup, pricing, and operations" },
             { label: "Benchmarks", unlocked: hasTierAccess(profile.tier, "core"), detail: "Weekly KPI tracking and scorecards" },
             { label: "AI Coach", unlocked: hasTierAccess(profile.tier, "pro"), detail: "Phase-aware coaching and guidance" }
           ].map((item) => (
@@ -158,6 +166,7 @@ export default function DashboardPage() {
                 business={business}
                 tagLabels={businessTagLabels}
                 onSelect={handleSelectBusiness}
+                tier={profile.tier}
                 isActiveBlueprint={activeBlueprintId === business.id}
               />
             ))}
@@ -169,6 +178,31 @@ export default function DashboardPage() {
           </div>
         )}
       </section>
+
+      {!hasTierAccess(profile.tier, "core") && (
+        <section className="mt-6 grid gap-4 xl:grid-cols-2">
+          <LockedFeatureCard
+            title="Core unlocks the full blueprint"
+            requiredTier="core"
+            description="Preview is intentionally limited to service discovery and fit. Core unlocks the real operating system."
+            bullets={[
+              "Detailed startup requirements and tool stack",
+              "Licensing, insurance, pricing, and operating guidance",
+              "Weekly launch execution and process design"
+            ]}
+          />
+          <LockedFeatureCard
+            title="Pro unlocks AI-guided execution"
+            requiredTier="pro"
+            description="Once the service model is selected, Pro adds guided prompts and tactical AI support."
+            bullets={[
+              "Setup, pricing, marketing, operations, and sales prompt starters",
+              "Service-specific responses based on the selected business",
+              "Execution help for objections, follow-up, and lead handling"
+            ]}
+          />
+        </section>
+      )}
     </div>
   );
 }

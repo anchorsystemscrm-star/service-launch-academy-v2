@@ -1,13 +1,15 @@
 "use client";
 
+import { ExecutionStage } from "@/types/business";
 import { getCompletedWeeks, weekGroups } from "@/utils/benchmarks";
 
 interface ProgressTrackerProps {
   progress: boolean[];
+  executionPlan?: ExecutionStage[];
   onToggleWeek: (weekIndex: number, checked: boolean) => void;
 }
 
-export function ProgressTracker({ progress, onToggleWeek }: ProgressTrackerProps) {
+export function ProgressTracker({ progress, executionPlan, onToggleWeek }: ProgressTrackerProps) {
   const completedWeeks = getCompletedWeeks(progress);
   const percentage = Math.round((completedWeeks / 13) * 100);
 
@@ -24,6 +26,17 @@ export function ProgressTracker({ progress, onToggleWeek }: ProgressTrackerProps
           {completedWeeks} of 13 weeks completed ({percentage}%).
         </p>
       </div>
+
+      {executionPlan && (
+        <div className="mb-5 grid gap-2">
+          {executionPlan.map((stage) => (
+            <div key={stage.title} className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3">
+              <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted">{stage.title}</p>
+              <p className="mt-1 text-sm text-slate-200">{stage.summary}</p>
+            </div>
+          ))}
+        </div>
+      )}
 
       <div className="grid gap-5">
         {weekGroups.map((group) => (

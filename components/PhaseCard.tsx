@@ -8,7 +8,12 @@ interface PhaseCardProps {
 export function PhaseCard({ phase }: PhaseCardProps) {
   return (
     <article className="rounded-[24px] border border-white/10 bg-white/5 p-5">
-      <h3 className="text-lg font-semibold text-white">{phase.title}</h3>
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <h3 className="text-lg font-semibold text-white">{phase.title}</h3>
+        <span className="rounded-full border border-white/10 bg-black/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.14em] text-slate-200">
+          KPI-aligned
+        </span>
+      </div>
       <p className="mt-3 text-sm leading-6 text-muted">
         <span className="font-semibold text-slate-100">Goal:</span> {phase.goal}
       </p>

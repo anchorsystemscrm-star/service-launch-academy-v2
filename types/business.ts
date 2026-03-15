@@ -1,5 +1,19 @@
-export type BusinessTag = "low2k" | "low5k" | "solo" | "high" | "indoor" | "outdoor";
+export type BusinessTag =
+  | "low2k"
+  | "low5k"
+  | "low10k"
+  | "solo"
+  | "crew"
+  | "high"
+  | "indoor"
+  | "outdoor"
+  | "mobile"
+  | "beginner"
+  | "recurring"
+  | "seasonal";
+
 export type SubscriptionTier = "preview" | "core" | "pro" | "elite";
+export type SoftwareRequirement = "required" | "recommended" | "optional";
 
 export interface Benchmark {
   leads: [number, number];
@@ -20,6 +34,99 @@ export interface Phase {
   benchmarks: Benchmark;
 }
 
+export interface ExecutionStage {
+  title: string;
+  summary: string;
+  actions: string[];
+}
+
+export interface BudgetBucket {
+  label: string;
+  range: string;
+  note: string;
+}
+
+export interface StartupRequirements {
+  tools: string[];
+  equipment: string[];
+  vehicleNeeds: string[];
+  requiredItems: string[];
+  optionalItems: string[];
+  budgetBuckets: BudgetBucket[];
+}
+
+export interface SoftwareRecommendation {
+  category: string;
+  tool: string;
+  requirement: SoftwareRequirement;
+  notes: string;
+}
+
+export interface LicensingGuidance {
+  disclaimer: string;
+  whereToCheck: string[];
+  checklist: string[];
+  commonCategories: string[];
+  agencyPrompts: string[];
+}
+
+export interface InsuranceGuidance {
+  generalLiability: string;
+  commercialAuto: string;
+  workersComp: string;
+  equipmentCoverage: string;
+  questionsToAsk: string[];
+  documentsToKeep: string[];
+}
+
+export interface OfferPricing {
+  starterOffer: string;
+  standardOffer: string;
+  premiumOffer: string;
+  addOns: string[];
+  recurringOption: string;
+  minimumPriceGuidance: string;
+  sampleUpsells: string[];
+  pricingNotes: string[];
+}
+
+export interface AcquisitionPlan {
+  bestFirstLeadSources: string[];
+  onlineSources: string[];
+  offlineSources: string[];
+  localOutreachIdeas: string[];
+  referralIdeas: string[];
+  neighborhoodMarketingIdeas: string[];
+  socialProofIdeas: string[];
+  beforeAfterContentIdeas: string[];
+  googleBusinessProfileGuidance: string[];
+}
+
+export interface OperationsSetup {
+  leadResponseProcess: string[];
+  quotingProcess: string[];
+  schedulingProcess: string[];
+  jobPrep: string[];
+  completionChecklist: string[];
+  invoicing: string[];
+  reviewRequestProcess: string[];
+  followUpProcess: string[];
+}
+
+export interface PromptSuggestions {
+  setup: string[];
+  pricing: string[];
+  marketing: string[];
+  operations: string[];
+  sales: string[];
+}
+
+export interface UpgradeTeaser {
+  title: string;
+  description: string;
+  items: string[];
+}
+
 export interface BusinessCosts {
   equipment: string;
   insurance: string;
@@ -32,15 +139,41 @@ export interface Business {
   id: string;
   name: string;
   tags: BusinessTag[];
+  summary: string;
+  teaser: string;
+  goodFor: string[];
+  operatorModel: string;
+  teamModel: string;
+  serviceMode: string;
+  difficulty: string;
   startup_cost_range: string;
   revenue_90_range: string;
   revenue_1yr_range: string;
   margin_range: string;
-  difficulty: string;
+  demandLevel: string;
+  seasonality: string;
+  recurringRevenuePotential: string;
   recommended_first_offer: string;
+  whyAttractive: string;
+  whyPeopleStartIt: string;
+  pros: string[];
+  cons: string[];
+  bestFitOperatorType: string;
   phaseBenchmarks: Benchmark[];
+  blueprintPhases: Phase[];
+  executionPlan: ExecutionStage[];
   costs: BusinessCosts;
-  tools: string[];
+  startupRequirements: StartupRequirements;
+  softwareStack: SoftwareRecommendation[];
+  licensingGuidance: LicensingGuidance;
+  insuranceGuidance: InsuranceGuidance;
+  offerPricing: OfferPricing;
+  acquisitionPlan: AcquisitionPlan;
+  operationsSetup: OperationsSetup;
+  promptSuggestions: PromptSuggestions;
+  scripts: Script[];
+  previewTeasers: UpgradeTeaser[];
+  advancedSystems: string[];
 }
 
 export interface KPIData {

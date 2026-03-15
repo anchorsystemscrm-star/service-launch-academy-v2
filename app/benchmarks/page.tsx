@@ -3,8 +3,9 @@
 import { useMemo } from "react";
 
 import { KPIInputs } from "@/components/KPIInputs";
+import { LockedFeatureCard } from "@/components/LockedFeatureCard";
 import { businesses } from "@/data/businesses";
-import { tierLabels } from "@/utils/access";
+import { hasTierAccess, tierLabels } from "@/utils/access";
 import { defaultKpiData, getFallbackBusiness, getTrackStatus, milestoneTemplate, buildBlueprint } from "@/utils/benchmarks";
 import { getCompletedWeeks } from "@/utils/benchmarks";
 import { useAccessProfile, useBlueprintProgress, useKpiState } from "@/utils/storage";
@@ -14,10 +15,28 @@ export default function BenchmarksPage() {
   const business = useMemo(() => getFallbackBusiness(profile.selectedBusinessId), [profile.selectedBusinessId]);
   const { progress } = useBlueprintProgress(business.id);
   const { kpis, setKpis } = useKpiState(business.id, defaultKpiData);
+  const hasCoreAccess = hasTierAccess(profile.tier, "core");
 
   const completedWeeks = getCompletedWeeks(progress);
   const trackStatus = getTrackStatus(business, progress, kpis);
   const currentPhase = buildBlueprint(business).find((phase) => phase.title === trackStatus.phaseTitle);
+
+  if (!hasCoreAccess) {
+    return (
+      <div className="mx-auto max-w-5xl animate-fade-up">
+        <LockedFeatureCard
+          title="Benchmarks unlock with Core"
+          requiredTier="core"
+          description="Preview is for exploring service opportunities. KPI tracking, on-track indicators, and weekly scorecards unlock in Core."
+          bullets={[
+            "Weekly lead, quote, jobs won, revenue, and review tracking",
+            "Phase-aware benchmark targets and on-track status",
+            "Timeline visibility to keep launch execution disciplined"
+          ]}
+        />
+      </div>
+    );
+  }
 
   return (
     <div className="mx-auto max-w-7xl animate-fade-up">

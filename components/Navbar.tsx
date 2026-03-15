@@ -5,7 +5,15 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 
-import { AccessProfile, getLockedCopy, hasTierAccess, isSetupComplete, navItems, tierLabels } from "@/utils/access";
+import {
+  AccessProfile,
+  getLockedCopy,
+  hasTierAccess,
+  isSetupComplete,
+  navItems,
+  tierDescriptions,
+  tierLabels
+} from "@/utils/access";
 import { getSupabaseBrowserClient, isSupabaseConfigured } from "@/lib/supabaseClient";
 import { clearAccessCookie } from "@/utils/storage";
 
@@ -81,24 +89,24 @@ export function Navbar({ profile }: NavbarProps) {
 
   return (
     <>
-      <aside className="fixed inset-y-0 left-0 z-40 hidden w-72 border-r border-white/10 bg-slate-950/80 backdrop-blur lg:block">
-        <div className="flex h-full flex-col px-5 py-6">
+      <aside className="fixed inset-y-0 left-0 z-40 hidden w-[19rem] border-r border-white/10 bg-slate-950/85 backdrop-blur lg:block">
+        <div className="flex h-full flex-col px-5 py-5">
           <Link
             href={setupComplete ? "/dashboard" : "/start"}
-            className="rounded-2xl border border-white/10 bg-white/5 p-4 shadow-card transition hover:border-accent/40 hover:bg-white/10"
+            className="rounded-[26px] border border-white/10 bg-white/5 p-4 shadow-card transition hover:border-accent/40 hover:bg-white/10"
           >
             <div className="flex items-center gap-3">
-              <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-accent/30 bg-accent/10">
-                <Image src="/logo.png" alt="Anchor Systems logo" width={30} height={30} className="rounded-xl" />
+              <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-[20px] border border-accent/30 bg-accent/10">
+                <Image src="/logo.png" alt="Anchor Systems logo" width={34} height={34} className="rounded-xl" />
               </div>
-              <div>
-                <p className="text-sm font-semibold text-white">Service Launch Academy</p>
-                <p className="text-xs text-muted">Powered by Anchor Systems</p>
+              <div className="min-w-0">
+                <p className="truncate text-sm font-semibold text-white">Service Launch Academy</p>
+                <p className="truncate text-xs text-muted">Powered by Anchor Systems</p>
               </div>
             </div>
           </Link>
 
-          <div className="mt-6 rounded-[24px] border border-white/10 bg-white/5 p-4">
+          <div className="mt-6 rounded-[26px] border border-white/10 bg-white/5 p-4">
             <p className="text-xs font-semibold uppercase tracking-[0.16em] text-muted">Access Tier</p>
             <div className="mt-3 flex items-center justify-between gap-3">
               <span className="rounded-full border border-accent/30 bg-accent/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.14em] text-white">
@@ -112,9 +120,7 @@ export function Navbar({ profile }: NavbarProps) {
               </Link>
             </div>
             <p className="mt-3 text-sm leading-6 text-muted">
-              {setupComplete
-                ? "Navigation unlocks according to the current tier. Locked modules stay hidden from direct access."
-                : "Complete setup to choose a business before entering the full workspace."}
+              {setupComplete ? tierDescriptions[profile.tier] : "Complete setup to choose a business before entering the workspace."}
             </p>
           </div>
 
@@ -132,8 +138,8 @@ export function Navbar({ profile }: NavbarProps) {
             {navItems.map((item) => renderNavItem(item.href, item.label, item.minTier))}
           </nav>
 
-          <div className="mt-auto rounded-3xl border border-white/10 bg-white/5 p-4">
-            <p className="text-sm font-semibold text-white">Launch Stack</p>
+          <div className="mt-auto rounded-[26px] border border-white/10 bg-white/5 p-4">
+            <p className="text-sm font-semibold text-white">Anchor Systems</p>
             <p className="mt-2 text-sm leading-6 text-muted">
               Pipeline, follow-up automation, scheduling, invoicing, and review requests in one premium operating layer.
             </p>
@@ -148,11 +154,14 @@ export function Navbar({ profile }: NavbarProps) {
         </div>
       </aside>
 
-      <header className="fixed inset-x-0 top-0 z-50 border-b border-accent/10 bg-slate-950/80 backdrop-blur">
-        <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-4 sm:px-6 lg:pl-80 lg:pr-8">
+      <header className="fixed inset-x-0 top-0 z-50 border-b border-accent/10 bg-slate-950/88 backdrop-blur">
+        <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-4 sm:px-6 lg:pl-[21rem] lg:pr-8">
           <div className="flex min-w-0 items-center gap-3">
-            <Link href={setupComplete ? "/dashboard" : "/start"} className="flex h-11 w-11 items-center justify-center rounded-2xl border border-accent/30 bg-accent/10 lg:hidden">
-              <Image src="/logo.png" alt="Anchor Systems logo" width={28} height={28} className="rounded-xl" />
+            <Link
+              href={setupComplete ? "/dashboard" : "/start"}
+              className="flex h-12 w-12 shrink-0 items-center justify-center rounded-[18px] border border-accent/30 bg-accent/10 lg:hidden"
+            >
+              <Image src="/logo.png" alt="Anchor Systems logo" width={30} height={30} className="rounded-xl" />
             </Link>
             <div className="min-w-0">
               <p className="truncate text-sm font-semibold text-white">Service Launch Academy</p>

@@ -1,9 +1,10 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
+import type { Session } from "@supabase/supabase-js";
 
 import { SubscriptionTier, ChatMessage, KPIData } from "@/types/business";
-import { AccessProfile } from "@/utils/access";
+import { AccessProfile, normalizeSubscriptionTier } from "@/utils/access";
 
 export const STORAGE_KEYS = {
   selectedBusiness: "sla_selected_business",
@@ -92,11 +93,24 @@ export function setTierCookie(value: SubscriptionTier) {
   setCookie(COOKIE_KEYS.subscriptionTier, value);
 }
 
+function extractTierFromSession(session: Session | null | undefined): SubscriptionTier {
+  const appTier = session?.user?.app_metadata?.subscription_tier ?? session?.user?.app_metadata?.tier;
+  const userTier = session?.user?.user_metadata?.subscription_tier ?? session?.user?.user_metadata?.tier;
+  return normalizeSubscriptionTier(appTier ?? userTier);
+}
+
+export function syncTierFromSession(session: Session | null | undefined) {
+  const tier = extractTierFromSession(session);
+  writeStorage(STORAGE_KEYS.subscriptionTier, tier);
+  setTierCookie(tier);
+  return tier;
+}
+
 export function readClientAccessProfile(): AccessProfile {
   return {
     onboardingComplete: readStorage<boolean>(STORAGE_KEYS.onboardingComplete, false),
     selectedBusinessId: readStorage<string | null>(STORAGE_KEYS.selectedBusiness, null),
-    tier: readStorage<SubscriptionTier>(STORAGE_KEYS.subscriptionTier, "preview")
+    tier: normalizeSubscriptionTier(readStorage<SubscriptionTier>(STORAGE_KEYS.subscriptionTier, "preview"))
   };
 }
 
@@ -184,14 +198,13 @@ export function useSubscriptionTier() {
 
   useEffect(() => {
     if (state.hydrated) {
-      setTierCookie(state.value);
+      setTierCookie(normalizeSubscriptionTier(state.value));
     }
   }, [state.hydrated, state.value]);
 
   return {
     hydrated: state.hydrated,
-    tier: state.value,
-    setTier: state.setValue
+    tier: normalizeSubscriptionTier(state.value)
   };
 }
 
@@ -209,7 +222,6 @@ export function useAccessProfile() {
         tier: tierState.tier
       },
       setOnboardingComplete: onboardingState.setOnboardingComplete,
-      setTier: tierState.setTier,
       setSelectedBusinessId: businessState.setSelectedBusinessId
     }),
     [
@@ -220,7 +232,6 @@ export function useAccessProfile() {
       onboardingState.onboardingComplete,
       onboardingState.setOnboardingComplete,
       tierState.hydrated,
-      tierState.setTier,
       tierState.tier
     ]
   );

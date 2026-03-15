@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 
 import { getSupabaseBrowserClient, isSupabaseConfigured } from "@/lib/supabaseClient";
 import { getFirstAvailableAppPath } from "@/utils/access";
-import { readClientAccessProfile, setAccessCookie } from "@/utils/storage";
+import { readClientAccessProfile, setAccessCookie, syncTierFromSession } from "@/utils/storage";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -27,6 +27,7 @@ export default function LoginPage() {
     supabase.auth.getSession().then(({ data }) => {
       if (data.session?.access_token) {
         setAccessCookie(data.session.access_token, data.session.expires_at);
+        syncTierFromSession(data.session);
         router.replace(getFirstAvailableAppPath(readClientAccessProfile()));
       }
     });
@@ -59,6 +60,7 @@ export default function LoginPage() {
 
       if (data.session?.access_token) {
         setAccessCookie(data.session.access_token, data.session.expires_at);
+        syncTierFromSession(data.session);
       }
 
       router.replace(getFirstAvailableAppPath(readClientAccessProfile()));
@@ -92,6 +94,11 @@ export default function LoginPage() {
       const { data, error: signUpError } = await supabase.auth.signUp({
         email,
         password,
+        options: {
+          data: {
+            subscription_tier: "preview"
+          }
+        }
       });
 
       if (signUpError) {
@@ -101,6 +108,7 @@ export default function LoginPage() {
 
       if (data.session?.access_token) {
         setAccessCookie(data.session.access_token, data.session.expires_at);
+        syncTierFromSession(data.session);
         router.replace(getFirstAvailableAppPath(readClientAccessProfile()));
         router.refresh();
         return;
@@ -178,8 +186,8 @@ export default function LoginPage() {
             </p>
             <h2 className="mt-3 text-3xl font-semibold text-white">Welcome back</h2>
             <p className="mt-3 text-sm leading-6 text-muted">
-              Sign in with your email and password to access your dashboard, blueprint,
-              benchmarks, and AI coach.
+              Sign in with your email and password to access your workspace. New accounts
+              start on Preview and unlock additional operating layers based on account access.
             </p>
 
             <form onSubmit={handleSubmit} className="mt-8 grid gap-4">

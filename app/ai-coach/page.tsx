@@ -3,8 +3,9 @@
 import { useMemo } from "react";
 
 import { ChatWindow } from "@/components/ChatWindow";
+import { LockedFeatureCard } from "@/components/LockedFeatureCard";
 import { businesses } from "@/data/businesses";
-import { tierLabels } from "@/utils/access";
+import { hasTierAccess, tierLabels } from "@/utils/access";
 import { buildBlueprint, defaultChatIntro, getCoachResponse, getFallbackBusiness, getPhaseIndexByProgress } from "@/utils/benchmarks";
 import { useAccessProfile, useBlueprintProgress, useChatHistory } from "@/utils/storage";
 
@@ -14,9 +15,17 @@ export default function AICoachPage() {
   const { progress } = useBlueprintProgress(business.id);
   const initialMessage = useMemo(() => defaultChatIntro(business), [business]);
   const { history, replaceHistory } = useChatHistory(business.id, initialMessage);
+  const hasProAccess = hasTierAccess(profile.tier, "pro");
 
   const phases = useMemo(() => buildBlueprint(business), [business]);
   const currentPhase = phases[getPhaseIndexByProgress(progress)];
+  const promptGroups = [
+    { title: "Setup", prompts: business.promptSuggestions.setup },
+    { title: "Pricing", prompts: business.promptSuggestions.pricing },
+    { title: "Marketing", prompts: business.promptSuggestions.marketing },
+    { title: "Operations", prompts: business.promptSuggestions.operations },
+    { title: "Sales", prompts: business.promptSuggestions.sales }
+  ];
 
   function handleSendMessage(message: string) {
     const nextHistory = [
@@ -26,6 +35,23 @@ export default function AICoachPage() {
     ];
 
     replaceHistory(nextHistory);
+  }
+
+  if (!hasProAccess) {
+    return (
+      <div className="mx-auto max-w-5xl animate-fade-up">
+        <LockedFeatureCard
+          title="AI Coach unlocks with Pro"
+          requiredTier="pro"
+          description="Core gives you the full playbook. Pro adds guided AI help so pricing, marketing, operations, and follow-up stop feeling blank."
+          bullets={[
+            business.promptSuggestions.setup[0],
+            business.promptSuggestions.pricing[0],
+            business.promptSuggestions.sales[0]
+          ]}
+        />
+      </div>
+    );
   }
 
   return (
@@ -40,7 +66,7 @@ export default function AICoachPage() {
       </section>
 
       <div className="mt-6 grid gap-6 xl:grid-cols-[1.15fr_0.85fr]">
-        <ChatWindow history={history} onSendMessage={handleSendMessage} />
+        <ChatWindow history={history} onSendMessage={handleSendMessage} promptGroups={promptGroups} />
 
         <aside className="panel-surface p-6">
           <h2 className="text-xl font-semibold text-white">Context</h2>
@@ -59,6 +85,15 @@ export default function AICoachPage() {
             <div className="rounded-[20px] border border-white/10 bg-white/5 p-4">
               <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted">Current Phase</p>
               <p className="mt-2 text-sm text-white">{currentPhase.title}</p>
+            </div>
+
+            <div className="rounded-[20px] border border-white/10 bg-white/5 p-4">
+              <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted">Prompt categories</p>
+              <ul className="mt-3 grid gap-2 pl-5 text-sm leading-6 text-slate-200">
+                {Object.keys(business.promptSuggestions).map((item) => (
+                  <li key={item}>{item}</li>
+                ))}
+              </ul>
             </div>
 
             <div className="rounded-[20px] border border-white/10 bg-white/5 p-4">

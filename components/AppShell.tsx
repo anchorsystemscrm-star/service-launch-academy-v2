@@ -5,7 +5,7 @@ import { usePathname, useRouter } from "next/navigation";
 
 import { getSupabaseBrowserClient, isSupabaseConfigured } from "@/lib/supabaseClient";
 import { canAccessPath, getFirstAvailableAppPath } from "@/utils/access";
-import { clearAccessCookie, readClientAccessProfile, setAccessCookie, useAccessProfile } from "@/utils/storage";
+import { clearAccessCookie, readClientAccessProfile, setAccessCookie, syncTierFromSession, useAccessProfile } from "@/utils/storage";
 
 import { Navbar } from "./Navbar";
 
@@ -34,6 +34,7 @@ export function AppShell({ children }: PropsWithChildren) {
 
         if (data.session?.access_token) {
           setAccessCookie(data.session.access_token, data.session.expires_at);
+          syncTierFromSession(data.session);
         } else {
           clearAccessCookie();
           if (!isLoginPage) {
@@ -56,6 +57,7 @@ export function AppShell({ children }: PropsWithChildren) {
     } = supabase.auth.onAuthStateChange((event, session) => {
       if (session?.access_token) {
         setAccessCookie(session.access_token, session.expires_at);
+        syncTierFromSession(session);
       } else {
         clearAccessCookie();
       }
@@ -106,8 +108,8 @@ export function AppShell({ children }: PropsWithChildren) {
   return (
     <>
       {!isLoginPage && <Navbar profile={profile} />}
-      <main className={isLoginPage ? "min-h-screen" : "min-h-screen lg:pl-72"}>
-        <div className={isLoginPage ? "" : "px-4 pb-8 pt-28 sm:px-6 lg:px-8"}>{children}</div>
+      <main className={isLoginPage ? "min-h-screen" : "min-h-screen lg:pl-[19rem]"}>
+        <div className={isLoginPage ? "" : "px-4 pb-10 pt-36 sm:px-6 lg:px-8 lg:pt-28"}>{children}</div>
       </main>
     </>
   );

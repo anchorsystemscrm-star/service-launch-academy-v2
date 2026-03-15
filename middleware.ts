@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 
-import { canAccessPath, getFirstAvailableAppPath } from "@/utils/access";
+import { canAccessPath, getFirstAvailableAppPath, normalizeSubscriptionTier } from "@/utils/access";
 
 const protectedRoutes = ["/dashboard", "/blueprint", "/benchmarks", "/ai-coach", "/start"];
 
@@ -13,10 +13,7 @@ export function middleware(request: NextRequest) {
   const profile = {
     onboardingComplete,
     selectedBusinessId,
-    tier:
-      tierCookie === "core" || tierCookie === "pro" || tierCookie === "elite" || tierCookie === "preview"
-        ? tierCookie
-        : "preview"
+    tier: normalizeSubscriptionTier(tierCookie)
   } as const;
 
   const isProtectedRoute = protectedRoutes.some((route) => pathname.startsWith(route));

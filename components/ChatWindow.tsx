@@ -4,12 +4,18 @@ import { FormEvent, useEffect, useRef, useState } from "react";
 
 import { ChatMessage } from "@/types/business";
 
+interface PromptGroup {
+  title: string;
+  prompts: string[];
+}
+
 interface ChatWindowProps {
   history: ChatMessage[];
   onSendMessage: (message: string) => void;
+  promptGroups?: PromptGroup[];
 }
 
-export function ChatWindow({ history, onSendMessage }: ChatWindowProps) {
+export function ChatWindow({ history, onSendMessage, promptGroups }: ChatWindowProps) {
   const [message, setMessage] = useState("");
   const scrollRef = useRef<HTMLDivElement | null>(null);
 
@@ -34,6 +40,28 @@ export function ChatWindow({ history, onSendMessage }: ChatWindowProps) {
 
   return (
     <div className="rounded-[28px] border border-white/10 bg-panel-gradient p-5 shadow-card">
+      {promptGroups && promptGroups.length > 0 && (
+        <div className="mb-4 grid gap-3">
+          {promptGroups.map((group) => (
+            <div key={group.title} className="rounded-[24px] border border-white/10 bg-white/5 p-4">
+              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-muted">{group.title}</p>
+              <div className="mt-3 flex flex-wrap gap-2">
+                {group.prompts.map((prompt) => (
+                  <button
+                    key={prompt}
+                    type="button"
+                    onClick={() => onSendMessage(prompt)}
+                    className="rounded-full border border-white/10 bg-black/10 px-3 py-2 text-left text-xs font-medium text-slate-100 transition hover:border-accent/40 hover:bg-accent/10"
+                  >
+                    {prompt}
+                  </button>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
       <div
         ref={scrollRef}
         className="grid max-h-[60vh] min-h-[440px] gap-3 overflow-y-auto rounded-[24px] border border-white/10 bg-slate-950/70 p-4"

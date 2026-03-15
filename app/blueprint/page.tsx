@@ -2,18 +2,21 @@
 
 import { useEffect, useMemo, useState } from "react";
 
+import { LockedFeatureCard } from "@/components/LockedFeatureCard";
 import { PhaseCard } from "@/components/PhaseCard";
 import { ProgressTracker } from "@/components/ProgressTracker";
 import { ScriptCard } from "@/components/ScriptCard";
-import { businesses } from "@/data/businesses";
-import { getLockedCopy, hasTierAccess, tierLabels } from "@/utils/access";
+import { getUpgradeMessage, hasTierAccess, tierLabels } from "@/utils/access";
 import { getFallbackBusiness, buildBlueprint, buildScripts } from "@/utils/benchmarks";
 import { useAccessProfile, useActiveBlueprint, useBlueprintProgress } from "@/utils/storage";
 
 const tabs = [
-  { id: "plan", label: "90-Day Plan", minTier: "preview" },
-  { id: "costs", label: "Costs & Tools", minTier: "preview" },
-  { id: "scripts", label: "Scripts", minTier: "preview" },
+  { id: "plan", label: "Launch Blueprint", minTier: "core" },
+  { id: "setup", label: "Setup + Stack", minTier: "core" },
+  { id: "pricing", label: "Offers + Pricing", minTier: "core" },
+  { id: "growth", label: "Lead Gen + Ops", minTier: "core" },
+  { id: "compliance", label: "Licensing + Insurance", minTier: "core" },
+  { id: "prompts", label: "AI Prompts", minTier: "pro" },
   { id: "anchor", label: "Anchor Setup", minTier: "elite" }
 ] as const;
 
@@ -26,21 +29,91 @@ export default function BlueprintPage() {
 
   const phases = useMemo(() => buildBlueprint(business), [business]);
   const scripts = useMemo(() => buildScripts(business), [business]);
-  const costs = [
-    ["Equipment", business.costs.equipment],
-    ["Insurance", business.costs.insurance],
-    ["Marketing", business.costs.marketing],
-    ["Software", business.costs.software],
-    ["Misc", business.costs.misc]
-  ];
   const isActive = activeBlueprintId === business.id;
+  const hasCoreAccess = hasTierAccess(profile.tier, "core");
+  const hasProAccess = hasTierAccess(profile.tier, "pro");
   const canAccessAnchor = hasTierAccess(profile.tier, "elite");
 
   useEffect(() => {
-    if (activeTab === "anchor" && !canAccessAnchor) {
+    if (!hasCoreAccess) {
+      setActiveTab("plan");
+      return;
+    }
+
+    if (activeTab === "prompts" && !hasProAccess) {
       setActiveTab("plan");
     }
-  }, [activeTab, canAccessAnchor]);
+
+    if (activeTab === "anchor" && !canAccessAnchor) {
+      setActiveTab(hasProAccess ? "prompts" : "plan");
+    }
+  }, [activeTab, canAccessAnchor, hasCoreAccess, hasProAccess]);
+
+  function renderPreviewExperience() {
+    return (
+      <div className="mt-6 grid gap-6 xl:grid-cols-[360px_minmax(0,1fr)]">
+        <div className="grid gap-6">
+          <section className="panel-surface p-6">
+            <h2 className="text-xl font-semibold text-white">At a glance</h2>
+            <div className="mt-4 grid gap-3 text-sm text-slate-200">
+              <div className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3">
+                <span className="text-muted">Summary:</span> {business.teaser}
+              </div>
+              <div className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3">
+                <span className="text-muted">Best for:</span> {business.bestFitOperatorType}
+              </div>
+              <div className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3">
+                <span className="text-muted">Startup range:</span> {business.startup_cost_range}
+              </div>
+              <div className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3">
+                <span className="text-muted">90-day revenue:</span> {business.revenue_90_range}
+              </div>
+              <div className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3">
+                <span className="text-muted">Recurring potential:</span> {business.recurringRevenuePotential}
+              </div>
+            </div>
+          </section>
+
+          <section className="panel-surface p-6">
+            <h2 className="text-xl font-semibold text-white">Why this business works</h2>
+            <p className="mt-4 text-sm leading-6 text-muted">{business.whyAttractive}</p>
+            <ul className="mt-4 grid gap-2 pl-5 text-sm leading-6 text-slate-200">
+              {business.pros.map((item) => (
+                <li key={item}>{item}</li>
+              ))}
+            </ul>
+          </section>
+        </div>
+
+        <div className="grid gap-6">
+          {business.previewTeasers.map((teaser) => (
+            <LockedFeatureCard
+              key={teaser.title}
+              title={teaser.title}
+              requiredTier={teaser.title.includes("Pro") ? "pro" : "core"}
+              description={teaser.description}
+              bullets={teaser.items}
+            />
+          ))}
+
+          <section className="panel-surface p-6 sm:p-8">
+            <h2 className="text-2xl font-semibold text-white">Preview includes opportunity fit, not the full operating system.</h2>
+            <p className="mt-4 text-sm leading-6 text-muted">
+              {getUpgradeMessage("core")} Upgrade to unlock startup requirements, software stack, licensing guidance, insurance guidance,
+              pricing design, lead generation systems, and the weekly launch plan.
+            </p>
+            <div className="mt-6 grid gap-3 md:grid-cols-2">
+              {business.goodFor.map((item) => (
+                <div key={item} className="rounded-[24px] border border-white/10 bg-white/5 p-4 text-sm text-slate-200">
+                  {item}
+                </div>
+              ))}
+            </div>
+          </section>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="mx-auto max-w-7xl animate-fade-up">
@@ -79,11 +152,17 @@ export default function BlueprintPage() {
         </div>
       </section>
 
+      {!hasCoreAccess ? (
+        renderPreviewExperience()
+      ) : (
       <div className="mt-6 grid gap-6 xl:grid-cols-[360px_minmax(0,1fr)]">
         <div className="grid gap-6">
           <section className="panel-surface p-6">
             <h2 className="text-lg font-semibold text-white">{business.name}</h2>
             <div className="mt-4 grid gap-3 text-sm text-slate-200">
+              <div className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3">
+                <span className="text-muted">Summary:</span> {business.summary}
+              </div>
               <div className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3">
                 <span className="text-muted">Startup Cost:</span> {business.startup_cost_range}
               </div>
@@ -106,7 +185,7 @@ export default function BlueprintPage() {
             <p className="mt-4 text-xs uppercase tracking-[0.18em] text-muted">Typical ranges; results vary.</p>
           </section>
 
-          <ProgressTracker progress={progress} onToggleWeek={setWeekComplete} />
+          <ProgressTracker progress={progress} executionPlan={business.executionPlan} onToggleWeek={setWeekComplete} />
         </div>
 
         <section className="panel-surface p-6 sm:p-8">
@@ -130,7 +209,7 @@ export default function BlueprintPage() {
                   key={tab.id}
                   type="button"
                   disabled
-                  title={getLockedCopy(tab.minTier)}
+                  title={getUpgradeMessage(tab.minTier)}
                   className="cursor-not-allowed rounded-2xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm font-semibold text-slate-500"
                 >
                   {tab.label}
@@ -141,49 +220,323 @@ export default function BlueprintPage() {
 
           {activeTab === "plan" && (
             <div className="mt-6 grid gap-4">
+              <section className="rounded-[24px] border border-white/10 bg-white/5 p-5">
+                <h3 className="text-lg font-semibold text-white">Detailed execution roadmap</h3>
+                <div className="mt-4 grid gap-4">
+                  {business.executionPlan.map((stage) => (
+                    <div key={stage.title} className="rounded-[20px] border border-white/10 bg-slate-950/40 p-4">
+                      <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted">{stage.title}</p>
+                      <p className="mt-2 text-sm text-white">{stage.summary}</p>
+                      <ul className="mt-3 grid gap-2 pl-5 text-sm leading-6 text-slate-200">
+                        {stage.actions.map((action) => (
+                          <li key={action}>{action}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  ))}
+                </div>
+              </section>
               {phases.map((phase) => (
                 <PhaseCard key={phase.title} phase={phase} />
               ))}
             </div>
           )}
 
-          {activeTab === "costs" && (
+          {activeTab === "setup" && (
             <div className="mt-6 grid gap-6">
-              <div className="overflow-hidden rounded-[24px] border border-white/10">
-                <table className="min-w-full divide-y divide-white/10">
-                  <thead className="bg-white/5">
-                    <tr>
-                      <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-[0.14em] text-muted">Category</th>
-                      <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-[0.14em] text-muted">Estimated Range</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-white/10 bg-slate-950/40">
-                    {costs.map(([label, value]) => (
-                      <tr key={label}>
-                        <td className="px-4 py-3 text-sm text-white">{label}</td>
-                        <td className="px-4 py-3 text-sm text-slate-200">{value}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+              <section className="rounded-[24px] border border-white/10 bg-white/5 p-5">
+                <h3 className="text-lg font-semibold text-white">Startup requirements</h3>
+                <div className="mt-4 grid gap-4 lg:grid-cols-2">
+                  <div>
+                    <p className="text-sm font-semibold text-white">Required items</p>
+                    <ul className="mt-3 grid gap-2 pl-5 text-sm leading-6 text-slate-200">
+                      {business.startupRequirements.requiredItems.map((item) => (
+                        <li key={item}>{item}</li>
+                      ))}
+                    </ul>
+                  </div>
+                  <div>
+                    <p className="text-sm font-semibold text-white">Optional upgrades</p>
+                    <ul className="mt-3 grid gap-2 pl-5 text-sm leading-6 text-slate-200">
+                      {business.startupRequirements.optionalItems.map((item) => (
+                        <li key={item}>{item}</li>
+                      ))}
+                    </ul>
+                  </div>
+                </div>
 
-              <div>
-                <h3 className="text-lg font-semibold text-white">Tools / equipment checklist</h3>
-                <ul className="mt-4 grid gap-3 pl-5 text-sm leading-6 text-slate-200">
-                  {business.tools.map((tool) => (
-                    <li key={tool}>{tool}</li>
+                <div className="mt-5 grid gap-4 lg:grid-cols-2">
+                  <div>
+                    <p className="text-sm font-semibold text-white">Vehicle needs</p>
+                    <ul className="mt-3 grid gap-2 pl-5 text-sm leading-6 text-slate-200">
+                      {business.startupRequirements.vehicleNeeds.map((item) => (
+                        <li key={item}>{item}</li>
+                      ))}
+                    </ul>
+                  </div>
+                  <div>
+                    <p className="text-sm font-semibold text-white">Core tools and equipment</p>
+                    <ul className="mt-3 grid gap-2 pl-5 text-sm leading-6 text-slate-200">
+                      {business.startupRequirements.tools.map((item) => (
+                        <li key={item}>{item}</li>
+                      ))}
+                    </ul>
+                  </div>
+                </div>
+              </section>
+
+              <section className="rounded-[24px] border border-white/10 bg-white/5 p-5">
+                <h3 className="text-lg font-semibold text-white">Software / apps / tools stack</h3>
+                <div className="mt-4 grid gap-3">
+                  {business.softwareStack.map((item) => (
+                    <div key={`${item.category}-${item.tool}`} className="rounded-[20px] border border-white/10 bg-slate-950/40 p-4">
+                      <div className="flex flex-wrap items-center justify-between gap-3">
+                        <p className="text-sm font-semibold text-white">{item.category}</p>
+                        <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs font-semibold uppercase tracking-[0.14em] text-slate-200">
+                          {item.requirement}
+                        </span>
+                      </div>
+                      <p className="mt-2 text-sm text-slate-100">{item.tool}</p>
+                      <p className="mt-2 text-sm leading-6 text-muted">{item.notes}</p>
+                    </div>
                   ))}
-                </ul>
-              </div>
+                </div>
+              </section>
+
+              <section className="rounded-[24px] border border-white/10 bg-white/5 p-5">
+                <h3 className="text-lg font-semibold text-white">Startup budget buckets</h3>
+                <div className="mt-4 grid gap-3 md:grid-cols-2">
+                  {business.startupRequirements.budgetBuckets.map((bucket) => (
+                    <div key={bucket.label} className="rounded-[20px] border border-white/10 bg-slate-950/40 p-4">
+                      <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted">{bucket.label}</p>
+                      <p className="mt-2 text-sm font-semibold text-white">{bucket.range}</p>
+                      <p className="mt-2 text-sm leading-6 text-muted">{bucket.note}</p>
+                    </div>
+                  ))}
+                </div>
+              </section>
             </div>
           )}
 
-          {activeTab === "scripts" && (
+          {activeTab === "pricing" && (
             <div className="mt-6 grid gap-4">
-              {scripts.map((script) => (
-                <ScriptCard key={script.title} script={script} />
+              <section className="rounded-[24px] border border-white/10 bg-white/5 p-5">
+                <h3 className="text-lg font-semibold text-white">Offer and pricing setup</h3>
+                <div className="mt-4 grid gap-4 lg:grid-cols-3">
+                  <div className="rounded-[20px] border border-white/10 bg-slate-950/40 p-4">
+                    <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted">Starter</p>
+                    <p className="mt-2 text-sm text-white">{business.offerPricing.starterOffer}</p>
+                  </div>
+                  <div className="rounded-[20px] border border-white/10 bg-slate-950/40 p-4">
+                    <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted">Standard</p>
+                    <p className="mt-2 text-sm text-white">{business.offerPricing.standardOffer}</p>
+                  </div>
+                  <div className="rounded-[20px] border border-white/10 bg-slate-950/40 p-4">
+                    <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted">Premium</p>
+                    <p className="mt-2 text-sm text-white">{business.offerPricing.premiumOffer}</p>
+                  </div>
+                </div>
+                <div className="mt-5 grid gap-4 lg:grid-cols-2">
+                  <div>
+                    <p className="text-sm font-semibold text-white">Add-ons and upsells</p>
+                    <ul className="mt-3 grid gap-2 pl-5 text-sm leading-6 text-slate-200">
+                      {[...business.offerPricing.addOns, ...business.offerPricing.sampleUpsells].map((item) => (
+                        <li key={item}>{item}</li>
+                      ))}
+                    </ul>
+                  </div>
+                  <div>
+                    <p className="text-sm font-semibold text-white">Pricing notes</p>
+                    <p className="mt-3 text-sm leading-6 text-muted">{business.offerPricing.minimumPriceGuidance}</p>
+                    <ul className="mt-3 grid gap-2 pl-5 text-sm leading-6 text-slate-200">
+                      {business.offerPricing.pricingNotes.map((item) => (
+                        <li key={item}>{item}</li>
+                      ))}
+                    </ul>
+                  </div>
+                </div>
+              </section>
+
+              <section className="rounded-[24px] border border-white/10 bg-white/5 p-5">
+                <h3 className="text-lg font-semibold text-white">Sales scripts</h3>
+                <div className="mt-4 grid gap-4">
+                  {scripts.map((script) => (
+                    <ScriptCard key={script.title} script={script} />
+                  ))}
+                </div>
+              </section>
+            </div>
+          )}
+
+          {activeTab === "growth" && (
+            <div className="mt-6 grid gap-6">
+              <section className="rounded-[24px] border border-white/10 bg-white/5 p-5">
+                <h3 className="text-lg font-semibold text-white">Customer acquisition</h3>
+                <div className="mt-4 grid gap-4 lg:grid-cols-2">
+                  {[
+                    { title: "Best first lead sources", items: business.acquisitionPlan.bestFirstLeadSources },
+                    { title: "Online sources", items: business.acquisitionPlan.onlineSources },
+                    { title: "Offline sources", items: business.acquisitionPlan.offlineSources },
+                    { title: "Local outreach ideas", items: business.acquisitionPlan.localOutreachIdeas },
+                    { title: "Referral ideas", items: business.acquisitionPlan.referralIdeas },
+                    { title: "Neighborhood marketing", items: business.acquisitionPlan.neighborhoodMarketingIdeas },
+                    { title: "Social proof ideas", items: business.acquisitionPlan.socialProofIdeas },
+                    { title: "Before / after content", items: business.acquisitionPlan.beforeAfterContentIdeas }
+                  ].map(({ title, items }) => (
+                    <div key={title} className="rounded-[20px] border border-white/10 bg-slate-950/40 p-4">
+                      <p className="text-sm font-semibold text-white">{title}</p>
+                      <ul className="mt-3 grid gap-2 pl-5 text-sm leading-6 text-slate-200">
+                        {items.map((item) => (
+                          <li key={item}>{item}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  ))}
+                </div>
+              </section>
+
+              <section className="rounded-[24px] border border-white/10 bg-white/5 p-5">
+                <h3 className="text-lg font-semibold text-white">Operations setup</h3>
+                <div className="mt-4 grid gap-4 lg:grid-cols-2">
+                  {[
+                    { title: "Lead response", items: business.operationsSetup.leadResponseProcess },
+                    { title: "Quoting", items: business.operationsSetup.quotingProcess },
+                    { title: "Scheduling", items: business.operationsSetup.schedulingProcess },
+                    { title: "Job prep", items: business.operationsSetup.jobPrep },
+                    { title: "Completion checklist", items: business.operationsSetup.completionChecklist },
+                    { title: "Invoicing", items: business.operationsSetup.invoicing },
+                    { title: "Review requests", items: business.operationsSetup.reviewRequestProcess },
+                    { title: "Follow-up", items: business.operationsSetup.followUpProcess }
+                  ].map(({ title, items }) => (
+                    <div key={title} className="rounded-[20px] border border-white/10 bg-slate-950/40 p-4">
+                      <p className="text-sm font-semibold text-white">{title}</p>
+                      <ul className="mt-3 grid gap-2 pl-5 text-sm leading-6 text-slate-200">
+                        {items.map((item) => (
+                          <li key={item}>{item}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  ))}
+                </div>
+              </section>
+            </div>
+          )}
+
+          {activeTab === "compliance" && (
+            <div className="mt-6 grid gap-6">
+              <section className="rounded-[24px] border border-white/10 bg-white/5 p-5">
+                <h3 className="text-lg font-semibold text-white">Licensing guidance</h3>
+                <p className="mt-4 text-sm leading-6 text-muted">{business.licensingGuidance.disclaimer}</p>
+                <div className="mt-4 grid gap-4 lg:grid-cols-2">
+                  <div>
+                    <p className="text-sm font-semibold text-white">Where to check</p>
+                    <ul className="mt-3 grid gap-2 pl-5 text-sm leading-6 text-slate-200">
+                      {business.licensingGuidance.whereToCheck.map((item) => (
+                        <li key={item}>{item}</li>
+                      ))}
+                    </ul>
+                  </div>
+                  <div>
+                    <p className="text-sm font-semibold text-white">Checklist</p>
+                    <ul className="mt-3 grid gap-2 pl-5 text-sm leading-6 text-slate-200">
+                      {business.licensingGuidance.checklist.map((item) => (
+                        <li key={item}>{item}</li>
+                      ))}
+                    </ul>
+                  </div>
+                </div>
+                <div className="mt-4 grid gap-4 lg:grid-cols-2">
+                  <div>
+                    <p className="text-sm font-semibold text-white">Common categories</p>
+                    <ul className="mt-3 grid gap-2 pl-5 text-sm leading-6 text-slate-200">
+                      {business.licensingGuidance.commonCategories.map((item) => (
+                        <li key={item}>{item}</li>
+                      ))}
+                    </ul>
+                  </div>
+                  <div>
+                    <p className="text-sm font-semibold text-white">Questions for local agencies</p>
+                    <ul className="mt-3 grid gap-2 pl-5 text-sm leading-6 text-slate-200">
+                      {business.licensingGuidance.agencyPrompts.map((item) => (
+                        <li key={item}>{item}</li>
+                      ))}
+                    </ul>
+                  </div>
+                </div>
+              </section>
+
+              <section className="rounded-[24px] border border-white/10 bg-white/5 p-5">
+                <h3 className="text-lg font-semibold text-white">Insurance guidance</h3>
+                <div className="mt-4 grid gap-4 lg:grid-cols-2">
+                  {[
+                    ["General liability", business.insuranceGuidance.generalLiability],
+                    ["Commercial auto", business.insuranceGuidance.commercialAuto],
+                    ["Workers comp", business.insuranceGuidance.workersComp],
+                    ["Equipment coverage", business.insuranceGuidance.equipmentCoverage]
+                  ].map(([title, copy]) => (
+                    <div key={title} className="rounded-[20px] border border-white/10 bg-slate-950/40 p-4">
+                      <p className="text-sm font-semibold text-white">{title}</p>
+                      <p className="mt-3 text-sm leading-6 text-muted">{copy}</p>
+                    </div>
+                  ))}
+                </div>
+                <div className="mt-4 grid gap-4 lg:grid-cols-2">
+                  <div>
+                    <p className="text-sm font-semibold text-white">Questions to ask your agent</p>
+                    <ul className="mt-3 grid gap-2 pl-5 text-sm leading-6 text-slate-200">
+                      {business.insuranceGuidance.questionsToAsk.map((item) => (
+                        <li key={item}>{item}</li>
+                      ))}
+                    </ul>
+                  </div>
+                  <div>
+                    <p className="text-sm font-semibold text-white">Documents to keep on file</p>
+                    <ul className="mt-3 grid gap-2 pl-5 text-sm leading-6 text-slate-200">
+                      {business.insuranceGuidance.documentsToKeep.map((item) => (
+                        <li key={item}>{item}</li>
+                      ))}
+                    </ul>
+                  </div>
+                </div>
+              </section>
+            </div>
+          )}
+
+          {activeTab === "prompts" && hasProAccess && (
+            <div className="mt-6 grid gap-6">
+              {(
+                [
+                  ["setup", business.promptSuggestions.setup],
+                  ["pricing", business.promptSuggestions.pricing],
+                  ["marketing", business.promptSuggestions.marketing],
+                  ["operations", business.promptSuggestions.operations],
+                  ["sales", business.promptSuggestions.sales]
+                ] as const
+              ).map(([category, prompts]) => (
+                <section key={category} className="rounded-[24px] border border-white/10 bg-white/5 p-5">
+                  <h3 className="text-lg font-semibold capitalize text-white">{category} prompts</h3>
+                  <ul className="mt-4 grid gap-3 pl-5 text-sm leading-6 text-slate-200">
+                    {prompts.map((prompt) => (
+                      <li key={prompt}>{prompt}</li>
+                    ))}
+                  </ul>
+                </section>
               ))}
+            </div>
+          )}
+
+          {activeTab === "prompts" && !hasProAccess && (
+            <div className="mt-6">
+              <LockedFeatureCard
+                title="Pro unlocks service-specific AI prompts"
+                requiredTier="pro"
+                description="Prompt categories are structured around setup, pricing, marketing, operations, and sales so the AI coach never feels blank."
+                bullets={[
+                  "Setup prompts for licensing, insurance, and software choices",
+                  "Pricing prompts for package design and objection handling",
+                  "Marketing and sales prompts for posts, scripts, and follow-up"
+                ]}
+              />
             </div>
           )}
 
@@ -259,6 +612,7 @@ export default function BlueprintPage() {
           )}
         </section>
       </div>
+      )}
     </div>
   );
 }
