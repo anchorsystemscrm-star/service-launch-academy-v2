@@ -3,7 +3,7 @@
 import Link from "next/link";
 
 import { SubscriptionTier } from "@/types/business";
-import { isExternalHref, tierLabels } from "@/utils/access";
+import { getCheckoutHref, isExternalHref, tierLabels } from "@/utils/access";
 
 interface PricingCardProps {
   plan: SubscriptionTier;
@@ -26,7 +26,13 @@ export function PricingCard({
   current = false,
   highlighted = false
 }: PricingCardProps) {
-  const isExternalCta = Boolean(ctaHref && isExternalHref(ctaHref));
+  const resolvedCtaHref = ctaHref ?? getCheckoutHref(plan);
+  const isExternalCta = isExternalHref(resolvedCtaHref);
+  const ctaClassName = `inline-flex w-full items-center justify-center rounded-2xl px-4 py-3 text-sm font-semibold transition ${
+    current
+      ? "border border-white/10 bg-white/5 text-white hover:border-white/20 hover:bg-white/10"
+      : "border border-accent/40 bg-accent/10 text-white hover:border-accent/80 hover:bg-accent/20"
+  }`;
 
   return (
     <article
@@ -55,34 +61,14 @@ export function PricingCard({
       </ul>
 
       <div className="mt-auto pt-6">
-        {ctaHref ? (
-          isExternalCta ? (
-            <a
-              href={ctaHref}
-              className={`inline-flex w-full items-center justify-center rounded-2xl px-4 py-3 text-sm font-semibold transition ${
-                current
-                  ? "border border-white/10 bg-white/5 text-white hover:border-white/20 hover:bg-white/10"
-                  : "border border-accent/40 bg-accent/10 text-white hover:border-accent/80 hover:bg-accent/20"
-              }`}
-            >
-              {ctaLabel}
-            </a>
-          ) : (
-            <Link
-              href={ctaHref}
-              className={`inline-flex w-full items-center justify-center rounded-2xl px-4 py-3 text-sm font-semibold transition ${
-                current
-                  ? "border border-white/10 bg-white/5 text-white hover:border-white/20 hover:bg-white/10"
-                  : "border border-accent/40 bg-accent/10 text-white hover:border-accent/80 hover:bg-accent/20"
-              }`}
-            >
-              {ctaLabel}
-            </Link>
-          )
-        ) : (
-          <div className="inline-flex w-full items-center justify-center rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm font-semibold text-white">
+        {isExternalCta ? (
+          <a href={resolvedCtaHref} className={ctaClassName}>
             {ctaLabel}
-          </div>
+          </a>
+        ) : (
+          <Link href={resolvedCtaHref} className={ctaClassName}>
+            {ctaLabel}
+          </Link>
         )}
       </div>
     </article>

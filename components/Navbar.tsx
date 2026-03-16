@@ -33,6 +33,7 @@ export function Navbar({ profile }: NavbarProps) {
 
   const setupComplete = isSetupComplete(profile);
   const coreCheckoutHref = getCheckoutHref("core");
+  const coreUpgradeIsExternal = isExternalHref(coreCheckoutHref);
   const currentLabel = normalizedPathname.startsWith("/start")
     ? "Get Started"
     : navItems.find((item) => normalizedPathname.startsWith(item.href))?.label ?? "Workspace";
@@ -126,7 +127,7 @@ export function Navbar({ profile }: NavbarProps) {
                 Compare Plans
               </Link>
               {profile.tier === "preview" && (
-                isExternalHref(coreCheckoutHref) ? (
+                coreUpgradeIsExternal ? (
                   <a
                     href={coreCheckoutHref}
                     className="inline-flex items-center justify-center rounded-2xl border border-accent/40 bg-accent/10 px-4 py-3 text-sm font-semibold text-white transition hover:border-accent/80 hover:bg-accent/20"

@@ -3,7 +3,7 @@ import Link from "next/link";
 import { BrandBlock } from "@/components/BrandBlock";
 import { PricingCard } from "@/components/PricingCard";
 import { SubscriptionTier } from "@/types/business";
-import { getCheckoutHref, getPricingHref, tierDescriptions, tierLabels } from "@/utils/access";
+import { getCheckoutHref, getPricingHref, isExternalHref, tierDescriptions, tierLabels } from "@/utils/access";
 
 const planContent: Array<{
   plan: SubscriptionTier;
@@ -63,6 +63,8 @@ interface PricingPageContentProps {
 }
 
 export function PricingPageContent({ focusedPlan, currentTier }: PricingPageContentProps) {
+  const focusedPlanHref = getPricingHref(focusedPlan);
+
   return (
     <div className="mx-auto max-w-7xl animate-fade-up">
       <section className="panel-surface relative overflow-hidden p-6 sm:p-8 lg:p-10">
@@ -98,7 +100,7 @@ export function PricingPageContent({ focusedPlan, currentTier }: PricingPageCont
                   Back to Workspace
                 </Link>
                 <Link
-                  href={getPricingHref(focusedPlan)}
+                  href={focusedPlanHref}
                   className="inline-flex items-center justify-center rounded-2xl border border-accent/40 bg-accent/10 px-4 py-3 text-sm font-semibold text-white transition hover:border-accent/80 hover:bg-accent/20"
                 >
                   Focus {tierLabels[focusedPlan]}
@@ -169,14 +171,25 @@ export function PricingPageContent({ focusedPlan, currentTier }: PricingPageCont
           </p>
           <div className="mt-6 grid gap-3">
             {(["core", "pro", "elite"] as SubscriptionTier[]).map((plan) => (
-              <a
-                key={plan}
-                href={getCheckoutHref(plan)}
-                className="inline-flex items-center justify-between rounded-[24px] border border-white/10 bg-white/5 px-5 py-4 text-sm font-semibold text-white transition hover:border-accent/40 hover:bg-white/10"
-              >
-                <span>Upgrade to {tierLabels[plan]}</span>
-                <span className="text-muted">Stripe Checkout</span>
-              </a>
+              isExternalHref(getCheckoutHref(plan)) ? (
+                <a
+                  key={plan}
+                  href={getCheckoutHref(plan)}
+                  className="inline-flex items-center justify-between rounded-[24px] border border-white/10 bg-white/5 px-5 py-4 text-sm font-semibold text-white transition hover:border-accent/40 hover:bg-white/10"
+                >
+                  <span>Upgrade to {tierLabels[plan]}</span>
+                  <span className="text-muted">Stripe Checkout</span>
+                </a>
+              ) : (
+                <Link
+                  key={plan}
+                  href={getCheckoutHref(plan)}
+                  className="inline-flex items-center justify-between rounded-[24px] border border-white/10 bg-white/5 px-5 py-4 text-sm font-semibold text-white transition hover:border-accent/40 hover:bg-white/10"
+                >
+                  <span>Upgrade to {tierLabels[plan]}</span>
+                  <span className="text-muted">Select Plan</span>
+                </Link>
+              )
             ))}
           </div>
         </div>

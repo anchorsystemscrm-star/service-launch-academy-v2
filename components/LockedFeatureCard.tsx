@@ -24,8 +24,10 @@ export function LockedFeatureCard({
   secondaryCtaHref = getPricingHref(),
   secondaryCtaLabel = "Compare Plans"
 }: LockedFeatureCardProps) {
-  const isExternalPrimaryCta = isExternalHref(ctaHref);
-  const isExternalSecondaryCta = isExternalHref(secondaryCtaHref);
+  const primaryHref = ctaHref ?? getCheckoutHref(requiredTier);
+  const secondaryHref = secondaryCtaHref ?? getPricingHref();
+  const isExternalPrimaryCta = isExternalHref(primaryHref);
+  const isExternalSecondaryCta = isExternalHref(secondaryHref);
 
   return (
     <div className="rounded-[30px] border border-white/10 bg-[linear-gradient(180deg,rgba(19,29,47,0.98),rgba(9,16,28,0.98))] p-6 shadow-premium">
@@ -51,14 +53,14 @@ export function LockedFeatureCard({
       <div className="mt-6 flex flex-col gap-3 sm:flex-row">
         {isExternalPrimaryCta ? (
           <a
-            href={ctaHref}
+            href={primaryHref}
             className="inline-flex items-center justify-center rounded-2xl border border-accent/40 bg-accent/10 px-4 py-3 text-sm font-semibold text-white transition hover:border-accent/80 hover:bg-accent/20"
           >
             {ctaLabel}
           </a>
         ) : (
           <Link
-            href={ctaHref}
+            href={primaryHref}
             className="inline-flex items-center justify-center rounded-2xl border border-accent/40 bg-accent/10 px-4 py-3 text-sm font-semibold text-white transition hover:border-accent/80 hover:bg-accent/20"
           >
             {ctaLabel}
@@ -66,14 +68,14 @@ export function LockedFeatureCard({
         )}
         {isExternalSecondaryCta ? (
           <a
-            href={secondaryCtaHref}
+            href={secondaryHref}
             className="inline-flex items-center justify-center rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm font-semibold text-white transition hover:border-white/20 hover:bg-white/10"
           >
             {secondaryCtaLabel}
           </a>
         ) : (
           <Link
-            href={secondaryCtaHref}
+            href={secondaryHref}
             className="inline-flex items-center justify-center rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm font-semibold text-white transition hover:border-white/20 hover:bg-white/10"
           >
             {secondaryCtaLabel}
