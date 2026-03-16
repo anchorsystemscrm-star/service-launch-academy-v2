@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import type { Session } from "@supabase/supabase-js";
 
 import { SubscriptionTier, ChatMessage, KPIData } from "@/types/business";
@@ -147,16 +147,13 @@ export function usePersistentState<T>(key: string, fallback: T) {
     };
   }, [key]);
 
-  const updateValue = useCallback(
-    (next: T | ((previous: T) => T)) => {
-      setValue((previous) => {
-        const resolved = next instanceof Function ? next(previous) : next;
-        writeStorage(key, resolved);
-        return resolved;
-      });
-    },
-    [key]
-  );
+  function updateValue(next: T | ((previous: T) => T)) {
+    setValue((previous) => {
+      const resolved = next instanceof Function ? next(previous) : next;
+      writeStorage(key, resolved);
+      return resolved;
+    });
+  }
 
   return { hydrated, value, setValue: updateValue };
 }
@@ -213,28 +210,16 @@ export function useAccessProfile() {
   const tierState = useSubscriptionTier();
   const businessState = useSelectedBusiness();
 
-  return useMemo(
-    () => ({
-      hydrated: onboardingState.hydrated && tierState.hydrated && businessState.hydrated,
-      profile: {
-        onboardingComplete: onboardingState.onboardingComplete,
-        selectedBusinessId: businessState.selectedBusinessId,
-        tier: tierState.tier
-      },
-      setOnboardingComplete: onboardingState.setOnboardingComplete,
-      setSelectedBusinessId: businessState.setSelectedBusinessId
-    }),
-    [
-      businessState.hydrated,
-      businessState.selectedBusinessId,
-      businessState.setSelectedBusinessId,
-      onboardingState.hydrated,
-      onboardingState.onboardingComplete,
-      onboardingState.setOnboardingComplete,
-      tierState.hydrated,
-      tierState.tier
-    ]
-  );
+  return {
+    hydrated: onboardingState.hydrated && tierState.hydrated && businessState.hydrated,
+    profile: {
+      onboardingComplete: onboardingState.onboardingComplete,
+      selectedBusinessId: businessState.selectedBusinessId,
+      tier: tierState.tier
+    },
+    setOnboardingComplete: onboardingState.setOnboardingComplete,
+    setSelectedBusinessId: businessState.setSelectedBusinessId
+  };
 }
 
 export function useActiveBlueprint() {
@@ -253,26 +238,22 @@ export function useBlueprintProgress(businessId: string) {
     {}
   );
 
-  const progress = useMemo(() => {
-    const existing = value[businessId];
-    return Array.isArray(existing) && existing.length === 13 ? existing : new Array(13).fill(false);
-  }, [businessId, value]);
+  const existing = value[businessId];
+  const progress =
+    Array.isArray(existing) && existing.length === 13 ? existing : new Array(13).fill(false);
 
-  const setWeekComplete = useCallback(
-    (weekIndex: number, checked: boolean) => {
-      setValue((previous) => {
-        const next = { ...previous };
-        const current =
-          Array.isArray(next[businessId]) && next[businessId].length === 13
-            ? [...next[businessId]]
-            : new Array(13).fill(false);
-        current[weekIndex] = checked;
-        next[businessId] = current;
-        return next;
-      });
-    },
-    [businessId, setValue]
-  );
+  function setWeekComplete(weekIndex: number, checked: boolean) {
+    setValue((previous) => {
+      const next = { ...previous };
+      const current =
+        Array.isArray(next[businessId]) && next[businessId].length === 13
+          ? [...next[businessId]]
+          : new Array(13).fill(false);
+      current[weekIndex] = checked;
+      next[businessId] = current;
+      return next;
+    });
+  }
 
   return { hydrated, progress, setWeekComplete };
 }
@@ -281,15 +262,12 @@ export function useKpiState(businessId: string, fallback: KPIData) {
   const { hydrated, value, setValue } = usePersistentState<Record<string, KPIData>>(STORAGE_KEYS.kpiMap, {});
   const kpis = value[businessId] ?? fallback;
 
-  const updateKpis = useCallback(
-    (next: KPIData) => {
-      setValue((previous) => ({
-        ...previous,
-        [businessId]: next
-      }));
-    },
-    [businessId, setValue]
-  );
+  function updateKpis(next: KPIData) {
+    setValue((previous) => ({
+      ...previous,
+      [businessId]: next
+    }));
+  }
 
   return { hydrated, kpis, setKpis: updateKpis };
 }
@@ -315,15 +293,12 @@ export function useChatHistory(businessId: string, initialMessage: ChatMessage) 
 
   const history = value[businessId] ?? [initialMessage];
 
-  const replaceHistory = useCallback(
-    (messages: ChatMessage[]) => {
-      setValue((previous) => ({
-        ...previous,
-        [businessId]: messages
-      }));
-    },
-    [businessId, setValue]
-  );
+  function replaceHistory(messages: ChatMessage[]) {
+    setValue((previous) => ({
+      ...previous,
+      [businessId]: messages
+    }));
+  }
 
   return { hydrated, history, replaceHistory };
 }
