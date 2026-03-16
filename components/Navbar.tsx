@@ -7,9 +7,11 @@ import { usePathname, useRouter } from "next/navigation";
 import { BrandBlock } from "@/components/BrandBlock";
 import {
   AccessProfile,
+  getCheckoutHref,
   getPricingHref,
   getLockedCopy,
   hasTierAccess,
+  isExternalHref,
   isSetupComplete,
   navItems,
   tierDescriptions,
@@ -30,6 +32,7 @@ export function Navbar({ profile }: NavbarProps) {
   const normalizedPathname = pathname ?? "";
 
   const setupComplete = isSetupComplete(profile);
+  const coreCheckoutHref = getCheckoutHref("core");
   const currentLabel = normalizedPathname.startsWith("/start")
     ? "Get Started"
     : navItems.find((item) => normalizedPathname.startsWith(item.href))?.label ?? "Workspace";
@@ -88,8 +91,8 @@ export function Navbar({ profile }: NavbarProps) {
 
   return (
     <>
-      <aside className="fixed inset-y-0 left-0 z-40 hidden w-[20rem] border-r border-white/10 bg-slate-950/88 backdrop-blur lg:block">
-        <div className="flex h-full flex-col px-5 pb-6 pt-8">
+      <aside className="pointer-events-none fixed inset-y-0 left-0 z-40 hidden w-[20rem] lg:block">
+        <div className="pointer-events-auto flex h-full flex-col border-r border-white/10 bg-slate-950/88 px-5 pb-6 pt-8 backdrop-blur">
           <div className="px-1">
             <BrandBlock
               href={setupComplete ? "/dashboard" : "/start"}
@@ -123,12 +126,21 @@ export function Navbar({ profile }: NavbarProps) {
                 Compare Plans
               </Link>
               {profile.tier === "preview" && (
-                <Link
-                  href={getPricingHref("core")}
-                  className="inline-flex items-center justify-center rounded-2xl border border-accent/40 bg-accent/10 px-4 py-3 text-sm font-semibold text-white transition hover:border-accent/80 hover:bg-accent/20"
-                >
-                  Upgrade to Core
-                </Link>
+                isExternalHref(coreCheckoutHref) ? (
+                  <a
+                    href={coreCheckoutHref}
+                    className="inline-flex items-center justify-center rounded-2xl border border-accent/40 bg-accent/10 px-4 py-3 text-sm font-semibold text-white transition hover:border-accent/80 hover:bg-accent/20"
+                  >
+                    Upgrade to Core
+                  </a>
+                ) : (
+                  <Link
+                    href={coreCheckoutHref}
+                    className="inline-flex items-center justify-center rounded-2xl border border-accent/40 bg-accent/10 px-4 py-3 text-sm font-semibold text-white transition hover:border-accent/80 hover:bg-accent/20"
+                  >
+                    Upgrade to Core
+                  </Link>
+                )
               )}
             </div>
           </div>
@@ -163,56 +175,58 @@ export function Navbar({ profile }: NavbarProps) {
         </div>
       </aside>
 
-      <header className="fixed inset-x-0 top-0 z-50 border-b border-accent/10 bg-slate-950/88 backdrop-blur">
-        <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-5 sm:px-6 lg:pl-[22rem] lg:pr-8">
-          <div className="flex min-w-0 items-center gap-3">
-            <BrandBlock
-              href={setupComplete ? "/dashboard" : "/start"}
-              size="compact"
-              currentLabel={currentLabel}
-              className="block lg:hidden"
-            />
-            <div className="hidden min-w-0 lg:block">
-              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-accent">Anchor Systems Workspace</p>
-              <p className="mt-1 truncate text-base font-semibold text-white">{currentLabel}</p>
+      <header className="pointer-events-none fixed inset-x-0 top-0 z-50">
+        <div className="pointer-events-auto border-b border-accent/10 bg-slate-950/88 backdrop-blur">
+          <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-5 sm:px-6 lg:pl-[22rem] lg:pr-8">
+            <div className="flex min-w-0 items-center gap-3">
+              <BrandBlock
+                href={setupComplete ? "/dashboard" : "/start"}
+                size="compact"
+                currentLabel={currentLabel}
+                className="block lg:hidden"
+              />
+              <div className="hidden min-w-0 lg:block">
+                <p className="text-xs font-semibold uppercase tracking-[0.16em] text-accent">Anchor Systems Workspace</p>
+                <p className="mt-1 truncate text-base font-semibold text-white">{currentLabel}</p>
+              </div>
             </div>
-          </div>
 
-          <div className="flex items-center gap-2">
-            <span className="hidden rounded-full border border-white/10 bg-white/5 px-3 py-2 text-xs font-semibold uppercase tracking-[0.14em] text-slate-200 sm:inline-flex">
-              {tierLabels[profile.tier]}
-            </span>
-            <Link
-              href={getPricingHref()}
-              className="hidden rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm font-semibold text-white transition hover:border-white/20 hover:bg-white/10 sm:inline-flex"
-            >
-              Pricing
-            </Link>
-            <Link
-              href="/start"
-              className="hidden rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm font-semibold text-white transition hover:border-white/20 hover:bg-white/10 sm:inline-flex"
-            >
-              Setup
-            </Link>
-            <button
-              type="button"
-              onClick={() => setModalOpen(true)}
-              className="hidden rounded-xl border border-accentSecondary/40 bg-accentSecondary/10 px-4 py-2.5 text-sm font-semibold text-white transition hover:border-accentSecondary/70 hover:bg-accentSecondary/15 sm:inline-flex"
-            >
-              Anchor Systems
-            </button>
-            <button
-              type="button"
-              onClick={handleLogout}
-              disabled={loggingOut}
-              className="rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm font-semibold text-white transition hover:border-white/20 hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-60"
-            >
-              {loggingOut ? "Logging out..." : "Logout"}
-            </button>
+            <div className="flex items-center gap-2">
+              <span className="hidden rounded-full border border-white/10 bg-white/5 px-3 py-2 text-xs font-semibold uppercase tracking-[0.14em] text-slate-200 sm:inline-flex">
+                {tierLabels[profile.tier]}
+              </span>
+              <Link
+                href={getPricingHref()}
+                className="hidden rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm font-semibold text-white transition hover:border-white/20 hover:bg-white/10 sm:inline-flex"
+              >
+                Pricing
+              </Link>
+              <Link
+                href="/start"
+                className="hidden rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm font-semibold text-white transition hover:border-white/20 hover:bg-white/10 sm:inline-flex"
+              >
+                Setup
+              </Link>
+              <button
+                type="button"
+                onClick={() => setModalOpen(true)}
+                className="hidden rounded-xl border border-accentSecondary/40 bg-accentSecondary/10 px-4 py-2.5 text-sm font-semibold text-white transition hover:border-accentSecondary/70 hover:bg-accentSecondary/15 sm:inline-flex"
+              >
+                Anchor Systems
+              </button>
+              <button
+                type="button"
+                onClick={handleLogout}
+                disabled={loggingOut}
+                className="rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm font-semibold text-white transition hover:border-white/20 hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                {loggingOut ? "Logging out..." : "Logout"}
+              </button>
+            </div>
           </div>
         </div>
 
-        <div className="border-t border-white/5 px-4 pb-3 pt-2 lg:hidden">
+        <div className="pointer-events-auto border-t border-white/5 bg-slate-950/88 px-4 pb-3 pt-2 backdrop-blur lg:hidden">
           <div className="flex gap-2 overflow-x-auto pb-1">
             <Link
               href="/start"
@@ -235,7 +249,7 @@ export function Navbar({ profile }: NavbarProps) {
           onClick={() => setModalOpen(false)}
         >
           <div
-            className="w-full max-w-2xl rounded-[28px] border border-accent/30 bg-panel-gradient p-6 shadow-premium"
+            className="pointer-events-auto w-full max-w-2xl rounded-[28px] border border-accent/30 bg-panel-gradient p-6 shadow-premium"
             onClick={(event) => event.stopPropagation()}
           >
             <div className="flex items-start justify-between gap-4">

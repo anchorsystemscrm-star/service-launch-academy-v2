@@ -71,11 +71,11 @@ export function BrandBlock({
   );
 
   if (!href) {
-    return <div className={className}>{content}</div>;
+    return <div className={`pointer-events-auto ${className}`.trim()}>{content}</div>;
   }
 
   return (
-    <Link href={href} className={className}>
+    <Link href={href} className={`pointer-events-auto ${className}`.trim()}>
       {content}
     </Link>
   );

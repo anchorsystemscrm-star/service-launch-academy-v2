@@ -8,7 +8,7 @@ import { businesses, businessTagLabels } from "@/data/businesses";
 import { LockedFeatureCard } from "@/components/LockedFeatureCard";
 import { BusinessCard } from "@/components/BusinessCard";
 import { getFallbackBusiness } from "@/utils/benchmarks";
-import { getFirstAvailableAppPath, getPricingHref, tierDescriptions, tierLabels } from "@/utils/access";
+import { getCheckoutHref, getFirstAvailableAppPath, getPricingHref, isExternalHref, tierDescriptions, tierLabels } from "@/utils/access";
 import { useAccessProfile, useActiveBlueprint } from "@/utils/storage";
 
 export default function StartPage() {
@@ -18,6 +18,7 @@ export default function StartPage() {
   const [pending, setPending] = useState(false);
 
   const selectedBusiness = getFallbackBusiness(profile.selectedBusinessId);
+  const coreCheckoutHref = getCheckoutHref("core");
 
   function completeSetup() {
     if (!profile.selectedBusinessId) {
@@ -38,8 +39,8 @@ export default function StartPage() {
   }
 
   return (
-    <div className="mx-auto max-w-7xl animate-fade-up">
-      <section className="panel-surface relative overflow-hidden p-6 sm:p-8">
+    <div className="relative z-10 mx-auto max-w-7xl animate-fade-up">
+      <section className="panel-surface relative z-10 overflow-hidden p-6 sm:p-8">
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(83,180,255,0.12),transparent_35%),radial-gradient(circle_at_bottom_left,rgba(58,212,166,0.12),transparent_28%)]" />
         <div className="relative">
           <p className="text-sm font-semibold uppercase tracking-[0.18em] text-accent">Get Started</p>
@@ -51,8 +52,8 @@ export default function StartPage() {
         </div>
       </section>
 
-      <div className="mt-6 grid gap-6 xl:grid-cols-[1.1fr_0.9fr]">
-        <section className="panel-surface p-6 sm:p-8">
+      <div className="relative z-10 mt-6 grid gap-6 xl:grid-cols-[1.1fr_0.9fr]">
+        <section className="panel-surface relative z-10 p-6 sm:p-8">
           <div className="flex items-center justify-between gap-4">
             <div>
               <p className="text-sm font-semibold uppercase tracking-[0.16em] text-muted">Step 1</p>
@@ -100,7 +101,7 @@ export default function StartPage() {
           </div>
         </section>
 
-        <section className="panel-surface p-6 sm:p-8">
+        <section className="panel-surface relative z-10 p-6 sm:p-8">
           <p className="text-sm font-semibold uppercase tracking-[0.16em] text-muted">Step 2</p>
           <h2 className="mt-2 text-2xl font-semibold text-white">Review account access</h2>
           <p className="mt-3 text-sm leading-6 text-muted">
@@ -142,12 +143,21 @@ export default function StartPage() {
               >
                 {pending ? "Preparing workspace..." : "Continue with Preview"}
               </button>
-              <Link
-                href={getPricingHref("core")}
-                className="inline-flex w-full items-center justify-center rounded-2xl border border-white/10 bg-white/5 px-5 py-3 text-sm font-semibold text-white transition hover:border-white/20 hover:bg-white/10"
-              >
-                Upgrade to Core
-              </Link>
+              {isExternalHref(coreCheckoutHref) ? (
+                <a
+                  href={coreCheckoutHref}
+                  className="inline-flex w-full items-center justify-center rounded-2xl border border-white/10 bg-white/5 px-5 py-3 text-sm font-semibold text-white transition hover:border-white/20 hover:bg-white/10"
+                >
+                  Upgrade to Core
+                </a>
+              ) : (
+                <Link
+                  href={coreCheckoutHref}
+                  className="inline-flex w-full items-center justify-center rounded-2xl border border-white/10 bg-white/5 px-5 py-3 text-sm font-semibold text-white transition hover:border-white/20 hover:bg-white/10"
+                >
+                  Upgrade to Core
+                </Link>
+              )}
               <Link
                 href={getPricingHref()}
                 className="inline-flex w-full items-center justify-center rounded-2xl border border-white/10 bg-white/5 px-5 py-3 text-sm font-semibold text-white transition hover:border-white/20 hover:bg-white/10"
@@ -167,7 +177,7 @@ export default function StartPage() {
                 "Unlock Core for the full launch playbook and operating setup.",
                 "Unlock Pro for guided AI execution help."
               ]}
-              ctaHref={getPricingHref("core")}
+              ctaHref={coreCheckoutHref}
             />
           </div>
         </section>

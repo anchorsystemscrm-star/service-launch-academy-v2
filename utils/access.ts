@@ -121,6 +121,29 @@ export function getPricingHref(plan?: SubscriptionTier) {
   return plan ? `/pricing?plan=${plan}` : "/pricing";
 }
 
+export function isExternalHref(href: string) {
+  return href.startsWith("http://") || href.startsWith("https://");
+}
+
+export function getCheckoutHref(plan: SubscriptionTier) {
+  if (plan === "preview") {
+    return "/dashboard";
+  }
+
+  const checkoutUrl =
+    plan === "core"
+      ? process.env.NEXT_PUBLIC_STRIPE_CORE_URL
+      : plan === "pro"
+        ? process.env.NEXT_PUBLIC_STRIPE_PRO_URL
+        : process.env.NEXT_PUBLIC_STRIPE_ELITE_URL;
+
+  if (checkoutUrl) {
+    return checkoutUrl;
+  }
+
+  return getPricingHref(plan);
+}
+
 export function getUpgradeMessage(requiredTier: SubscriptionTier) {
   if (requiredTier === "core") {
     return "Upgrade to Core to unlock the full launch operating system.";

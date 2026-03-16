@@ -7,7 +7,7 @@ import { LockedFeatureCard } from "@/components/LockedFeatureCard";
 import { PhaseCard } from "@/components/PhaseCard";
 import { ProgressTracker } from "@/components/ProgressTracker";
 import { ScriptCard } from "@/components/ScriptCard";
-import { getPricingHref, getUpgradeMessage, hasTierAccess, tierLabels } from "@/utils/access";
+import { getCheckoutHref, getPricingHref, getUpgradeMessage, hasTierAccess, isExternalHref, tierLabels } from "@/utils/access";
 import { getFallbackBusiness, buildBlueprint, buildScripts } from "@/utils/benchmarks";
 import { useAccessProfile, useActiveBlueprint, useBlueprintProgress } from "@/utils/storage";
 
@@ -34,6 +34,7 @@ export default function BlueprintPage() {
   const hasCoreAccess = hasTierAccess(profile.tier, "core");
   const hasProAccess = hasTierAccess(profile.tier, "pro");
   const canAccessAnchor = hasTierAccess(profile.tier, "elite");
+  const coreCheckoutHref = getCheckoutHref("core");
 
   useEffect(() => {
     if (!hasCoreAccess) {
@@ -94,7 +95,7 @@ export default function BlueprintPage() {
               requiredTier={teaser.title.includes("Pro") ? "pro" : "core"}
               description={teaser.description}
               bullets={teaser.items}
-              ctaHref={getPricingHref(teaser.title.includes("Pro") ? "pro" : "core")}
+              ctaHref={getCheckoutHref(teaser.title.includes("Pro") ? "pro" : "core")}
             />
           ))}
 
@@ -112,12 +113,21 @@ export default function BlueprintPage() {
               ))}
             </div>
             <div className="mt-6 flex flex-col gap-3 sm:flex-row">
-              <Link
-                href={getPricingHref("core")}
-                className="inline-flex items-center justify-center rounded-2xl border border-accent/40 bg-accent/10 px-4 py-3 text-sm font-semibold text-white transition hover:border-accent/80 hover:bg-accent/20"
-              >
-                Upgrade to Core
-              </Link>
+              {isExternalHref(coreCheckoutHref) ? (
+                <a
+                  href={coreCheckoutHref}
+                  className="inline-flex items-center justify-center rounded-2xl border border-accent/40 bg-accent/10 px-4 py-3 text-sm font-semibold text-white transition hover:border-accent/80 hover:bg-accent/20"
+                >
+                  Upgrade to Core
+                </a>
+              ) : (
+                <Link
+                  href={coreCheckoutHref}
+                  className="inline-flex items-center justify-center rounded-2xl border border-accent/40 bg-accent/10 px-4 py-3 text-sm font-semibold text-white transition hover:border-accent/80 hover:bg-accent/20"
+                >
+                  Upgrade to Core
+                </Link>
+              )}
               <Link
                 href={getPricingHref()}
                 className="inline-flex items-center justify-center rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm font-semibold text-white transition hover:border-white/20 hover:bg-white/10"
@@ -552,7 +562,7 @@ export default function BlueprintPage() {
                   "Pricing prompts for package design and objection handling",
                   "Marketing and sales prompts for posts, scripts, and follow-up"
                 ]}
-                ctaHref={getPricingHref("pro")}
+                ctaHref={getCheckoutHref("pro")}
               />
             </div>
           )}
@@ -629,7 +639,7 @@ export default function BlueprintPage() {
                   "Automation and systemization content for scaling operators",
                   "Premium CRM and operating-system visibility"
                 ]}
-                ctaHref={getPricingHref("elite")}
+                ctaHref={getCheckoutHref("elite")}
               />
             </div>
           )}

@@ -3,7 +3,7 @@
 import { ChatWindow } from "@/components/ChatWindow";
 import { LockedFeatureCard } from "@/components/LockedFeatureCard";
 import { businesses } from "@/data/businesses";
-import { getPricingHref, hasTierAccess, tierLabels } from "@/utils/access";
+import { getCheckoutHref, hasTierAccess, tierLabels } from "@/utils/access";
 import { buildBlueprint, defaultChatIntro, getCoachResponse, getFallbackBusiness, getPhaseIndexByProgress } from "@/utils/benchmarks";
 import { useAccessProfile, useBlueprintProgress, useChatHistory } from "@/utils/storage";
 
@@ -47,7 +47,7 @@ export default function AICoachPage() {
             business.promptSuggestions.pricing[0],
             business.promptSuggestions.sales[0]
           ]}
-          ctaHref={getPricingHref("pro")}
+          ctaHref={getCheckoutHref("pro")}
         />
       </div>
     );

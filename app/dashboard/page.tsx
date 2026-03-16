@@ -7,7 +7,7 @@ import { useRouter } from "next/navigation";
 import { BusinessCard } from "@/components/BusinessCard";
 import { LockedFeatureCard } from "@/components/LockedFeatureCard";
 import { businessTagLabels, businesses } from "@/data/businesses";
-import { getPricingHref, hasTierAccess, tierLabels } from "@/utils/access";
+import { getCheckoutHref, getPricingHref, hasTierAccess, tierLabels } from "@/utils/access";
 import { filterBusinesses } from "@/utils/benchmarks";
 import { useAccessProfile, useActiveBlueprint } from "@/utils/storage";
 
@@ -195,7 +195,7 @@ export default function DashboardPage() {
               "Licensing, insurance, pricing, and operating guidance",
               "Weekly launch execution and process design"
             ]}
-            ctaHref={getPricingHref("core")}
+            ctaHref={getCheckoutHref("core")}
           />
           <LockedFeatureCard
             title="Pro unlocks AI-guided execution"
@@ -206,7 +206,7 @@ export default function DashboardPage() {
               "Service-specific responses based on the selected business",
               "Execution help for objections, follow-up, and lead handling"
             ]}
-            ctaHref={getPricingHref("pro")}
+            ctaHref={getCheckoutHref("pro")}
           />
         </section>
       )}

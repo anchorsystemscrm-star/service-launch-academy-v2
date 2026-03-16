@@ -3,7 +3,7 @@ import Link from "next/link";
 import { BrandBlock } from "@/components/BrandBlock";
 import { PricingCard } from "@/components/PricingCard";
 import { SubscriptionTier } from "@/types/business";
-import { getPricingHref, tierDescriptions, tierLabels } from "@/utils/access";
+import { getCheckoutHref, getPricingHref, tierDescriptions, tierLabels } from "@/utils/access";
 
 const planContent: Array<{
   plan: SubscriptionTier;
@@ -56,19 +56,6 @@ const planContent: Array<{
     ]
   }
 ];
-
-function getUpgradeActionHref(plan: SubscriptionTier) {
-  if (plan === "preview") {
-    return "/dashboard";
-  }
-
-  const subject = encodeURIComponent(`Service Launch Academy upgrade request: ${tierLabels[plan]}`);
-  const body = encodeURIComponent(
-    `I want to upgrade my Service Launch Academy access to ${tierLabels[plan]}.\n\nCurrent plan: [fill in]\nBusiness selected: [fill in]\nTeam size: [fill in]`
-  );
-
-  return `mailto:upgrades@anchorsystems.com?subject=${subject}&body=${body}`;
-}
 
 interface PricingPageContentProps {
   focusedPlan: SubscriptionTier;
@@ -147,7 +134,7 @@ export function PricingPageContent({ focusedPlan, currentTier }: PricingPageCont
               description={item.description}
               features={item.features}
               ctaLabel={ctaLabel}
-              ctaHref={current ? "/dashboard" : getUpgradeActionHref(item.plan)}
+              ctaHref={current ? "/dashboard" : getCheckoutHref(item.plan)}
               current={current}
               highlighted={highlighted}
             />
@@ -184,11 +171,11 @@ export function PricingPageContent({ focusedPlan, currentTier }: PricingPageCont
             {(["core", "pro", "elite"] as SubscriptionTier[]).map((plan) => (
               <a
                 key={plan}
-                href={getUpgradeActionHref(plan)}
+                href={getCheckoutHref(plan)}
                 className="inline-flex items-center justify-between rounded-[24px] border border-white/10 bg-white/5 px-5 py-4 text-sm font-semibold text-white transition hover:border-accent/40 hover:bg-white/10"
               >
-                <span>Request {tierLabels[plan]} upgrade</span>
-                <span className="text-muted">Placeholder action</span>
+                <span>Upgrade to {tierLabels[plan]}</span>
+                <span className="text-muted">Stripe Checkout</span>
               </a>
             ))}
           </div>
