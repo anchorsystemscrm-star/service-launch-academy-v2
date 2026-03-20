@@ -176,9 +176,9 @@ export function Navbar({ profile }: NavbarProps) {
         </div>
       </aside>
 
-      <header className="pointer-events-none fixed inset-x-0 top-0 z-50">
+      <header className="pointer-events-none fixed left-0 right-0 top-0 z-50 lg:left-[19rem]">
         <div className="pointer-events-auto border-b border-accent/10 bg-slate-950/88 backdrop-blur">
-          <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-3 sm:px-6 lg:pl-[21rem] lg:pr-8">
+          <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-3 sm:px-6 lg:px-8">
             <div className="flex min-w-0 items-center gap-3">
               <BrandBlock
                 href={setupComplete ? "/dashboard" : "/start"}
