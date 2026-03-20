@@ -14,17 +14,24 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Missing message" }, { status: 400 });
     }
 
-    const systemPrompt = `
-You are a tactical business coach helping someone launch a ${business || "service business"}.
+    if (!process.env.OPENAI_API_KEY) {
+      return NextResponse.json(
+        { error: "OPENAI_API_KEY is missing in Vercel environment variables." },
+        { status: 500 }
+      );
+    }
 
-Current phase: ${phase || "early stage"}.
+    const systemPrompt = `
+You are a tactical business coach helping someone launch a ${business?.name || business || "service business"}.
+
+Current phase: ${phase?.title || phase || "early stage"}.
 
 Give clear, direct, actionable advice.
 No fluff. No long essays.
 Focus on execution, pricing, marketing, operations, or sales.
 `;
 
-    const response = await openai.chat.completions.create({
+    const completion = await openai.chat.completions.create({
       model: "gpt-4o-mini",
       messages: [
         { role: "system", content: systemPrompt },
@@ -34,12 +41,16 @@ Focus on execution, pricing, marketing, operations, or sales.
     });
 
     return NextResponse.json({
-      reply: response.choices[0].message.content,
+      reply: completion.choices[0]?.message?.content || "No response returned.",
     });
   } catch (err) {
-    console.error(err);
+    console.error("AI coach route error:", err);
+
+    const errorMessage =
+      err instanceof Error ? err.message : "Unknown AI request error";
+
     return NextResponse.json(
-      { error: "AI request failed" },
+      { error: errorMessage },
       { status: 500 }
     );
   }
