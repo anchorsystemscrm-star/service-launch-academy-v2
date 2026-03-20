@@ -40,6 +40,7 @@ export default function AICoachPage() {
 
   async function handleSendMessage(message: string) {
     const trimmed = message.trim();
+
     if (!trimmed || isLoading) return;
 
     const optimisticHistory = [
@@ -62,12 +63,6 @@ export default function AICoachPage() {
             id: business.id,
             name: business.name,
             summary: business.summary,
-            startupCost: business.metrics.startupCost,
-            ninetyDayRevenue: business.metrics.ninetyDayRevenue,
-            oneYearRevenue: business.metrics.oneYearRevenue,
-            marginRange: business.metrics.marginRange,
-            difficulty: business.metrics.difficulty,
-            firstOffer: business.metrics.recommendedFirstOffer,
           },
           currentPhase: {
             title: currentPhase.title,
@@ -89,20 +84,18 @@ export default function AICoachPage() {
         ...optimisticHistory,
         {
           role: "assistant" as const,
-          text: data.text || "I couldn't generate a useful answer.",
+          text: data.reply || data.text || "I couldn't generate a useful answer.",
         },
       ]);
     } catch (error) {
-      const message =
-        error instanceof Error
-          ? error.message
-          : "The AI coach ran into an error.";
+      const errorMessage =
+        error instanceof Error ? error.message : "The AI coach ran into an error.";
 
       replaceHistory([
         ...optimisticHistory,
         {
           role: "assistant" as const,
-          text: `I hit an error while generating a response: ${message}`,
+          text: `I hit an error while generating a response: ${errorMessage}`,
         },
       ]);
     } finally {
@@ -143,9 +136,7 @@ export default function AICoachPage() {
           business and current phase.
         </p>
         {isLoading && (
-          <p className="mt-4 text-sm text-accent">
-            Generating response...
-          </p>
+          <p className="mt-4 text-sm text-accent">Generating response...</p>
         )}
       </section>
 
