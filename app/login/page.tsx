@@ -129,6 +129,7 @@ export default function LoginPage() {
       <div className="relative grid w-full max-w-6xl overflow-hidden rounded-[32px] border border-white/10 bg-slate-950/60 shadow-premium backdrop-blur xl:grid-cols-[1.15fr_0.85fr]">
         <section className="border-b border-white/10 p-8 sm:p-10 xl:border-b-0 xl:border-r xl:pt-14">
           <BrandBlock
+            href="/"
             size="shell"
             currentLabel="Premium launch operating system for service businesses"
           />
