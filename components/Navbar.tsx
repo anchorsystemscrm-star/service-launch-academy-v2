@@ -92,18 +92,18 @@ export function Navbar({ profile }: NavbarProps) {
 
   return (
     <>
-      <aside className="pointer-events-none fixed inset-y-0 left-0 z-40 hidden w-[20rem] lg:block">
-        <div className="pointer-events-auto flex h-full flex-col border-r border-white/10 bg-slate-950/88 px-5 pb-6 pt-8 backdrop-blur">
-          <div className="px-1">
+      <aside className="pointer-events-none fixed inset-y-0 left-0 z-40 hidden w-[19rem] lg:block">
+        <div className="pointer-events-auto flex h-full flex-col border-r border-white/10 bg-slate-950/88 px-4 pb-5 pt-4 backdrop-blur">
+          <div>
             <BrandBlock
               href={setupComplete ? "/dashboard" : "/start"}
               size="shell"
               currentLabel={currentLabel}
-              className="block rounded-[28px] border border-white/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.08),rgba(255,255,255,0.03))] px-5 py-5 shadow-card transition hover:border-accent/40 hover:bg-white/10"
+              className="block rounded-[24px] border border-white/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.08),rgba(255,255,255,0.03))] px-4 py-3 shadow-card transition hover:border-accent/40 hover:bg-white/10"
             />
           </div>
 
-          <div className="mt-7 rounded-[28px] border border-white/10 bg-white/5 p-5">
+          <div className="mt-5 rounded-[24px] border border-white/10 bg-white/5 p-4">
             <p className="text-xs font-semibold uppercase tracking-[0.16em] text-muted">Access Tier</p>
             <div className="mt-3 flex items-center justify-between gap-3">
               <span className="rounded-full border border-accent/30 bg-accent/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.14em] text-white">
@@ -146,7 +146,7 @@ export function Navbar({ profile }: NavbarProps) {
             </div>
           </div>
 
-          <nav className="mt-7 grid gap-2">
+          <nav className="mt-5 grid gap-2">
             <Link
               href="/start"
               className={`rounded-2xl px-4 py-3 text-sm font-medium transition ${
@@ -160,7 +160,7 @@ export function Navbar({ profile }: NavbarProps) {
             {navItems.map((item) => renderNavItem(item.href, item.label, item.minTier))}
           </nav>
 
-          <div className="mt-auto rounded-[28px] border border-white/10 bg-white/5 p-5">
+          <div className="mt-auto rounded-[24px] border border-white/10 bg-white/5 p-4">
             <p className="text-sm font-semibold text-white">Anchor Systems</p>
             <p className="mt-2 text-sm leading-6 text-muted">
               Pipeline, follow-up automation, scheduling, invoicing, and review requests in one premium operating layer.
@@ -178,7 +178,7 @@ export function Navbar({ profile }: NavbarProps) {
 
       <header className="pointer-events-none fixed inset-x-0 top-0 z-50">
         <div className="pointer-events-auto border-b border-accent/10 bg-slate-950/88 backdrop-blur">
-          <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-5 sm:px-6 lg:pl-[22rem] lg:pr-8">
+          <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-3 sm:px-6 lg:pl-[21rem] lg:pr-8">
             <div className="flex min-w-0 items-center gap-3">
               <BrandBlock
                 href={setupComplete ? "/dashboard" : "/start"}
@@ -187,8 +187,8 @@ export function Navbar({ profile }: NavbarProps) {
                 className="block lg:hidden"
               />
               <div className="hidden min-w-0 lg:block">
-                <p className="text-xs font-semibold uppercase tracking-[0.16em] text-accent">Anchor Systems Workspace</p>
-                <p className="mt-1 truncate text-base font-semibold text-white">{currentLabel}</p>
+                <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-accent">Anchor Systems Workspace</p>
+                <p className="mt-1 truncate text-sm font-semibold text-white">{currentLabel}</p>
               </div>
             </div>
 
