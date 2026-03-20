@@ -130,18 +130,7 @@ export function getCheckoutHref(plan: SubscriptionTier) {
     return "/dashboard";
   }
 
-  const checkoutUrl =
-    plan === "core"
-      ? process.env.NEXT_PUBLIC_STRIPE_CORE_URL
-      : plan === "pro"
-        ? process.env.NEXT_PUBLIC_STRIPE_PRO_URL
-        : process.env.NEXT_PUBLIC_STRIPE_ELITE_URL;
-
-  if (checkoutUrl) {
-    return checkoutUrl;
-  }
-
-  return getPricingHref(plan);
+  return `/api/checkout?plan=${plan}`;
 }
 
 export function getUpgradeMessage(requiredTier: SubscriptionTier) {
