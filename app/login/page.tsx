@@ -96,9 +96,9 @@ export default function LoginPage() {
         password,
         options: {
           data: {
-            subscription_tier: "preview"
-          }
-        }
+            subscription_tier: "preview",
+          },
+        },
       });
 
       if (signUpError) {
@@ -128,7 +128,10 @@ export default function LoginPage() {
 
       <div className="relative grid w-full max-w-6xl overflow-hidden rounded-[32px] border border-white/10 bg-slate-950/60 shadow-premium backdrop-blur xl:grid-cols-[1.15fr_0.85fr]">
         <section className="border-b border-white/10 p-8 sm:p-10 xl:border-b-0 xl:border-r xl:pt-14">
-          <BrandBlock size="login" currentLabel="Premium launch operating system for service businesses" />
+          <BrandBlock
+            size="shell"
+            currentLabel="Premium launch operating system for service businesses"
+          />
 
           <div className="mt-12">
             <p className="text-sm font-semibold uppercase tracking-[0.18em] text-muted">
@@ -162,8 +165,8 @@ export default function LoginPage() {
           <div className="mt-8 rounded-[24px] border border-white/10 bg-white/5 p-5">
             <p className="text-sm font-semibold text-white">Preview-first access model</p>
             <p className="mt-2 text-sm leading-6 text-muted">
-              New accounts start on Preview to explore service opportunities first. Core, Pro, and Elite unlock the deeper
-              operating system as account access expands.
+              New accounts start on Preview to explore service opportunities first. Core, Pro,
+              and Elite unlock the deeper operating system as account access expands.
             </p>
           </div>
         </section>
@@ -239,7 +242,8 @@ export default function LoginPage() {
             <div className="mt-6 rounded-[24px] border border-white/10 bg-white/5 p-5">
               <p className="text-sm font-semibold text-white">Need plan details first?</p>
               <p className="mt-2 text-sm leading-6 text-muted">
-                Once you sign in, you can compare Preview, Core, Pro, and Elite plans from the in-app pricing page.
+                Once you sign in, you can compare Preview, Core, Pro, and Elite plans from the
+                in-app pricing page.
               </p>
               <div className="mt-4 inline-flex rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm font-semibold text-white">
                 Pricing unlocks after sign-in
