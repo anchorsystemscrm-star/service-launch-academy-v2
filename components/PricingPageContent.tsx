@@ -70,7 +70,7 @@ export function PricingPageContent({ focusedPlan, currentTier }: PricingPageCont
       <section className="panel-surface relative overflow-hidden p-6 sm:p-8 lg:p-10">
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(83,180,255,0.18),transparent_28%),radial-gradient(circle_at_bottom_right,rgba(58,212,166,0.12),transparent_24%)]" />
         <div className="relative">
-          <BrandBlock size="shell" currentLabel="Choose the operating layer that matches where you are in the launch cycle" />
+          <BrandBlock href="/pricing" size="shell" currentLabel="Choose the operating layer that matches where you are in the launch cycle" />
           <div className="mt-8 grid gap-8 xl:grid-cols-[1.1fr_0.9fr]">
             <div>
               <p className="text-sm font-semibold uppercase tracking-[0.18em] text-accent">Pricing</p>
