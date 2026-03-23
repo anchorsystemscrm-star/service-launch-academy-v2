@@ -11,7 +11,6 @@ import {
   getPricingHref,
   getLockedCopy,
   hasTierAccess,
-  isExternalHref,
   isSetupComplete,
   navItems,
   tierDescriptions,
@@ -33,7 +32,6 @@ export function Navbar({ profile }: NavbarProps) {
 
   const setupComplete = isSetupComplete(profile);
   const coreCheckoutHref = getCheckoutHref("core");
-  const coreUpgradeIsExternal = isExternalHref(coreCheckoutHref);
   const currentLabel = normalizedPathname.startsWith("/start")
     ? "Get Started"
     : navItems.find((item) => normalizedPathname.startsWith(item.href))?.label ?? "Workspace";
@@ -54,7 +52,12 @@ export function Navbar({ profile }: NavbarProps) {
     }
   }
 
-  function renderNavItem(href: string, label: string, minTier: AccessProfile["tier"], compact = false) {
+  function renderNavItem(
+    href: string,
+    label: string,
+    minTier: AccessProfile["tier"],
+    compact = false
+  ) {
     const active = normalizedPathname.startsWith(href);
     const enabled = setupComplete && hasTierAccess(profile.tier, minTier);
     const baseClass = compact
@@ -92,8 +95,8 @@ export function Navbar({ profile }: NavbarProps) {
 
   return (
     <>
-      <aside className="pointer-events-none fixed inset-y-0 left-0 z-40 hidden w-[19rem] lg:block">
-        <div className="pointer-events-auto flex h-full flex-col border-r border-white/10 bg-slate-950/88 px-4 pb-5 pt-4 backdrop-blur">
+      <aside className="fixed inset-y-0 left-0 z-40 hidden w-[19rem] lg:block">
+        <div className="flex h-full flex-col border-r border-white/10 bg-slate-950/88 px-4 pb-5 pt-4 backdrop-blur">
           <div>
             <BrandBlock
               href={setupComplete ? "/dashboard" : "/start"}
@@ -104,7 +107,9 @@ export function Navbar({ profile }: NavbarProps) {
           </div>
 
           <div className="mt-5 rounded-[24px] border border-white/10 bg-white/5 p-4">
-            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-muted">Access Tier</p>
+            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-muted">
+              Access Tier
+            </p>
             <div className="mt-3 flex items-center justify-between gap-3">
               <span className="rounded-full border border-accent/30 bg-accent/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.14em] text-white">
                 {tierLabels[profile.tier]}
@@ -117,7 +122,9 @@ export function Navbar({ profile }: NavbarProps) {
               </Link>
             </div>
             <p className="mt-3 text-sm leading-6 text-muted">
-              {setupComplete ? tierDescriptions[profile.tier] : "Complete setup to choose a business before entering the workspace."}
+              {setupComplete
+                ? tierDescriptions[profile.tier]
+                : "Complete setup to choose a business before entering the workspace."}
             </p>
             <div className="mt-4 flex flex-col gap-2">
               <Link
@@ -126,22 +133,14 @@ export function Navbar({ profile }: NavbarProps) {
               >
                 Compare Plans
               </Link>
+
               {profile.tier === "preview" && (
-                coreUpgradeIsExternal ? (
-                  <a
-                    href={coreCheckoutHref}
-                    className="inline-flex items-center justify-center rounded-2xl border border-accent/40 bg-accent/10 px-4 py-3 text-sm font-semibold text-white transition hover:border-accent/80 hover:bg-accent/20"
-                  >
-                    Upgrade to Core
-                  </a>
-                ) : (
-                  <Link
-                    href={coreCheckoutHref}
-                    className="inline-flex items-center justify-center rounded-2xl border border-accent/40 bg-accent/10 px-4 py-3 text-sm font-semibold text-white transition hover:border-accent/80 hover:bg-accent/20"
-                  >
-                    Upgrade to Core
-                  </Link>
-                )
+                <a
+                  href={coreCheckoutHref}
+                  className="inline-flex items-center justify-center rounded-2xl border border-accent/40 bg-accent/10 px-4 py-3 text-sm font-semibold text-white transition hover:border-accent/80 hover:bg-accent/20"
+                >
+                  Upgrade to Core
+                </a>
               )}
             </div>
           </div>
@@ -163,7 +162,8 @@ export function Navbar({ profile }: NavbarProps) {
           <div className="mt-auto rounded-[24px] border border-white/10 bg-white/5 p-4">
             <p className="text-sm font-semibold text-white">Anchor Systems</p>
             <p className="mt-2 text-sm leading-6 text-muted">
-              Pipeline, follow-up automation, scheduling, invoicing, and review requests in one premium operating layer.
+              Pipeline, follow-up automation, scheduling, invoicing, and review requests in one
+              premium operating layer.
             </p>
             <button
               type="button"
@@ -176,8 +176,8 @@ export function Navbar({ profile }: NavbarProps) {
         </div>
       </aside>
 
-      <header className="pointer-events-none fixed left-0 right-0 top-0 z-50 lg:left-[19rem]">
-        <div className="pointer-events-auto border-b border-accent/10 bg-slate-950/88 backdrop-blur">
+      <header className="fixed left-0 right-0 top-0 z-50 lg:left-[19rem]">
+        <div className="border-b border-accent/10 bg-slate-950/88 backdrop-blur">
           <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-3 sm:px-6 lg:px-8">
             <div className="flex min-w-0 items-center gap-3">
               <BrandBlock
@@ -187,7 +187,9 @@ export function Navbar({ profile }: NavbarProps) {
                 className="block lg:hidden"
               />
               <div className="hidden min-w-0 lg:block">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-accent">Anchor Systems Workspace</p>
+                <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-accent">
+                  Anchor Systems Workspace
+                </p>
                 <p className="mt-1 truncate text-sm font-semibold text-white">{currentLabel}</p>
               </div>
             </div>
@@ -227,7 +229,7 @@ export function Navbar({ profile }: NavbarProps) {
           </div>
         </div>
 
-        <div className="pointer-events-auto border-t border-white/5 bg-slate-950/88 px-4 pb-3 pt-2 backdrop-blur lg:hidden">
+        <div className="border-t border-white/5 bg-slate-950/88 px-4 pb-3 pt-2 backdrop-blur lg:hidden">
           <div className="flex gap-2 overflow-x-auto pb-1">
             <Link
               href="/start"
@@ -257,8 +259,9 @@ export function Navbar({ profile }: NavbarProps) {
               <div>
                 <h2 className="text-xl font-semibold text-white">Run This on Anchor Systems</h2>
                 <p className="mt-2 max-w-xl text-sm leading-6 text-muted">
-                  Anchor Systems is the CRM layer for this playbook. It helps operators capture leads, automate follow-up,
-                  schedule work, and send invoices without juggling multiple tools.
+                  Anchor Systems is the CRM layer for this playbook. It helps operators capture
+                  leads, automate follow-up, schedule work, and send invoices without juggling
+                  multiple tools.
                 </p>
               </div>
               <button
@@ -280,7 +283,10 @@ export function Navbar({ profile }: NavbarProps) {
                 "Invoices, payment tracking, and review request workflows",
                 "A clean operating system for launch-stage service teams"
               ].map((point) => (
-                <div key={point} className="rounded-2xl border border-white/10 bg-white/5 p-4 text-sm text-slate-200">
+                <div
+                  key={point}
+                  className="rounded-2xl border border-white/10 bg-white/5 p-4 text-sm text-slate-200"
+                >
                   {point}
                 </div>
               ))}
