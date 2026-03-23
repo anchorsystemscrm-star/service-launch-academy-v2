@@ -10,6 +10,7 @@ export function middleware(request: NextRequest) {
   const onboardingComplete = request.cookies.get("sla-onboarding")?.value === "1";
   const selectedBusinessId = request.cookies.get("sla-selected-business")?.value ?? null;
   const tierCookie = request.cookies.get("sla-tier")?.value;
+
   const profile = {
     onboardingComplete,
     selectedBusinessId,
@@ -17,6 +18,12 @@ export function middleware(request: NextRequest) {
   } as const;
 
   const isProtectedRoute = protectedRoutes.some((route) => pathname.startsWith(route));
+
+  // Handle root path here, before React renders anything
+  if (pathname === "/") {
+    const destination = accessToken ? getFirstAvailableAppPath(profile) : "/login";
+    return NextResponse.redirect(new URL(destination, request.url));
+  }
 
   if (pathname === "/login" && accessToken) {
     return NextResponse.redirect(new URL(getFirstAvailableAppPath(profile), request.url));
@@ -34,5 +41,14 @@ export function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/login", "/start/:path*", "/dashboard/:path*", "/blueprint/:path*", "/benchmarks/:path*", "/ai-coach/:path*", "/pricing/:path*"]
+  matcher: [
+    "/",
+    "/login",
+    "/start/:path*",
+    "/dashboard/:path*",
+    "/blueprint/:path*",
+    "/benchmarks/:path*",
+    "/ai-coach/:path*",
+    "/pricing/:path*"
+  ]
 };
