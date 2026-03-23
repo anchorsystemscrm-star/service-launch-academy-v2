@@ -3,11 +3,13 @@ import { redirect } from "next/navigation";
 
 import { getFirstAvailableAppPath } from "@/utils/access";
 
-export default function HomePage() {
-  const accessToken = cookies().get("sla-access-token")?.value;
-  const onboardingComplete = cookies().get("sla-onboarding")?.value === "1";
-  const selectedBusinessId = cookies().get("sla-selected-business")?.value ?? null;
-  const tierCookie = cookies().get("sla-tier")?.value;
+export default async function HomePage() {
+  const cookieStore = await cookies();
+
+  const accessToken = cookieStore.get("sla-access-token")?.value;
+  const onboardingComplete = cookieStore.get("sla-onboarding")?.value === "1";
+  const selectedBusinessId = cookieStore.get("sla-selected-business")?.value ?? null;
+  const tierCookie = cookieStore.get("sla-tier")?.value;
 
   if (accessToken) {
     redirect(
@@ -17,7 +19,7 @@ export default function HomePage() {
         tier:
           tierCookie === "core" || tierCookie === "pro" || tierCookie === "elite" || tierCookie === "preview"
             ? tierCookie
-            : "preview"
+            : "preview",
       })
     );
   }
