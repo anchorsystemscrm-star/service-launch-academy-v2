@@ -11,7 +11,7 @@ import { useAccessProfile, useBlueprintProgress, useKpiState } from "@/utils/sto
 export default function BenchmarksPage() {
   const { profile } = useAccessProfile();
   const business = getFallbackBusiness(profile.selectedBusinessId);
-  const { progress } = useBlueprintProgress(business.id);
+  const { progress } = useBlueprintProgress(business.id, business.executionPlan);
   const { kpis, setKpis } = useKpiState(business.id, defaultKpiData);
   const hasCoreAccess = hasTierAccess(profile.tier, "core");
 

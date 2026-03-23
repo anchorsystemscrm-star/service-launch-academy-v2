@@ -20,7 +20,7 @@ import {
 export default function AICoachPage() {
   const { profile } = useAccessProfile();
   const business = getFallbackBusiness(profile.selectedBusinessId);
-  const { progress } = useBlueprintProgress(business.id);
+  const { progress } = useBlueprintProgress(business.id, business.executionPlan);
   const initialMessage = defaultChatIntro(business);
   const { history, replaceHistory } = useChatHistory(business.id, initialMessage);
   const [isLoading, setIsLoading] = useState(false);

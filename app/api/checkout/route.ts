@@ -1,8 +1,6 @@
 import Stripe from "stripe";
 import { NextRequest, NextResponse } from "next/server";
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || "");
-
 const PRICE_IDS = {
   core: process.env.STRIPE_CORE_PRICE_ID,
   pro: process.env.STRIPE_PRO_PRICE_ID,
@@ -13,6 +11,13 @@ type PlanKey = keyof typeof PRICE_IDS;
 
 export async function GET(request: NextRequest) {
   try {
+    if (!process.env.STRIPE_SECRET_KEY) {
+      return NextResponse.json(
+        { error: "Missing Stripe secret key." },
+        { status: 500 }
+      );
+    }
+
     const { searchParams } = new URL(request.url);
     const plan = searchParams.get("plan") as PlanKey | null;
 
@@ -31,6 +36,7 @@ export async function GET(request: NextRequest) {
 
     const appUrl =
       process.env.NEXT_PUBLIC_APP_URL || new URL(request.url).origin;
+    const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
     const session = await stripe.checkout.sessions.create({
       mode: "subscription",

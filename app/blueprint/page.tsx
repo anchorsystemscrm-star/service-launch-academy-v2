@@ -3,12 +3,20 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
+import { ExecutionStageCard } from "@/components/ExecutionStageCard";
 import { LockedFeatureCard } from "@/components/LockedFeatureCard";
 import { PhaseCard } from "@/components/PhaseCard";
 import { ProgressTracker } from "@/components/ProgressTracker";
 import { ScriptCard } from "@/components/ScriptCard";
 import { getCheckoutHref, getPricingHref, getUpgradeMessage, hasTierAccess, isExternalHref, tierLabels } from "@/utils/access";
-import { getFallbackBusiness, buildBlueprint, buildScripts } from "@/utils/benchmarks";
+import {
+  buildBlueprint,
+  buildScripts,
+  getChecklistCompletion,
+  getExecutionStageStatus,
+  getFallbackBusiness,
+  milestoneTemplate
+} from "@/utils/benchmarks";
 import { useAccessProfile, useActiveBlueprint, useBlueprintProgress } from "@/utils/storage";
 
 const tabs = [
@@ -25,7 +33,7 @@ export default function BlueprintPage() {
   const { profile } = useAccessProfile();
   const { activeBlueprintId, setActiveBlueprintId } = useActiveBlueprint();
   const business = getFallbackBusiness(profile.selectedBusinessId);
-  const { progress, setWeekComplete } = useBlueprintProgress(business.id);
+  const { progress, taskProgress, setWeekComplete, setTaskComplete } = useBlueprintProgress(business.id, business.executionPlan);
   const [activeTab, setActiveTab] = useState<(typeof tabs)[number]["id"]>("plan");
 
   const phases = buildBlueprint(business);
@@ -35,6 +43,25 @@ export default function BlueprintPage() {
   const hasProAccess = hasTierAccess(profile.tier, "pro");
   const canAccessAnchor = hasTierAccess(profile.tier, "elite");
   const coreCheckoutHref = getCheckoutHref("core");
+  const checklistStats = getChecklistCompletion(taskProgress);
+  const stageStatuses = business.executionPlan.map((stage, stageIndex) => ({
+    stage,
+    stageIndex,
+    status: getExecutionStageStatus(progress, taskProgress, stageIndex)
+  }));
+  const currentStage =
+    stageStatuses.find((item) => item.status !== "completed") ?? stageStatuses[stageStatuses.length - 1];
+  const currentStageTasks = currentStage ? taskProgress[currentStage.stageIndex] ?? [] : [];
+  const currentStageCompletedTasks = currentStageTasks.filter(Boolean).length;
+  const currentStageRemainingTasks = Math.max(currentStage.stage.checklist.length - currentStageCompletedTasks, 0);
+  const currentStageMomentum =
+    currentStage.status === "completed"
+      ? currentStage.stage.momentumMessages.complete
+      : currentStageRemainingTasks === 1
+        ? currentStage.stage.momentumMessages.nearComplete
+        : currentStage.status === "in_progress"
+          ? currentStage.stage.momentumMessages.inProgress
+          : currentStage.stage.momentumMessages.notStarted;
 
   useEffect(() => {
     if (!hasCoreAccess) {
@@ -211,7 +238,12 @@ export default function BlueprintPage() {
             <p className="mt-4 text-xs uppercase tracking-[0.18em] text-muted">Typical ranges; results vary.</p>
           </section>
 
-          <ProgressTracker progress={progress} executionPlan={business.executionPlan} onToggleWeek={setWeekComplete} />
+          <ProgressTracker
+            progress={progress}
+            taskProgress={taskProgress}
+            executionPlan={business.executionPlan}
+            onToggleWeek={setWeekComplete}
+          />
         </div>
 
         <section className="panel-surface p-6 sm:p-8">
@@ -246,19 +278,72 @@ export default function BlueprintPage() {
 
           {activeTab === "plan" && (
             <div className="mt-6 grid gap-4">
-              <section className="rounded-[24px] border border-white/10 bg-white/5 p-5">
-                <h3 className="text-lg font-semibold text-white">Detailed execution roadmap</h3>
-                <div className="mt-4 grid gap-4">
-                  {business.executionPlan.map((stage) => (
-                    <div key={stage.title} className="rounded-[20px] border border-white/10 bg-slate-950/40 p-4">
-                      <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted">{stage.title}</p>
-                      <p className="mt-2 text-sm text-white">{stage.summary}</p>
-                      <ul className="mt-3 grid gap-2 pl-5 text-sm leading-6 text-slate-200">
-                        {stage.actions.map((action) => (
-                          <li key={action}>{action}</li>
-                        ))}
-                      </ul>
+              <section className="rounded-[24px] border border-white/10 bg-panel-gradient p-5">
+                <div className="grid gap-4 xl:grid-cols-[minmax(0,1.15fr)_minmax(260px,0.85fr)]">
+                  <div>
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-accentSecondary">Current execution focus</p>
+                    <h3 className="mt-2 text-2xl font-semibold text-white">{currentStage.stage.title}</h3>
+                    <p className="mt-3 max-w-3xl text-sm leading-6 text-slate-200">{currentStage.stage.summary}</p>
+                    <div className="mt-4 grid gap-3 lg:grid-cols-2">
+                      <div className="rounded-[20px] border border-white/10 bg-black/20 p-4">
+                        <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-muted">Do this now</p>
+                        <p className="mt-2 text-sm leading-6 text-slate-100">{currentStage.stage.nextAction}</p>
+                      </div>
+                      <div className="rounded-[20px] border border-white/10 bg-black/20 p-4">
+                        <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-muted">Rule for this stage</p>
+                        <p className="mt-2 text-sm leading-6 text-slate-100">{currentStage.stage.rule}</p>
+                      </div>
                     </div>
+                  </div>
+
+                  <div className="grid gap-3">
+                    <div className="rounded-[20px] border border-white/10 bg-black/20 p-4">
+                      <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-muted">Completion snapshot</p>
+                      <p className="mt-2 text-3xl font-semibold text-white">{checklistStats.percentage}%</p>
+                      <p className="mt-2 text-sm leading-6 text-slate-200">
+                        {checklistStats.completed} of {checklistStats.total} execution tasks complete across the blueprint
+                      </p>
+                    </div>
+                    <div className="rounded-[20px] border border-accent/20 bg-accent/5 p-4">
+                      <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-accentSecondary">Momentum</p>
+                      <p className="mt-2 text-sm leading-6 text-slate-100">{currentStageMomentum}</p>
+                      <p className="mt-3 text-xs font-semibold uppercase tracking-[0.16em] text-muted">
+                        {currentStageRemainingTasks === 0
+                          ? "Stage checklist complete. Mark the milestone week when the work is actually live."
+                          : `${currentStageRemainingTasks} task${currentStageRemainingTasks === 1 ? "" : "s"} left in ${currentStage.stage.title}`}
+                      </p>
+                    </div>
+                    <div className="rounded-[20px] border border-white/10 bg-black/20 p-4">
+                      <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-muted">Done means</p>
+                      <p className="mt-2 text-sm leading-6 text-slate-100">{currentStage.stage.successLooksLike}</p>
+                    </div>
+                  </div>
+                </div>
+              </section>
+
+              <section className="rounded-[24px] border border-white/10 bg-white/5 p-5">
+                <div className="flex flex-col gap-2 lg:flex-row lg:items-end lg:justify-between">
+                  <div>
+                    <h3 className="text-lg font-semibold text-white">Detailed execution roadmap</h3>
+                    <p className="mt-2 text-sm leading-6 text-muted">
+                      Finish the checklist inside each stage before marking the matching week complete in the milestone tracker.
+                    </p>
+                  </div>
+                  <div className="rounded-full border border-white/10 bg-white/5 px-4 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-slate-200">
+                    {stageStatuses.filter((item) => item.status === "completed").length}/{stageStatuses.length} stages completed
+                  </div>
+                </div>
+                <div className="mt-4 grid gap-4">
+                  {stageStatuses.map(({ stage, stageIndex, status }) => (
+                    <ExecutionStageCard
+                      key={stage.title}
+                      stage={stage}
+                      stageIndex={stageIndex}
+                      taskProgress={taskProgress[stageIndex] ?? []}
+                      status={status}
+                      milestoneText={milestoneTemplate[Math.min(stageIndex, milestoneTemplate.length - 1)]}
+                      onToggleTask={setTaskComplete}
+                    />
                   ))}
                 </div>
               </section>

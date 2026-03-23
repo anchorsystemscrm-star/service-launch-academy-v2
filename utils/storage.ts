@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import type { Session } from "@supabase/supabase-js";
 
-import { SubscriptionTier, ChatMessage, KPIData } from "@/types/business";
+import { SubscriptionTier, ChatMessage, KPIData, ExecutionStage } from "@/types/business";
 import { AccessProfile, normalizeSubscriptionTier } from "@/utils/access";
 
 export const STORAGE_KEYS = {
@@ -232,30 +232,85 @@ export function useActiveBlueprint() {
   };
 }
 
-export function useBlueprintProgress(businessId: string) {
-  const { hydrated, value, setValue } = usePersistentState<Record<string, boolean[]>>(
+type StoredBlueprintProgress = {
+  weeks: boolean[];
+  tasks: boolean[][];
+};
+
+function normalizeWeeks(raw: unknown): boolean[] {
+  return Array.isArray(raw) && raw.length === 13 ? raw.map(Boolean) : new Array(13).fill(false);
+}
+
+function normalizeTaskProgress(raw: unknown, executionPlan: ExecutionStage[]): boolean[][] {
+  if (!executionPlan.length) {
+    return [];
+  }
+
+  const normalized = Array.isArray(raw) ? raw : [];
+
+  return executionPlan.map((stage, stageIndex) => {
+    const existing = normalized[stageIndex];
+    return Array.isArray(existing) && existing.length === stage.checklist.length
+      ? existing.map(Boolean)
+      : new Array(stage.checklist.length).fill(false);
+  });
+}
+
+function normalizeStoredProgress(raw: unknown, executionPlan: ExecutionStage[]): StoredBlueprintProgress {
+  if (Array.isArray(raw)) {
+    return {
+      weeks: normalizeWeeks(raw),
+      tasks: normalizeTaskProgress([], executionPlan)
+    };
+  }
+
+  const record = raw as Partial<StoredBlueprintProgress> | null;
+
+  return {
+    weeks: normalizeWeeks(record?.weeks),
+    tasks: normalizeTaskProgress(record?.tasks, executionPlan)
+  };
+}
+
+export function useBlueprintProgress(businessId: string, executionPlan: ExecutionStage[] = []) {
+  const { hydrated, value, setValue } = usePersistentState<Record<string, boolean[] | StoredBlueprintProgress>>(
     STORAGE_KEYS.progressMap,
     {}
   );
 
   const existing = value[businessId];
-  const progress =
-    Array.isArray(existing) && existing.length === 13 ? existing : new Array(13).fill(false);
+  const normalized = normalizeStoredProgress(existing, executionPlan);
+  const progress = normalized.weeks;
+  const taskProgress = normalized.tasks;
 
   function setWeekComplete(weekIndex: number, checked: boolean) {
     setValue((previous) => {
       const next = { ...previous };
-      const current =
-        Array.isArray(next[businessId]) && next[businessId].length === 13
-          ? [...next[businessId]]
-          : new Array(13).fill(false);
-      current[weekIndex] = checked;
-      next[businessId] = current;
+      const current = normalizeStoredProgress(next[businessId], executionPlan);
+      const weeks = [...current.weeks];
+      weeks[weekIndex] = checked;
+      next[businessId] = { ...current, weeks };
       return next;
     });
   }
 
-  return { hydrated, progress, setWeekComplete };
+  function setTaskComplete(stageIndex: number, taskIndex: number, checked: boolean) {
+    setValue((previous) => {
+      const next = { ...previous };
+      const current = normalizeStoredProgress(next[businessId], executionPlan);
+      const tasks = current.tasks.map((stageTasks) => [...stageTasks]);
+
+      if (!tasks[stageIndex]) {
+        return previous;
+      }
+
+      tasks[stageIndex][taskIndex] = checked;
+      next[businessId] = { ...current, tasks };
+      return next;
+    });
+  }
+
+  return { hydrated, progress, taskProgress, setWeekComplete, setTaskComplete };
 }
 
 export function useKpiState(businessId: string, fallback: KPIData) {

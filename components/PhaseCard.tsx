@@ -18,6 +18,17 @@ export function PhaseCard({ phase }: PhaseCardProps) {
         <span className="font-semibold text-slate-100">Goal:</span> {phase.goal}
       </p>
 
+      <div className="mt-4 grid gap-3 lg:grid-cols-2">
+        <div className="rounded-[20px] border border-white/10 bg-slate-950/60 p-4">
+          <p className="text-xs font-semibold uppercase tracking-[0.12em] text-muted">Rule</p>
+          <p className="mt-2 text-sm leading-6 text-slate-100">{phase.rule}</p>
+        </div>
+        <div className="rounded-[20px] border border-white/10 bg-slate-950/60 p-4">
+          <p className="text-xs font-semibold uppercase tracking-[0.12em] text-muted">Success looks like</p>
+          <p className="mt-2 text-sm leading-6 text-slate-100">{phase.successLooksLike}</p>
+        </div>
+      </div>
+
       <ul className="mt-4 grid gap-2 pl-5 text-sm leading-6 text-slate-200">
         {phase.tasks.map((task) => (
           <li key={task}>{task}</li>

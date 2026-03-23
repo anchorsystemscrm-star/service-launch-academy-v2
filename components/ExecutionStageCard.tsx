@@ -1,0 +1,162 @@
+import { ExecutionStage } from "@/types/business";
+import { ExecutionStageStatus } from "@/utils/benchmarks";
+
+interface ExecutionStageCardProps {
+  stage: ExecutionStage;
+  stageIndex: number;
+  taskProgress: boolean[];
+  status: ExecutionStageStatus;
+  milestoneText: string;
+  onToggleTask: (stageIndex: number, taskIndex: number, checked: boolean) => void;
+}
+
+const statusClasses: Record<ExecutionStageStatus, string> = {
+  not_started: "border-white/10 bg-white/5 text-slate-300",
+  in_progress: "border-accent/40 bg-accent/10 text-white",
+  completed: "border-emerald-400/30 bg-emerald-500/10 text-emerald-100"
+};
+
+const statusLabels: Record<ExecutionStageStatus, string> = {
+  not_started: "Not started",
+  in_progress: "In progress",
+  completed: "Completed"
+};
+
+export function ExecutionStageCard({
+  stage,
+  stageIndex,
+  taskProgress,
+  status,
+  milestoneText,
+  onToggleTask
+}: ExecutionStageCardProps) {
+  const completedTasks = taskProgress.filter(Boolean).length;
+  const totalTasks = stage.checklist.length;
+  const percentage = totalTasks === 0 ? 0 : Math.round((completedTasks / totalTasks) * 100);
+  const nearComplete = totalTasks > 0 && completedTasks === totalTasks - 1;
+  const momentum =
+    status === "completed"
+      ? stage.momentumMessages.complete
+      : nearComplete
+        ? stage.momentumMessages.nearComplete
+        : completedTasks > 0
+          ? stage.momentumMessages.inProgress
+          : stage.momentumMessages.notStarted;
+
+  return (
+    <article className="overflow-hidden rounded-[28px] border border-white/10 bg-white/5 shadow-card">
+      <div className="border-b border-white/10 bg-panel-gradient px-5 py-5 sm:px-6">
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+          <div>
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-muted">
+                {stage.title}
+              </span>
+              <span className={`rounded-full border px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] ${statusClasses[status]}`}>
+                {statusLabels[status]}
+              </span>
+            </div>
+            <p className="mt-3 max-w-3xl text-sm leading-6 text-slate-200">{stage.summary}</p>
+          </div>
+
+          <div className="min-w-[220px] rounded-[20px] border border-white/10 bg-black/20 p-4">
+            <div className="flex items-end justify-between gap-3">
+              <div>
+                <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-muted">Stage progress</p>
+                <p className="mt-2 text-2xl font-semibold text-white">{completedTasks}/{totalTasks}</p>
+              </div>
+              <p className="text-sm font-semibold text-slate-100">{percentage}%</p>
+            </div>
+            <div className="mt-3 h-2 overflow-hidden rounded-full bg-slate-950">
+              <div
+                className="h-full rounded-full bg-gradient-to-r from-accent to-accentSecondary transition-all"
+                style={{ width: `${percentage}%` }}
+              />
+            </div>
+            <p className="mt-3 text-xs leading-5 text-muted">{milestoneText}</p>
+          </div>
+        </div>
+
+        <div className="mt-4 grid gap-3 lg:grid-cols-[minmax(0,1fr)_260px]">
+          <div className="rounded-[20px] border border-white/10 bg-white/5 p-4">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-muted">Rule for this stage</p>
+            <p className="mt-2 text-sm leading-6 text-slate-100">{stage.rule}</p>
+          </div>
+          <div className="rounded-[20px] border border-white/10 bg-white/5 p-4">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-muted">Done means</p>
+            <p className="mt-2 text-sm leading-6 text-slate-100">{stage.successLooksLike}</p>
+          </div>
+        </div>
+
+        <div className="mt-4 rounded-[20px] border border-accent/20 bg-accent/5 p-4">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-accentSecondary">Momentum</p>
+          <p className="mt-2 text-sm leading-6 text-slate-100">{momentum}</p>
+          <p className="mt-3 text-xs font-semibold uppercase tracking-[0.16em] text-muted">Next action: {stage.nextAction}</p>
+        </div>
+      </div>
+
+      <div className="grid gap-4 p-5 sm:p-6">
+        {stage.checklist.map((item, taskIndex) => {
+          const checked = taskProgress[taskIndex] ?? false;
+
+          return (
+            <div
+              key={item.id}
+              className={`rounded-[24px] border p-4 transition ${
+                checked ? "border-emerald-400/30 bg-emerald-500/10" : "border-white/10 bg-slate-950/35"
+              }`}
+            >
+              <label className="flex cursor-pointer gap-4">
+                <input
+                  type="checkbox"
+                  checked={checked}
+                  onChange={(event) => onToggleTask(stageIndex, taskIndex, event.target.checked)}
+                  className="mt-1 h-5 w-5 rounded border-white/20 bg-slate-950 text-accent focus:ring-accent"
+                />
+                <div className="min-w-0 flex-1">
+                  <div className="flex flex-wrap items-center justify-between gap-3">
+                    <p className="text-sm font-semibold text-white">{item.title}</p>
+                    <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-muted">
+                      {checked ? "Checked off" : "Open task"}
+                    </span>
+                  </div>
+
+                  <ul className="mt-3 grid gap-2 pl-5 text-sm leading-6 text-slate-200">
+                    {item.instructions.map((instruction) => (
+                      <li key={instruction}>{instruction}</li>
+                    ))}
+                  </ul>
+
+                  <div className="mt-4 grid gap-3 lg:grid-cols-2">
+                    <div className="rounded-2xl border border-white/10 bg-white/5 p-3">
+                      <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-muted">Done when</p>
+                      <p className="mt-2 text-sm leading-6 text-slate-100">{item.doneDefinition}</p>
+                    </div>
+                    {item.documentation ? (
+                      <div className="rounded-2xl border border-white/10 bg-white/5 p-3">
+                        <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-muted">What to document</p>
+                        <p className="mt-2 text-sm leading-6 text-slate-100">{item.documentation}</p>
+                      </div>
+                    ) : null}
+                    {item.avoid ? (
+                      <div className="rounded-2xl border border-amber-400/20 bg-amber-500/5 p-3">
+                        <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-amber-100">What to avoid</p>
+                        <p className="mt-2 text-sm leading-6 text-slate-100">{item.avoid}</p>
+                      </div>
+                    ) : null}
+                    {item.example ? (
+                      <div className="rounded-2xl border border-cyan-400/20 bg-cyan-500/5 p-3">
+                        <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-cyan-100">Example</p>
+                        <p className="mt-2 text-sm leading-6 text-slate-100">{item.example}</p>
+                      </div>
+                    ) : null}
+                  </div>
+                </div>
+              </label>
+            </div>
+          );
+        })}
+      </div>
+    </article>
+  );
+}

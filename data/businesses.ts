@@ -3,7 +3,9 @@ import {
   Benchmark,
   Business,
   BusinessTag,
+  ExecutionChecklistItem,
   ExecutionStage,
+  MomentumMessages,
   OfferPricing,
   OperationsSetup,
   Phase,
@@ -95,6 +97,38 @@ type ServiceSeed = {
   advancedSystems: string[];
 };
 
+function slugify(value: string): string {
+  return value
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+}
+
+function createChecklistItem(
+  stageTitle: string,
+  title: string,
+  instructions: string[],
+  doneDefinition: string,
+  options: Partial<Pick<ExecutionChecklistItem, "documentation" | "avoid" | "example">> = {}
+): ExecutionChecklistItem {
+  return {
+    id: `${slugify(stageTitle)}-${slugify(title)}`,
+    title,
+    instructions,
+    doneDefinition,
+    ...options
+  };
+}
+
+function createMomentumMessages(stageTitle: string, nextAction: string): MomentumMessages {
+  return {
+    notStarted: `Start ${stageTitle} by completing the first task. Momentum shows up once the first decision is made.`,
+    inProgress: `Keep moving. ${stageTitle} gets easier once the checklist is partially real, not just planned.`,
+    nearComplete: `You are close. Finish the last task in ${stageTitle} so ${nextAction.toLowerCase()} happens without hesitation.`,
+    complete: `${stageTitle} is complete. Lock the win, document it, and roll straight into ${nextAction.toLowerCase()}.`
+  };
+}
+
 function buildBlueprintPhases(seed: ServiceSeed): Phase[] {
   return [
     {
@@ -102,6 +136,9 @@ function buildBlueprintPhases(seed: ServiceSeed): Phase[] {
       goal:
         `Build the launch infrastructure for ${seed.name}. Success looks like one clear starter offer, a working admin stack, ` +
         "and a business that can answer leads the same day without improvising.",
+      rule: "Do not market a vague service. Define the offer, the minimum, and the admin stack before chasing leads.",
+      successLooksLike:
+        `You can explain "${seed.starterOffer}" in one sentence, send a quote without rewriting it, and collect payment with a real workflow.`,
       tasks: [
         `Choose the exact jobs included in "${seed.starterOffer}" and list what is not included so scope stays controlled.`,
         "Register the business, open the business bank account, and secure insurance documents before meaningful outreach begins.",
@@ -117,6 +154,9 @@ function buildBlueprintPhases(seed: ServiceSeed): Phase[] {
       goal:
         `Turn attention into paid work for ${seed.name}. Success looks like consistent lead handling, same-day quotes, ` +
         "and the first batch of completed jobs with proof and reviews.",
+      rule: "Speed matters. Leads should get a real next step quickly, not a vague promise to follow up later.",
+      successLooksLike:
+        "You are responding fast, sending same-day quotes, finishing paid jobs cleanly, and collecting proof plus reviews from real customers.",
       tasks: [
         "Push one starter offer across your strongest local channels instead of marketing too many offers at once.",
         "Answer every inbound lead fast, collect the right intake details, and book the next step before ending the conversation.",
@@ -132,6 +172,9 @@ function buildBlueprintPhases(seed: ServiceSeed): Phase[] {
       goal:
         "Turn the early wins into a repeatable operating rhythm. Success looks like cleaner pricing, tighter scheduling, " +
         "and delivery checklists that make the work easier to repeat.",
+      rule: "Protect the calendar and the margin. Stop making the business up from scratch on every job.",
+      successLooksLike:
+        "You have a repeatable delivery checklist, a weekly admin rhythm, and a clearer idea of which offers and channels produce the best work.",
       tasks: [
         "Turn the best-selling offer into a checklist with setup, execution, closeout, and upsell notes.",
         "Install a weekly admin block for lead review, estimate follow-up, invoicing, and partner outreach.",
@@ -147,6 +190,9 @@ function buildBlueprintPhases(seed: ServiceSeed): Phase[] {
       goal:
         "Install cleaner systems so growth does not create chaos. Success looks like documented SOPs, reliable follow-up, " +
         "and a business that can protect margin as volume rises.",
+      rule: "Do not add complexity before the core workflow is documented and measurable.",
+      successLooksLike:
+        "Your intake, quoting, reminders, closeout, and follow-up flow are documented well enough that another person could follow them.",
       tasks: [
         "Document the intake, quote, schedule, job, invoice, review, and follow-up flow in plain English.",
         "Install missed-call text-back, quote reminders, and customer reminders so fewer leads die from delay.",
@@ -163,66 +209,528 @@ function buildBlueprintPhases(seed: ServiceSeed): Phase[] {
 function buildExecutionPlan(seed: ServiceSeed): ExecutionStage[] {
   const [week1, week2, week3, week4, month2, month3] = seed.executionFocus;
 
+  const week1Title = "Week 2";
+  const week2Title = "Week 3";
+  const week3Title = "Week 4";
+  const week4Title = "Month 2";
+  const month2Title = "Month 3";
+
   return [
     {
       title: "Week 1",
-      summary: "Choose the offer, lock the basics, and remove launch friction.",
+      summary: `${week1} Choose the offer, set the minimums, and make the business operational before any real push for leads.`,
       actions: [
-        week1,
-        "Open the bank account, connect branded email, and set up one clean pipeline for new lead, quoted, booked, completed, and follow-up.",
-        `Write the quote template for "${seed.starterOffer}" with inclusions, exclusions, travel rules, and the minimum acceptable price.`,
-        "Stage the required tools, photo process, payment method, and review link so the first customer experience feels complete instead of improvised."
-      ]
+        "Step 1 — Lock the starter offer and minimum job price.",
+        "Step 2 — Set up the business rails and payment stack.",
+        "Step 3 — Buy and stage only the launch-critical tools.",
+        "Step 4 — Write the quote, invoice, and review templates.",
+        "Step 5 — Build the proof pack and define what done looks like."
+      ],
+      checklist: [
+        createChecklistItem(
+          "Week 1",
+          "Lock the starter offer",
+          [
+            `Write a one-sentence version of "${seed.starterOffer}" that a customer can understand without explanation.`,
+            "List exactly what is included, what is excluded, and what triggers an add-on or a higher tier.",
+            "Set the minimum job price, service radius, and travel rule before you speak to real prospects."
+          ],
+          "You can explain the starter offer in one sentence, and you know the minimum price you will not go below.",
+          {
+            documentation: "Save the scope, exclusions, and minimum in your CRM notes or operating doc.",
+            avoid: "Do not market three offers at once. One clear offer closes faster than a menu of vague services.",
+            example: `Offer format: "${seed.starterOffer}" | Includes [scope] | Excludes [scope] | Starts at [minimum].`
+          }
+        ),
+        createChecklistItem(
+          "Week 1",
+          "Set the commercial rails",
+          [
+            "Open the business bank account, connect branded email, and make sure the business phone is live.",
+            "Put the CRM stages in order: new lead, contacted, quoted, booked, completed, follow-up.",
+            "Make sure payment collection and invoice links work before the first customer asks how to pay."
+          ],
+          "You can answer a lead, send a quote, and collect payment without creating anything on the fly.",
+          {
+            documentation: "Store bank, phone, email, CRM, and invoice links in one setup note.",
+            avoid: "Do not wait until the first paid job to figure out where invoices or payments live."
+          }
+        ),
+        createChecklistItem(
+          "Week 1",
+          "Stage the field setup",
+          [
+            "Buy only the required gear that directly supports the starter and standard offer.",
+            "Load the tools, PPE, and consumables in the order you will actually use them.",
+            "Do one mock setup in your driveway or workspace and time how long it takes."
+          ],
+          "The setup can be deployed cleanly and packed back up without hunting for tools.",
+          {
+            documentation: "Write a simple loadout checklist with the exact gear that must be in the vehicle each day.",
+            avoid: "Do not overspend on premium upgrades before the starter offer is consistently sold."
+          }
+        ),
+        createChecklistItem(
+          "Week 1",
+          "Write the customer-facing templates",
+          [
+            `Create the quote template for "${seed.starterOffer}" with inclusions, exclusions, price floor, and acceptance language.`,
+            "Draft the invoice message, appointment confirmation, and review request before the first live job.",
+            "Write one simple objection response for price, timing, and scope confusion."
+          ],
+          "You can send a quote, confirmation, invoice, and review request without rewriting them from scratch.",
+          {
+            documentation: "Store the templates in the CRM, notes app, or a shared operating doc.",
+            example: 'Acceptance line: "Reply book it and I will lock the next opening for you."'
+          }
+        ),
+        createChecklistItem(
+          "Week 1",
+          "Build the launch proof pack",
+          [
+            "Choose the first set of photos, examples, or mockups that visually explain the service.",
+            "Update Google Business Profile, service-area description, and one simple offer graphic or landing page.",
+            "Define what a ready-to-launch business looks like so you know when to stop tweaking and start selling."
+          ],
+          "The business has enough proof, copy, and contact infrastructure to market confidently.",
+          {
+            documentation: "Save the review link, logo, offer graphic, and proof images in one easy-to-reuse folder.",
+            avoid: "Do not delay launch because the brand is not perfect. Clarity beats polish at this stage."
+          }
+        )
+      ],
+      rule: "Do not chase leads until the offer, minimum, phone, CRM, and payment stack are all real.",
+      successLooksLike:
+        `You can explain "${seed.starterOffer}", send a quote, collect payment, and show basic proof without improvising.`,
+      nextAction: week1Title,
+      momentumMessages: createMomentumMessages("Week 1", week1Title)
     },
     {
       title: "Week 2",
-      summary: "Go live with focused local visibility and disciplined lead handling.",
+      summary: `${week2} Go live with focused visibility, fast lead response, and one simple local outreach system.`,
       actions: [
-        week2,
-        "Publish the launch offer on Google Business Profile, one neighborhood platform, and one social profile with proof-based wording.",
-        "Answer every inquiry fast, request missing photos immediately, and log source plus next action before moving on.",
-        "Prepare one simple flyer, text template, and referral ask so outreach is consistent instead of made up each day."
-      ]
+        "Step 1 — Publish the launch offer in the right local places.",
+        "Step 2 — Install a fast intake and response standard.",
+        "Step 3 — Run one neighborhood or partner outreach play daily.",
+        "Step 4 — Track lead source, quality, and quote speed.",
+        "Step 5 — Close the week with enough proof to keep promoting."
+      ],
+      checklist: [
+        createChecklistItem(
+          "Week 2",
+          "Publish the visible launch offer",
+          [
+            "Put the starter offer on Google Business Profile, one neighborhood platform, and one social profile.",
+            "Lead with the problem solved, the service area, and the simple next step to request a quote.",
+            "Use proof visuals instead of generic brand graphics wherever possible."
+          ],
+          "Prospects can find the offer online and know exactly how to contact you.",
+          {
+            documentation: "Track which channel each live post or listing came from.",
+            avoid: "Do not spread attention across every platform. Pick the two or three places local leads already look."
+          }
+        ),
+        createChecklistItem(
+          "Week 2",
+          "Install the response standard",
+          [
+            "Set the rule that every live lead gets a response or text-back within five minutes during business hours.",
+            "Use one intake flow: address, photos, scope, urgency, and how they heard about you.",
+            "Log the lead source and next action before you move to the next message or call."
+          ],
+          "Every incoming lead has a status, a next step, and enough intake detail to quote or book an estimate.",
+          {
+            documentation: "Keep a short intake script on your phone or inside the CRM.",
+            example: 'Text template: "Send your address, 2-3 photos, and the main issue. I will reply with next steps and a price range."'
+          }
+        ),
+        createChecklistItem(
+          "Week 2",
+          "Run one outreach play every day",
+          [
+            "Choose one outreach channel that matches the business: neighborhood route drops, partner visits, same-street offers, or direct outreach.",
+            "Do the same play repeatedly for the week instead of changing tactics every day.",
+            "Use one offer and one call to action so you can measure what actually works."
+          ],
+          "You completed one consistent outreach motion for the full week and can say how many leads it produced.",
+          {
+            documentation: "Track simple counts: outreach sent, replies, quotes, booked jobs.",
+            avoid: "Do not call a tactic bad after one attempt. Run enough volume to learn something."
+          }
+        ),
+        createChecklistItem(
+          "Week 2",
+          "Track quality, not just activity",
+          [
+            "Review which leads are in your ideal service radius and which ones are weak or unprofitable.",
+            "Note how quickly quotes are being sent and whether price confusion keeps appearing.",
+            "Cut any source that creates noise without realistic jobs."
+          ],
+          "You know which lead source is producing the cleanest conversations and closest-fit jobs.",
+          {
+            documentation: "Record lead source, quote sent time, job size, and booked or lost reason.",
+            avoid: "Do not chase vanity activity if the leads are outside your radius or below your minimum."
+          }
+        ),
+        createChecklistItem(
+          "Week 2",
+          "Finish the week with proof",
+          [
+            "Save screenshots, photos, objections, and any booked-job notes from the week.",
+            "Turn at least one real lead or job into content you can reuse next week.",
+            "Write one sentence about what worked best so it becomes part of the operating system."
+          ],
+          "You leave Week 2 with proof, numbers, and a better sense of where the next leads should come from.",
+          {
+            documentation: "Save best proof, best-performing outreach message, and common objections in one folder."
+          }
+        )
+      ],
+      rule: "Respond fast and market one focused offer in a few local channels instead of everywhere at once.",
+      successLooksLike:
+        "Leads are coming in, response time is controlled, and you know which visibility channel is producing the best first conversations.",
+      nextAction: week2Title,
+      momentumMessages: createMomentumMessages("Week 2", week2Title)
     },
     {
       title: "Week 3",
-      summary: "Run real quotes, tighten the sales process, and finish early jobs cleanly.",
+      summary: `${week3} Run live quotes, tighten the sales conversation, and make early jobs profitable instead of merely completed.`,
       actions: [
-        week3,
-        "Time the estimate, setup, production, cleanup, and drive segments so pricing starts reflecting reality.",
-        "Capture before-and-after proof on every completed job and note what sold, what slowed the job, and what should be upsold next time.",
-        "Tighten your phone and text language around the three most common objections: price, timing, and trust."
-      ]
+        "Step 1 — Quote faster without skipping scope clarity.",
+        "Step 2 — Time the real work so pricing stops being a guess.",
+        "Step 3 — Tighten what you say when prospects hesitate.",
+        "Step 4 — Capture proof and job notes on every completion.",
+        "Step 5 — Use the first closed jobs to improve the next quote."
+      ],
+      checklist: [
+        createChecklistItem(
+          "Week 3",
+          "Run same-day quotes",
+          [
+            "Use photos or route-based estimate blocks to keep quoting fast.",
+            "State scope, exclusions, schedule assumptions, and the exact acceptance step in writing.",
+            "If a quote is weak because the lead is vague, request better photos instead of guessing."
+          ],
+          "Every real lead gets a quote or a clearly scheduled estimate without unnecessary delay.",
+          {
+            documentation: "Track quote amount, send time, and whether the customer asked follow-up questions before booking.",
+            avoid: "Do not speed up quoting by leaving scope fuzzy. Ambiguity becomes rework and margin loss later."
+          }
+        ),
+        createChecklistItem(
+          "Week 3",
+          "Time the work honestly",
+          [
+            "Measure estimate time, drive time, setup, production, cleanup, and payment collection on real jobs.",
+            "Compare the actual job effort to what your price assumed.",
+            "Raise the minimum or add-on rules if the work is taking longer than the model supports."
+          ],
+          "You know whether your starter pricing is realistic because it has been tested against real job time.",
+          {
+            documentation: "Write actual time spent by job segment for every completed job this week."
+          }
+        ),
+        createChecklistItem(
+          "Week 3",
+          "Tighten the sales language",
+          [
+            "Write short answers for the three objections showing up most: price, trust, and timing.",
+            "Use simple language that explains what the customer is buying, not defensive language about being expensive.",
+            "Keep the close simple: one next opening, one approval step, one clear payment path."
+          ],
+          "You can respond to common objections without freezing or immediately discounting.",
+          {
+            documentation: "Save the three most common objections and your best responses in the sales notes.",
+            example: 'Price response: "The quote reflects the full scope, travel, setup, cleanup, and the result we discussed. If you want, I can narrow the scope instead of cutting corners."'
+          }
+        ),
+        createChecklistItem(
+          "Week 3",
+          "Capture proof and job notes",
+          [
+            "Take before-and-after photos from consistent angles on every completed job.",
+            "Write down what sold the job, what slowed it down, and what add-on the customer nearly bought.",
+            "Save a text screenshot or testimonial if the customer reacts positively."
+          ],
+          "Every finished job leaves behind proof and learning that improves the next sale.",
+          {
+            documentation: "Store proof photos, job notes, and testimonial snippets by date or customer name."
+          }
+        ),
+        createChecklistItem(
+          "Week 3",
+          "Improve the next quote immediately",
+          [
+            "Use what you learned from the first jobs to update the quote template, minimum, or exclusions today.",
+            "Adjust timing promises if the calendar or service windows are unrealistic.",
+            "Remove wording that caused confusion and add wording that helped customers say yes."
+          ],
+          "The next quote you send is already better than the one before it because the system was updated in real time.",
+          {
+            documentation: "Version the quote template or note what changed after each learning cycle.",
+            avoid: "Do not wait until the end of the month to fix pricing or wording problems that are already obvious."
+          }
+        )
+      ],
+      rule: "Quote clearly, time the work honestly, and improve the system after every live job.",
+      successLooksLike:
+        "You are sending faster quotes, protecting margin better, and using completed jobs to strengthen the sales process instead of just surviving them.",
+      nextAction: week3Title,
+      momentumMessages: createMomentumMessages("Week 3", week3Title)
     },
     {
       title: "Week 4",
-      summary: "Turn the first month into repeatable operating standards.",
+      summary: `${week4} Turn first-month chaos into a repeatable operating loop with checklists, follow-up, and clear closeout standards.`,
       actions: [
-        week4,
-        "Write the first production checklist, review request flow, and Day 2 or Day 7 quote follow-up sequence.",
-        "Review the first month of numbers by lead source, close rate, average ticket, and gross margin assumptions.",
-        "Cut or pause the weakest channel and double down on the lead source that produced the cleanest jobs."
-      ]
+        "Step 1 — Write the first real SOP for delivery.",
+        "Step 2 — Install quote follow-up and review workflows.",
+        "Step 3 — Review the first month of numbers honestly.",
+        "Step 4 — Cut weak channels and weak pricing assumptions.",
+        "Step 5 — Start operating by checklist instead of memory."
+      ],
+      checklist: [
+        createChecklistItem(
+          "Week 4",
+          "Write the production checklist",
+          [
+            "Document the exact order of intake, prep, production, cleanup, payment, and follow-up for your most common job.",
+            "Keep the checklist short enough to use in the field, but specific enough that another person could follow it.",
+            "Mark where photos, notes, and upsell opportunities should be captured."
+          ],
+          "You have a real delivery checklist that reduces mistakes and makes the job easier to repeat.",
+          {
+            documentation: "Save the checklist where it can be used on the job, not hidden in a document you never open."
+          }
+        ),
+        createChecklistItem(
+          "Week 4",
+          "Install quote and review follow-up",
+          [
+            "Set the first estimate follow-up for Day 2 and the second for Day 7.",
+            "Write the review request so it can be sent immediately after the customer confirms the result.",
+            "Track which quotes are open and which completed customers were asked for reviews."
+          ],
+          "Open quotes are being followed up on purpose and finished jobs are triggering review requests consistently.",
+          {
+            documentation: "Keep a simple follow-up queue with dates and status updates.",
+            avoid: "Do not rely on memory for open quotes. If it is not scheduled, it will probably disappear."
+          }
+        ),
+        createChecklistItem(
+          "Week 4",
+          "Review the first-month numbers",
+          [
+            "Look at lead source, quote speed, close rate, average ticket, and the real time each job category took.",
+            "Identify the one channel that produced the best-fit jobs and the one that produced weak leads.",
+            "Check whether your minimum price is high enough for the actual effort involved."
+          ],
+          "You know what is working, what is draining time, and what needs to change before Month 2 starts.",
+          {
+            documentation: "Write one page of lessons learned: best lead source, weakest lead source, best offer, weakest pricing rule."
+          }
+        ),
+        createChecklistItem(
+          "Week 4",
+          "Cut the weak operating habits",
+          [
+            "Pause the noisiest lead source if it is not creating booked jobs.",
+            "Raise or rewrite any price rule that is obviously underpaying the business.",
+            "Remove any offer, add-on, or custom exception that created confusion without real profit."
+          ],
+          "The Month 2 system is cleaner than Month 1 because weak channels and weak habits were removed.",
+          {
+            avoid: "Do not keep bad offers alive just because they sounded smart on launch day."
+          }
+        ),
+        createChecklistItem(
+          "Week 4",
+          "Prepare the Month 2 operating rhythm",
+          [
+            "Set the calendar blocks for marketing, estimates, admin, and production for the next four weeks.",
+            "Choose one recurring or repeat-work motion you will begin promoting next month.",
+            "Define the non-negotiable weekly numbers you will keep watching."
+          ],
+          "You enter Month 2 with a weekly rhythm, a cleaner offer set, and a tighter follow-up system.",
+          {
+            documentation: "Save the next four-week calendar structure and weekly KPI checklist in the operating notes."
+          }
+        )
+      ],
+      rule: "If a process repeated this month, document it now instead of relearning it in Month 2.",
+      successLooksLike:
+        "You now have a real checklist, live follow-up system, and enough first-month data to stop guessing.",
+      nextAction: week4Title,
+      momentumMessages: createMomentumMessages("Week 4", week4Title)
     },
     {
       title: "Month 2",
-      summary: "Move from reactive hustle into a weekly operator rhythm.",
+      summary: `${month2} Move from reactive hustle into a predictable weekly operating rhythm with better route control, pricing, and partner motion.`,
       actions: [
-        month2,
-        "Set fixed calendar blocks for marketing, estimates, admin, collections, and route production so the week has structure.",
-        "Refine add-ons, recurring pathways, and job minimums using real first-month data instead of guesswork.",
-        "Add one partner channel and one repeatable neighborhood play that can be run every week."
-      ]
+        "Step 1 — Run the calendar by blocks, not by random inbound chaos.",
+        "Step 2 — Tighten pricing and repeat-work offers with real data.",
+        "Step 3 — Add one dependable partner channel.",
+        "Step 4 — Build route density or project quality rules.",
+        "Step 5 — Review the week like an operator, not just a technician."
+      ],
+      checklist: [
+        createChecklistItem(
+          "Month 2",
+          "Run the calendar by operating blocks",
+          [
+            "Assign fixed blocks for marketing, estimates, admin, production, collections, and follow-up each week.",
+            "Protect those blocks unless a high-value opportunity truly justifies breaking them.",
+            "Use the same structure for at least two weeks before changing it."
+          ],
+          "Your week has a repeatable rhythm and fewer decisions are being made live in reaction mode.",
+          {
+            documentation: "Save the weekly schedule template and adjust from reality, not impulse."
+          }
+        ),
+        createChecklistItem(
+          "Month 2",
+          "Tighten pricing and repeat-work logic",
+          [
+            "Use Month 1 data to raise weak minimums, travel rules, or underpriced job types.",
+            "Push the recurring option, maintenance reminder, or repeat-service path where it fits the model.",
+            "Trim add-ons that create operational friction without real margin."
+          ],
+          "Pricing now reflects actual delivery effort and the repeat-work path is being sold intentionally.",
+          {
+            documentation: "Update the offer sheet and quote templates with new minimums or recurring options."
+          }
+        ),
+        createChecklistItem(
+          "Month 2",
+          "Add one dependable partner channel",
+          [
+            "Choose one local partner type that naturally overlaps with the service.",
+            "Prepare one short intro message, one proof example, and one clear referral reason.",
+            "Contact the same category consistently rather than sampling five partner types at once."
+          ],
+          "You have one partner channel in motion with real conversations or referrals starting to appear.",
+          {
+            documentation: "Track partner name, status, last touch, and next follow-up date.",
+            example: 'Referral intro: "We help your clients with [service]. Fast response, clear quoting, and clean closeout. If you ever need a dependable option, I can send a quick overview."'
+          }
+        ),
+        createChecklistItem(
+          "Month 2",
+          "Protect density and job quality",
+          [
+            "If the model is route-based, keep jobs grouped by area and cut weak outlier stops.",
+            "If the model is project-based, tighten scope review, deposits, and material planning.",
+            "Create a written list of jobs you want more of and jobs you now know to avoid."
+          ],
+          "The business is choosing better work instead of simply taking whatever appears.",
+          {
+            documentation: "Create a 'good jobs / bad jobs' note after every week.",
+            avoid: "Do not let early growth trick you into accepting work that breaks the model."
+          }
+        ),
+        createChecklistItem(
+          "Month 2",
+          "Review like an operator every week",
+          [
+            "Score the week by leads, booked jobs, average ticket, review asks, and money collected.",
+            "Write the one process improvement that would make next week easier.",
+            "Carry that one improvement into the next week immediately."
+          ],
+          "Every week is producing a concrete improvement instead of a vague intention to get better.",
+          {
+            documentation: "Keep a weekly review note with numbers, wins, misses, and next fix."
+          }
+        )
+      ],
+      rule: "Protect the weekly rhythm. The business should start to run on planned blocks, not constant reaction.",
+      successLooksLike:
+        "The calendar is structured, pricing is improving, partner outreach is active, and the business is selecting better work.",
+      nextAction: month2Title,
+      momentumMessages: createMomentumMessages("Month 2", month2Title)
     },
     {
       title: "Month 3",
-      summary: "Systemize the business and prepare the next growth decision.",
+      summary: `${month3} Document the operating system, tighten automation, and decide the next growth move from real data instead of guesswork.`,
       actions: [
-        month3,
-        "Document SOPs for intake, reminders, quoting, scheduling, closeout, and review collection so another person could follow them.",
-        "Set month-four targets for lead volume, close rate, average ticket, repeat work, and review count.",
-        "Decide whether the best next move is higher pricing, denser routes, stronger follow-up, or selective labor support."
-      ]
+        "Step 1 — Document the core SOPs in plain English.",
+        "Step 2 — Automate the reminders and follow-up that should not rely on memory.",
+        "Step 3 — Set the next 30-day targets using real numbers.",
+        "Step 4 — Choose the next bottleneck to solve.",
+        "Step 5 — Prepare the business for cleaner scale, not just more activity."
+      ],
+      checklist: [
+        createChecklistItem(
+          "Month 3",
+          "Document the core SOPs",
+          [
+            "Write the intake, quote, schedule, job prep, completion, invoicing, and follow-up process in plain language.",
+            "Make the SOPs short enough that you would actually use them and good enough that someone else could follow them.",
+            "Include what to document, what to send, and what the customer should hear at each step."
+          ],
+          "The core workflow is documented well enough that another person could follow it without guessing.",
+          {
+            documentation: "Store SOPs in one operations folder and link them from your CRM or notes system."
+          }
+        ),
+        createChecklistItem(
+          "Month 3",
+          "Automate the obvious reminders",
+          [
+            "Install missed-call text-back, estimate follow-up, appointment confirmations, and review requests where possible.",
+            "Keep the language human and short so automation feels like service, not spam.",
+            "Test every automation yourself before relying on it."
+          ],
+          "Routine reminders are firing without manual memory and the customer experience still feels personal.",
+          {
+            documentation: "List each automation, when it fires, and the exact message used.",
+            avoid: "Do not automate confusing or overly aggressive follow-up just because the tool allows it."
+          }
+        ),
+        createChecklistItem(
+          "Month 3",
+          "Set the next 30-day targets",
+          [
+            "Use real numbers from the first 60 to 90 days to set targets for leads, close rate, average ticket, repeat work, and reviews.",
+            "Choose targets that are aggressive enough to matter but specific enough to be operational.",
+            "Tie each target to one weekly action so the number is supported by behavior."
+          ],
+          "The next month has written targets and the weekly actions that support them.",
+          {
+            documentation: "Save the next 30-day scorecard in the same place you review weekly numbers."
+          }
+        ),
+        createChecklistItem(
+          "Month 3",
+          "Choose the next bottleneck",
+          [
+            "Identify whether the business is currently limited by lead volume, close rate, pricing, route density, follow-up, or labor capacity.",
+            "Pick one primary bottleneck instead of chasing six improvements at once.",
+            "Set one concrete change to test in the next 30 days."
+          ],
+          "You know the next lever to improve and you are not guessing at what growth means.",
+          {
+            documentation: "Write the bottleneck, the reason, and the test you will run next.",
+            avoid: "Do not hire or add expensive tools before the real bottleneck is obvious."
+          }
+        ),
+        createChecklistItem(
+          "Month 3",
+          "Prepare for cleaner scale",
+          [
+            "Decide whether the next move is better pricing, denser routes, stronger follow-up, or selective labor support.",
+            "Make sure the documentation, templates, and reminders are good enough before adding complexity.",
+            "Keep the business focused on profitable work and clean customer experience as volume rises."
+          ],
+          "The business is set up to grow through cleaner systems instead of extra chaos.",
+          {
+            documentation: "Save the next-hire, next-price, or next-system decision in the operating notes."
+          }
+        )
+      ],
+      rule: "Only scale what is already repeatable. Documentation and follow-up come before added complexity.",
+      successLooksLike:
+        "The business has written SOPs, reliable reminders, a real scorecard, and a clear next bottleneck to solve.",
+      nextAction: "the next 30-day operating cycle",
+      momentumMessages: createMomentumMessages("Month 3", "the next 30-day operating cycle")
     }
   ];
 }
@@ -236,21 +744,30 @@ function buildScripts(seed: ServiceSeed): Script[] {
       body:
         `Hi [Name], this is [Your Name] with [Business Name]. We help local customers with ${serviceName}.\n` +
         `We are currently booking a focused launch offer: "${seed.starterOffer}".\n` +
-        "If you send me your address plus a couple photos, I can text back the likely price range, what is included, and the next opening."
+        "If you send me your address plus a couple photos, I can text back the likely price range, what is included, and the next opening.",
+      whenToUse: "Use this for first-touch text outreach, missed-call text-back, or warm local leads who asked what you do.",
+      whyItWorks:
+        "It keeps the message short, names one offer, asks for the minimum intake, and moves the customer toward the next step instead of a long conversation."
     },
     {
       title: "Estimate Follow-Up",
       body:
         `Hi [Name], I am following up on the ${serviceName} quote I sent over.\n` +
         "Based on the scope, I can still hold a spot on [Day / Window] if you would like to move forward.\n" +
-        'If the quote looks good, just reply "book it" and I will lock the visit and send the confirmation details.'
+        'If the quote looks good, just reply "book it" and I will lock the visit and send the confirmation details.',
+      whenToUse: "Send on Day 2 for open quotes, then again on Day 7 if the lead has gone quiet but still fits your service area.",
+      whyItWorks:
+        "It reminds the customer about the quote, gives one clear calendar next step, and avoids discounting too early."
     },
     {
       title: "Review Request",
       body:
         `Thanks again for trusting us with your ${serviceName} project.\n` +
         "If the work looked the way you hoped, would you mind leaving a short review and mentioning the service, communication, and result?\n" +
-        "Here is the direct link: [Review Link]"
+        "Here is the direct link: [Review Link]",
+      whenToUse: "Send right after the customer confirms the result or reacts positively during the walkthrough.",
+      whyItWorks:
+        "It asks while satisfaction is high, tells the customer what feedback is useful, and makes the next step easy with the direct link."
     }
   ];
 }

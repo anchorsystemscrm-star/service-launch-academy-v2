@@ -1,11 +1,22 @@
 import { businesses } from "@/data/businesses";
 import { Benchmark, Business, ChatMessage, KPIData, Phase, Script, WeekGroup } from "@/types/business";
 
+export type ExecutionStageStatus = "not_started" | "in_progress" | "completed";
+
 export const weekGroups: WeekGroup[] = [
   { title: "Weeks 1-2: Foundation", weeks: [1, 2] },
   { title: "Weeks 3-4: Launch Motion", weeks: [3, 4] },
   { title: "Weeks 5-8: Operating Rhythm", weeks: [5, 6, 7, 8] },
   { title: "Weeks 9-13: Systemize & Scale", weeks: [9, 10, 11, 12, 13] }
+];
+
+export const executionStageWeekMap: number[][] = [
+  [1],
+  [2],
+  [3],
+  [4],
+  [5, 6, 7, 8],
+  [9, 10, 11, 12, 13]
 ];
 
 export const milestoneTemplate = [
@@ -62,6 +73,37 @@ export function filterBusinesses(list: Business[], query: string, filters: strin
 
 export function getCompletedWeeks(progress: boolean[]): number {
   return progress.filter(Boolean).length;
+}
+
+export function getChecklistCompletion(taskProgress: boolean[][]) {
+  const total = taskProgress.reduce((sum, stage) => sum + stage.length, 0);
+  const completed = taskProgress.reduce((sum, stage) => sum + stage.filter(Boolean).length, 0);
+  const percentage = total === 0 ? 0 : Math.round((completed / total) * 100);
+
+  return { total, completed, percentage };
+}
+
+export function getExecutionStageStatus(
+  progress: boolean[],
+  taskProgress: boolean[][],
+  stageIndex: number
+): ExecutionStageStatus {
+  const weekIndexes = executionStageWeekMap[stageIndex] ?? [];
+  const completedWeeks = weekIndexes.filter((week) => progress[week - 1]).length;
+  const totalWeeks = weekIndexes.length;
+  const stageTasks = taskProgress[stageIndex] ?? [];
+  const completedTasks = stageTasks.filter(Boolean).length;
+  const totalTasks = stageTasks.length;
+
+  if (completedTasks > 0 && completedTasks === totalTasks && completedWeeks === totalWeeks) {
+    return "completed";
+  }
+
+  if (completedTasks > 0 || completedWeeks > 0) {
+    return "in_progress";
+  }
+
+  return "not_started";
 }
 
 export function getPhaseIndexByProgress(progress: boolean[]): number {

@@ -25,6 +25,25 @@ export interface Benchmark {
 export interface Script {
   title: string;
   body: string;
+  whenToUse?: string;
+  whyItWorks?: string;
+}
+
+export interface ExecutionChecklistItem {
+  id: string;
+  title: string;
+  instructions: string[];
+  doneDefinition: string;
+  documentation?: string;
+  avoid?: string;
+  example?: string;
+}
+
+export interface MomentumMessages {
+  notStarted: string;
+  inProgress: string;
+  nearComplete: string;
+  complete: string;
 }
 
 export interface Phase {
@@ -32,12 +51,19 @@ export interface Phase {
   goal: string;
   tasks: string[];
   benchmarks: Benchmark;
+  rule: string;
+  successLooksLike: string;
 }
 
 export interface ExecutionStage {
   title: string;
   summary: string;
   actions: string[];
+  checklist: ExecutionChecklistItem[];
+  rule: string;
+  successLooksLike: string;
+  nextAction: string;
+  momentumMessages: MomentumMessages;
 }
 
 export interface BudgetBucket {
