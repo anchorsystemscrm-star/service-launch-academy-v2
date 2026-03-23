@@ -77,6 +77,20 @@ textarea {
   }
 }
 
+@keyframes blueprint-task-in-strong {
+  0% {
+    opacity: 0;
+    transform: translateY(14px) scale(0.975);
+    filter: blur(8px);
+  }
+
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    filter: blur(0);
+  }
+}
+
 @keyframes blueprint-task-complete {
   0% {
     transform: scale(1);
@@ -88,6 +102,23 @@ textarea {
 
   100% {
     transform: scale(0.975);
+  }
+}
+
+@keyframes blueprint-task-complete-strong {
+  0% {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  40% {
+    opacity: 1;
+    transform: scale(0.985);
+  }
+
+  100% {
+    opacity: 0.98;
+    transform: scale(0.965);
   }
 }
 
@@ -108,6 +139,23 @@ textarea {
   }
 }
 
+@keyframes blueprint-check-glow-strong {
+  0% {
+    opacity: 0;
+    transform: scale(0.35);
+  }
+
+  35% {
+    opacity: 1;
+    transform: scale(1.1);
+  }
+
+  100% {
+    opacity: 0;
+    transform: scale(1.7);
+  }
+}
+
 @keyframes blueprint-check-pop {
   0% {
     transform: scale(0.6);
@@ -116,6 +164,23 @@ textarea {
 
   60% {
     transform: scale(1.08);
+    opacity: 1;
+  }
+
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes blueprint-check-pop-strong {
+  0% {
+    transform: scale(0.5);
+    opacity: 0;
+  }
+
+  55% {
+    transform: scale(1.14);
     opacity: 1;
   }
 
@@ -138,6 +203,19 @@ textarea {
   }
 }
 
+@keyframes blueprint-progress-pulse-strong {
+  0%,
+  100% {
+    box-shadow: 0 0 0 rgba(83, 180, 255, 0);
+    filter: saturate(1);
+  }
+
+  45% {
+    box-shadow: 0 0 22px rgba(83, 180, 255, 0.45), 0 0 48px rgba(58, 212, 166, 0.18);
+    filter: saturate(1.22);
+  }
+}
+
 @keyframes blueprint-toast-in {
   0% {
     opacity: 0;
@@ -147,6 +225,190 @@ textarea {
   100% {
     opacity: 1;
     transform: translateY(0);
+  }
+}
+
+@keyframes blueprint-task-sparkle {
+  0% {
+    opacity: 0;
+    transform: scale(0.2);
+  }
+
+  30% {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  100% {
+    opacity: 0;
+    transform: scale(1.8);
+  }
+}
+
+@keyframes blueprint-success-ring {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.5);
+  }
+
+  30% {
+    opacity: 1;
+  }
+
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(1.6);
+  }
+}
+
+@keyframes blueprint-overlay-enter {
+  0% {
+    opacity: 0;
+    transform: translateY(24px) scale(0.96);
+    filter: blur(12px);
+  }
+
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    filter: blur(0);
+  }
+}
+
+@keyframes blueprint-overlay-glow {
+  0%,
+  100% {
+    opacity: 0.4;
+    transform: translate(-50%, -50%) scale(0.92);
+  }
+
+  50% {
+    opacity: 0.85;
+    transform: translate(-50%, -50%) scale(1.08);
+  }
+}
+
+@keyframes blueprint-overlay-glow-soft {
+  0%,
+  100% {
+    opacity: 0.22;
+    transform: translate(-50%, -50%) scale(0.96);
+  }
+
+  50% {
+    opacity: 0.5;
+    transform: translate(-50%, -50%) scale(1.04);
+  }
+}
+
+@keyframes blueprint-overlay-glow-strong {
+  0%,
+  100% {
+    opacity: 0.45;
+    transform: translate(-50%, -50%) scale(0.88);
+  }
+
+  50% {
+    opacity: 0.95;
+    transform: translate(-50%, -50%) scale(1.14);
+  }
+}
+
+@keyframes blueprint-celebration-particle {
+  0% {
+    opacity: 0;
+    transform: scale(0.2);
+  }
+
+  25% {
+    opacity: 1;
+  }
+
+  100% {
+    opacity: 0;
+    transform: translateY(-18px) scale(1.6);
+  }
+}
+
+@keyframes blueprint-celebration-particle-strong {
+  0% {
+    opacity: 0;
+    transform: scale(0.25);
+  }
+
+  25% {
+    opacity: 1;
+  }
+
+  100% {
+    opacity: 0;
+    transform: translateY(-28px) scale(1.9);
+  }
+}
+
+@keyframes blueprint-celebration-ray {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scaleX(0.4);
+  }
+
+  30% {
+    opacity: 0.8;
+  }
+
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scaleX(1.2);
+  }
+}
+
+@keyframes blueprint-celebration-ray-strong {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scaleX(0.35);
+  }
+
+  30% {
+    opacity: 1;
+  }
+
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scaleX(1.45);
+  }
+}
+
+@keyframes blueprint-success-seal {
+  0% {
+    transform: scale(0.84);
+    box-shadow: 0 0 0 rgba(83, 180, 255, 0);
+  }
+
+  50% {
+    transform: scale(1.06);
+    box-shadow: 0 0 24px rgba(83, 180, 255, 0.28);
+  }
+
+  100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 rgba(83, 180, 255, 0);
+  }
+}
+
+@keyframes blueprint-success-seal-strong {
+  0% {
+    transform: scale(0.8);
+    box-shadow: 0 0 0 rgba(83, 180, 255, 0);
+  }
+
+  50% {
+    transform: scale(1.1);
+    box-shadow: 0 0 32px rgba(83, 180, 255, 0.36), 0 0 50px rgba(58, 212, 166, 0.16);
+  }
+
+  100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 rgba(83, 180, 255, 0);
   }
 }
 
@@ -169,23 +431,91 @@ textarea {
     animation: blueprint-task-in 260ms ease-out;
   }
 
+  .animate-blueprint-task-in-strong {
+    animation: blueprint-task-in-strong 360ms ease-out;
+  }
+
   .animate-blueprint-task-complete {
     animation: blueprint-task-complete 320ms ease-out forwards;
+  }
+
+  .animate-blueprint-task-complete-strong {
+    animation: blueprint-task-complete-strong 420ms ease-out forwards;
   }
 
   .animate-blueprint-check-glow {
     animation: blueprint-check-glow 700ms ease-out forwards;
   }
 
+  .animate-blueprint-check-glow-strong {
+    animation: blueprint-check-glow-strong 820ms ease-out forwards;
+  }
+
   .animate-blueprint-check-pop {
     animation: blueprint-check-pop 300ms ease-out forwards;
+  }
+
+  .animate-blueprint-check-pop-strong {
+    animation: blueprint-check-pop-strong 360ms ease-out forwards;
   }
 
   .animate-blueprint-progress-pulse {
     animation: blueprint-progress-pulse 650ms ease-out;
   }
 
+  .animate-blueprint-progress-pulse-strong {
+    animation: blueprint-progress-pulse-strong 900ms ease-out;
+  }
+
   .animate-blueprint-toast-in {
     animation: blueprint-toast-in 220ms ease-out;
+  }
+
+  .animate-blueprint-task-sparkle {
+    animation: blueprint-task-sparkle 620ms ease-out forwards;
+  }
+
+  .animate-blueprint-success-ring {
+    animation: blueprint-success-ring 760ms ease-out forwards;
+  }
+
+  .animate-blueprint-overlay-enter {
+    animation: blueprint-overlay-enter 360ms ease-out forwards;
+  }
+
+  .animate-blueprint-overlay-glow {
+    animation: blueprint-overlay-glow 2000ms ease-in-out infinite;
+  }
+
+  .animate-blueprint-overlay-glow-soft {
+    animation: blueprint-overlay-glow-soft 2000ms ease-in-out infinite;
+  }
+
+  .animate-blueprint-overlay-glow-strong {
+    animation: blueprint-overlay-glow-strong 1800ms ease-in-out infinite;
+  }
+
+  .animate-blueprint-celebration-particle {
+    animation: blueprint-celebration-particle 1000ms ease-out forwards;
+  }
+
+  .animate-blueprint-celebration-particle-strong {
+    animation: blueprint-celebration-particle-strong 1200ms ease-out forwards;
+  }
+
+  .animate-blueprint-celebration-ray {
+    animation: blueprint-celebration-ray 900ms ease-out forwards;
+  }
+
+  .animate-blueprint-celebration-ray-strong {
+    animation: blueprint-celebration-ray-strong 1100ms ease-out forwards;
+  }
+
+  .animate-blueprint-success-seal {
+    animation: blueprint-success-seal 780ms ease-out forwards;
+  }
+
+  .animate-blueprint-success-seal-strong {
+    animation: blueprint-success-seal-strong 900ms ease-out forwards;
   }
 }

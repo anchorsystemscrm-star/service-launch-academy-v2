@@ -286,6 +286,7 @@ export default function BlueprintPage() {
                 taskProgress={taskProgress}
                 onToggleTask={setTaskComplete}
                 onToggleWeek={setWeekComplete}
+                hasProAccess={hasProAccess}
               />
 
               <section className="hidden rounded-[24px] border border-white/10 bg-panel-gradient p-5 lg:block">
