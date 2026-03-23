@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 
 import { ExecutionStageCard } from "@/components/ExecutionStageCard";
 import { LockedFeatureCard } from "@/components/LockedFeatureCard";
+import { MobileBlueprintFocus } from "@/components/MobileBlueprintFocus";
 import { PhaseCard } from "@/components/PhaseCard";
 import { ProgressTracker } from "@/components/ProgressTracker";
 import { ScriptCard } from "@/components/ScriptCard";
@@ -208,8 +209,8 @@ export default function BlueprintPage() {
       {!hasCoreAccess ? (
         renderPreviewExperience()
       ) : (
-      <div className="mt-6 grid gap-6 xl:grid-cols-[360px_minmax(0,1fr)]">
-        <div className="grid gap-6">
+      <div className="mt-6 grid gap-6 lg:grid-cols-[320px_minmax(0,1fr)] xl:grid-cols-[360px_minmax(0,1fr)]">
+        <div className="hidden gap-6 lg:grid">
           <section className="panel-surface p-6">
             <h2 className="text-lg font-semibold text-white">{business.name}</h2>
             <div className="mt-4 grid gap-3 text-sm text-slate-200">
@@ -247,7 +248,7 @@ export default function BlueprintPage() {
         </div>
 
         <section className="panel-surface p-6 sm:p-8">
-          <div className="flex flex-wrap gap-2">
+          <div className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-1">
             {tabs.map((tab) => (
               hasTierAccess(profile.tier, tab.minTier) ? (
                 <button
@@ -278,7 +279,16 @@ export default function BlueprintPage() {
 
           {activeTab === "plan" && (
             <div className="mt-6 grid gap-4">
-              <section className="rounded-[24px] border border-white/10 bg-panel-gradient p-5">
+              <MobileBlueprintFocus
+                executionPlan={business.executionPlan}
+                phases={phases}
+                progress={progress}
+                taskProgress={taskProgress}
+                onToggleTask={setTaskComplete}
+                onToggleWeek={setWeekComplete}
+              />
+
+              <section className="hidden rounded-[24px] border border-white/10 bg-panel-gradient p-5 lg:block">
                 <div className="grid gap-4 xl:grid-cols-[minmax(0,1.15fr)_minmax(260px,0.85fr)]">
                   <div>
                     <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-accentSecondary">Current execution focus</p>
@@ -321,7 +331,7 @@ export default function BlueprintPage() {
                 </div>
               </section>
 
-              <section className="rounded-[24px] border border-white/10 bg-white/5 p-5">
+              <section className="hidden rounded-[24px] border border-white/10 bg-white/5 p-5 lg:block">
                 <div className="flex flex-col gap-2 lg:flex-row lg:items-end lg:justify-between">
                   <div>
                     <h3 className="text-lg font-semibold text-white">Detailed execution roadmap</h3>
@@ -347,9 +357,11 @@ export default function BlueprintPage() {
                   ))}
                 </div>
               </section>
-              {phases.map((phase) => (
-                <PhaseCard key={phase.title} phase={phase} />
-              ))}
+              <div className="hidden gap-4 lg:grid">
+                {phases.map((phase) => (
+                  <PhaseCard key={phase.title} phase={phase} />
+                ))}
+              </div>
             </div>
           )}
 
