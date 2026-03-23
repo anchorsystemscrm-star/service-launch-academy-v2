@@ -3,13 +3,14 @@
 import { useEffect, useState } from "react";
 import type { Session } from "@supabase/supabase-js";
 
-import { SubscriptionTier, ChatMessage, KPIData, ExecutionStage } from "@/types/business";
+import { SubscriptionTier, ChatMessage, KPIData, ExecutionStage, BlueprintMilestoneKey } from "@/types/business";
 import { AccessProfile, normalizeSubscriptionTier } from "@/utils/access";
 
 export const STORAGE_KEYS = {
   selectedBusiness: "sla_selected_business",
   activeBlueprint: "sla_active_blueprint",
   progressMap: "sla_progress_map",
+  milestoneMap: "sla_milestone_map",
   kpiMap: "sla_kpi_map",
   chatMap: "sla_chat_map",
   onboardingComplete: "sla_onboarding_complete",
@@ -237,6 +238,8 @@ type StoredBlueprintProgress = {
   tasks: boolean[][];
 };
 
+type StoredBlueprintMilestones = Partial<Record<BlueprintMilestoneKey, boolean>>;
+
 function normalizeWeeks(raw: unknown): boolean[] {
   return Array.isArray(raw) && raw.length === 13 ? raw.map(Boolean) : new Array(13).fill(false);
 }
@@ -311,6 +314,27 @@ export function useBlueprintProgress(businessId: string, executionPlan: Executio
   }
 
   return { hydrated, progress, taskProgress, setWeekComplete, setTaskComplete };
+}
+
+export function useBlueprintMilestones(businessId: string) {
+  const { hydrated, value, setValue } = usePersistentState<Record<string, StoredBlueprintMilestones>>(
+    STORAGE_KEYS.milestoneMap,
+    {}
+  );
+
+  const milestones = value[businessId] ?? {};
+
+  function setMilestoneAchieved(key: BlueprintMilestoneKey, achieved = true) {
+    setValue((previous) => ({
+      ...previous,
+      [businessId]: {
+        ...(previous[businessId] ?? {}),
+        [key]: achieved
+      }
+    }));
+  }
+
+  return { hydrated, milestones, setMilestoneAchieved };
 }
 
 export function useKpiState(businessId: string, fallback: KPIData) {

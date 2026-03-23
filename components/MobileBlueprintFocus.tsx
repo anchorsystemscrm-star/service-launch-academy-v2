@@ -6,11 +6,15 @@ import { PhaseCard } from "@/components/PhaseCard";
 import { ExecutionStage, Phase } from "@/types/business";
 import {
   ExecutionStageStatus,
+  blueprintMilestones,
   executionStageWeekMap,
   getChecklistCompletion,
   getExecutionStageStatus,
+  getMilestoneState,
+  getNextActionSuggestion,
   milestoneTemplate
 } from "@/utils/benchmarks";
+import { useBlueprintMilestones } from "@/utils/storage";
 
 type MobileView = "focus" | "checklist" | "full";
 
@@ -29,6 +33,7 @@ type CelebrationState = {
 };
 
 interface MobileBlueprintFocusProps {
+  businessId: string;
   executionPlan: ExecutionStage[];
   phases: Phase[];
   progress: boolean[];
@@ -36,6 +41,7 @@ interface MobileBlueprintFocusProps {
   onToggleTask: (stageIndex: number, taskIndex: number, checked: boolean) => void;
   onToggleWeek: (weekIndex: number, checked: boolean) => void;
   hasProAccess: boolean;
+  focusRequest?: { stageIndex: number; taskIndex: number; token: number } | null;
 }
 
 const stepRewardCopy = [
@@ -101,13 +107,15 @@ function getNextPosition(current: TaskPosition, executionPlan: ExecutionStage[])
 }
 
 export function MobileBlueprintFocus({
+  businessId,
   executionPlan,
   phases,
   progress,
   taskProgress,
   onToggleTask,
   onToggleWeek,
-  hasProAccess
+  hasProAccess,
+  focusRequest
 }: MobileBlueprintFocusProps) {
   const [view, setView] = useState<MobileView>("focus");
   const [activeTask, setActiveTask] = useState<TaskPosition>(() => getFirstIncompletePosition(executionPlan, taskProgress));
@@ -117,13 +125,16 @@ export function MobileBlueprintFocus({
   const [celebration, setCelebration] = useState<CelebrationState | null>(null);
   const [completedOpen, setCompletedOpen] = useState(false);
   const [rewardNonce, setRewardNonce] = useState(0);
+  const [milestoneToast, setMilestoneToast] = useState<{ title: string; description: string } | null>(null);
   const timeoutRefs = useRef<number[]>([]);
+  const { milestones, setMilestoneAchieved } = useBlueprintMilestones(businessId);
 
   if (!executionPlan.length) {
     return null;
   }
 
   const checklistStats = getChecklistCompletion(taskProgress);
+  const nextAction = getNextActionSuggestion(executionPlan, taskProgress);
   const stageStatuses = useMemo(
     () =>
       executionPlan.map((stage, stageIndex) => ({
@@ -166,6 +177,14 @@ export function MobileBlueprintFocus({
         : []
     )
   );
+
+  useEffect(() => {
+    if (!focusRequest) {
+      return;
+    }
+
+    setFocusedTask({ stageIndex: focusRequest.stageIndex, taskIndex: focusRequest.taskIndex });
+  }, [focusRequest]);
 
   useEffect(() => {
     if (isAnimatingComplete || celebration) {
@@ -250,11 +269,19 @@ export function MobileBlueprintFocus({
 
     const nextChecklistStats = getChecklistCompletion(nextTaskProgress);
     const weekComplete = nextTaskProgress[activeTask.stageIndex].every(Boolean);
+    const nextWeeks = [...progress];
     const fullBlueprintComplete = nextChecklistStats.total > 0 && nextChecklistStats.completed === nextChecklistStats.total;
     const nextPosition = fullBlueprintComplete
       ? getFallbackPosition(executionPlan)
       : getFirstIncompletePosition(executionPlan, nextTaskProgress);
     const rewardIndex = (nextChecklistStats.completed - 1) % stepRewardCopy.length;
+    const orderedMilestones = [
+      "full_blueprint_completed",
+      "first_phase_completed",
+      "first_five_tasks_completed",
+      "first_week_completed",
+      "first_task_completed"
+    ] as const;
 
     setRewardCopy(stepRewardCopy[Math.max(rewardIndex, 0)]);
     setRewardNonce((previous) => previous + 1);
@@ -262,7 +289,25 @@ export function MobileBlueprintFocus({
     onToggleTask(activeTask.stageIndex, activeTask.taskIndex, true);
 
     if (weekComplete) {
-      (executionStageWeekMap[activeTask.stageIndex] ?? []).forEach((week) => onToggleWeek(week - 1, true));
+      (executionStageWeekMap[activeTask.stageIndex] ?? []).forEach((week) => {
+        nextWeeks[week - 1] = true;
+        onToggleWeek(week - 1, true);
+      });
+    }
+
+    const nextMilestoneState = getMilestoneState(nextWeeks, nextTaskProgress);
+    const unlockedMilestones = orderedMilestones.filter((key) => nextMilestoneState[key] && !milestones[key]);
+    unlockedMilestones.forEach((key) => setMilestoneAchieved(key, true));
+    const subtleMilestone = unlockedMilestones.find(
+      (key) => key !== "first_week_completed" && key !== "full_blueprint_completed"
+    );
+
+    if (subtleMilestone) {
+      setMilestoneToast({
+        title: blueprintMilestones[subtleMilestone].title,
+        description: blueprintMilestones[subtleMilestone].description
+      });
+      queueTimeout(() => setMilestoneToast(null), 2600);
     }
 
     if (fullBlueprintComplete) {
@@ -352,6 +397,17 @@ export function MobileBlueprintFocus({
                 </div>
               </div>
 
+              {nextAction ? (
+                <div className="rounded-2xl border border-white/10 bg-black/20 px-3 py-3">
+                  <div className="flex items-center justify-between gap-3">
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-accentSecondary">Next action queued</p>
+                    <span className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted">{nextAction.effortLabel}</span>
+                  </div>
+                  <p className="mt-2 text-sm font-semibold text-white">{nextAction.title}</p>
+                  <p className="mt-1 text-sm leading-6 text-slate-300">{nextAction.description}</p>
+                </div>
+              ) : null}
+
               <div className="grid grid-cols-3 gap-2">
                 {(["focus", "checklist", "full"] as const).map((mode) => (
                   <button
@@ -377,6 +433,13 @@ export function MobileBlueprintFocus({
               >
                 <p className="font-semibold">{rewardCopy}</p>
                 <p className="mt-1 text-xs uppercase tracking-[0.16em] text-slate-200">Momentum building</p>
+              </div>
+            ) : null}
+
+            {milestoneToast ? (
+              <div className="mt-3 rounded-2xl border border-white/10 bg-white/5 px-3 py-3 text-sm text-white animate-blueprint-toast-in">
+                <p className="font-semibold">{milestoneToast.title}</p>
+                <p className="mt-1 text-sm leading-6 text-slate-200">{milestoneToast.description}</p>
               </div>
             ) : null}
           </div>

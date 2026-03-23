@@ -14,6 +14,12 @@ export type BusinessTag =
 
 export type SubscriptionTier = "preview" | "core" | "pro" | "elite";
 export type SoftwareRequirement = "required" | "recommended" | "optional";
+export type BlueprintMilestoneKey =
+  | "first_task_completed"
+  | "first_week_completed"
+  | "first_five_tasks_completed"
+  | "first_phase_completed"
+  | "full_blueprint_completed";
 
 export interface Benchmark {
   leads: [number, number];
@@ -37,6 +43,12 @@ export interface ExecutionChecklistItem {
   documentation?: string;
   avoid?: string;
   example?: string;
+}
+
+export interface BlueprintMilestone {
+  key: BlueprintMilestoneKey;
+  title: string;
+  description: string;
 }
 
 export interface MomentumMessages {

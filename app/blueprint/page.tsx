@@ -3,9 +3,11 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
+import { BlueprintUpgradePrompt } from "@/components/BlueprintUpgradePrompt";
 import { ExecutionStageCard } from "@/components/ExecutionStageCard";
 import { LockedFeatureCard } from "@/components/LockedFeatureCard";
 import { MobileBlueprintFocus } from "@/components/MobileBlueprintFocus";
+import { NextActionCard } from "@/components/NextActionCard";
 import { PhaseCard } from "@/components/PhaseCard";
 import { ProgressTracker } from "@/components/ProgressTracker";
 import { ScriptCard } from "@/components/ScriptCard";
@@ -16,6 +18,7 @@ import {
   getChecklistCompletion,
   getExecutionStageStatus,
   getFallbackBusiness,
+  getNextActionSuggestion,
   milestoneTemplate
 } from "@/utils/benchmarks";
 import { useAccessProfile, useActiveBlueprint, useBlueprintProgress } from "@/utils/storage";
@@ -36,6 +39,7 @@ export default function BlueprintPage() {
   const business = getFallbackBusiness(profile.selectedBusinessId);
   const { progress, taskProgress, setWeekComplete, setTaskComplete } = useBlueprintProgress(business.id, business.executionPlan);
   const [activeTab, setActiveTab] = useState<(typeof tabs)[number]["id"]>("plan");
+  const [focusRequest, setFocusRequest] = useState<{ stageIndex: number; taskIndex: number; token: number } | null>(null);
 
   const phases = buildBlueprint(business);
   const scripts = buildScripts(business);
@@ -45,6 +49,7 @@ export default function BlueprintPage() {
   const canAccessAnchor = hasTierAccess(profile.tier, "elite");
   const coreCheckoutHref = getCheckoutHref("core");
   const checklistStats = getChecklistCompletion(taskProgress);
+  const nextAction = getNextActionSuggestion(business.executionPlan, taskProgress);
   const stageStatuses = business.executionPlan.map((stage, stageIndex) => ({
     stage,
     stageIndex,
@@ -63,7 +68,6 @@ export default function BlueprintPage() {
         : currentStage.status === "in_progress"
           ? currentStage.stage.momentumMessages.inProgress
           : currentStage.stage.momentumMessages.notStarted;
-
   useEffect(() => {
     if (!hasCoreAccess) {
       setActiveTab("plan");
@@ -279,7 +283,53 @@ export default function BlueprintPage() {
 
           {activeTab === "plan" && (
             <div className="mt-6 grid gap-4">
+              {nextAction ? (
+                <div className="grid gap-4">
+                  <div className="grid gap-4 lg:grid-cols-[minmax(0,1.15fr)_minmax(260px,0.85fr)]">
+                    <NextActionCard
+                      weekLabel={nextAction.weekLabel}
+                      stageTitle={nextAction.stageTitle}
+                      title={nextAction.title}
+                      description={nextAction.description}
+                      effortLabel={nextAction.effortLabel}
+                      completed={nextAction.completed}
+                      buttonLabel={nextAction.completed ? "Review Blueprint" : "Continue"}
+                      onStart={() => {
+                        setActiveTab("plan");
+                        setFocusRequest({
+                          stageIndex: nextAction.stageIndex,
+                          taskIndex: nextAction.taskIndex,
+                          token: Date.now()
+                        });
+                      }}
+                    />
+                    <div className="rounded-[26px] border border-white/10 bg-white/5 p-5 shadow-card">
+                      <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-accentSecondary">Progress snapshot</p>
+                      <div className="mt-4 grid grid-cols-2 gap-3">
+                        <div className="rounded-[20px] border border-white/10 bg-black/20 p-4">
+                          <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-muted">Overall progress</p>
+                          <p className="mt-2 text-2xl font-semibold text-white">{checklistStats.percentage}%</p>
+                        </div>
+                        <div className="rounded-[20px] border border-white/10 bg-black/20 p-4">
+                          <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-muted">Current week</p>
+                          <p className="mt-2 text-2xl font-semibold text-white">{nextAction.weekLabel}</p>
+                        </div>
+                      </div>
+                      <div className="mt-4 h-2 overflow-hidden rounded-full bg-slate-950">
+                        <div
+                          className="h-full rounded-full bg-gradient-to-r from-accent to-accentSecondary transition-all duration-700"
+                          style={{ width: `${checklistStats.percentage}%` }}
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  <BlueprintUpgradePrompt tier={profile.tier} progressPercentage={checklistStats.percentage} />
+                </div>
+              ) : null}
+
               <MobileBlueprintFocus
+                businessId={business.id}
                 executionPlan={business.executionPlan}
                 phases={phases}
                 progress={progress}
@@ -287,6 +337,7 @@ export default function BlueprintPage() {
                 onToggleTask={setTaskComplete}
                 onToggleWeek={setWeekComplete}
                 hasProAccess={hasProAccess}
+                focusRequest={focusRequest}
               />
 
               <section className="hidden rounded-[24px] border border-white/10 bg-panel-gradient p-5 lg:block">

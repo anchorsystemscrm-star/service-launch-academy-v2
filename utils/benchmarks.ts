@@ -1,7 +1,30 @@
 import { businesses } from "@/data/businesses";
-import { Benchmark, Business, ChatMessage, KPIData, Phase, Script, WeekGroup } from "@/types/business";
+import {
+  Benchmark,
+  BlueprintMilestone,
+  BlueprintMilestoneKey,
+  Business,
+  ChatMessage,
+  ExecutionChecklistItem,
+  ExecutionStage,
+  KPIData,
+  Phase,
+  Script,
+  WeekGroup
+} from "@/types/business";
 
 export type ExecutionStageStatus = "not_started" | "in_progress" | "completed";
+
+export interface NextActionSuggestion {
+  stageIndex: number;
+  taskIndex: number;
+  stageTitle: string;
+  weekLabel: string;
+  title: string;
+  description: string;
+  effortLabel: string;
+  completed: boolean;
+}
 
 export const weekGroups: WeekGroup[] = [
   { title: "Weeks 1-2: Foundation", weeks: [1, 2] },
@@ -34,6 +57,34 @@ export const milestoneTemplate = [
   "Protect route density or project profitability",
   "Set the next 30-day operating target"
 ];
+
+export const blueprintMilestones: Record<BlueprintMilestoneKey, BlueprintMilestone> = {
+  first_task_completed: {
+    key: "first_task_completed",
+    title: "First step complete",
+    description: "You are in motion now. Keep the first win small and stack the next one fast."
+  },
+  first_week_completed: {
+    key: "first_week_completed",
+    title: "Week complete",
+    description: "The first milestone is locked in. Keep the same pace into the next stage."
+  },
+  first_five_tasks_completed: {
+    key: "first_five_tasks_completed",
+    title: "Five tasks down",
+    description: "Momentum is real now. The execution rhythm is starting to form."
+  },
+  first_phase_completed: {
+    key: "first_phase_completed",
+    title: "Phase complete",
+    description: "The foundation is built. You are ready to operate with more confidence."
+  },
+  full_blueprint_completed: {
+    key: "full_blueprint_completed",
+    title: "Blueprint complete",
+    description: "You completed the tracked blueprint. Now the work becomes consistency and scale."
+  }
+};
 
 export const defaultKpiData: KPIData = {
   leads: 0,
@@ -81,6 +132,93 @@ export function getChecklistCompletion(taskProgress: boolean[][]) {
   const percentage = total === 0 ? 0 : Math.round((completed / total) * 100);
 
   return { total, completed, percentage };
+}
+
+export function getTaskEffortLabel(item: ExecutionChecklistItem): string {
+  const complexityScore =
+    item.instructions.length +
+    (item.documentation ? 1 : 0) +
+    (item.avoid ? 1 : 0) +
+    (item.example ? 1 : 0);
+
+  if (complexityScore <= 2) {
+    return "5 min";
+  }
+
+  if (complexityScore <= 4) {
+    return "10 min";
+  }
+
+  return "15 min";
+}
+
+export function formatWeekLabel(stageIndex: number): string {
+  const weeks = executionStageWeekMap[stageIndex] ?? [];
+
+  if (weeks.length <= 1) {
+    return `Week ${weeks[0] ?? 1}`;
+  }
+
+  return `Weeks ${weeks[0]}-${weeks[weeks.length - 1]}`;
+}
+
+export function getNextActionSuggestion(
+  executionPlan: ExecutionStage[],
+  taskProgress: boolean[][]
+): NextActionSuggestion | null {
+  if (!executionPlan.length) {
+    return null;
+  }
+
+  for (let stageIndex = 0; stageIndex < executionPlan.length; stageIndex += 1) {
+    const stage = executionPlan[stageIndex];
+    const stageTasks = taskProgress[stageIndex] ?? [];
+
+    for (let taskIndex = 0; taskIndex < stage.checklist.length; taskIndex += 1) {
+      if (!stageTasks[taskIndex]) {
+        const item = stage.checklist[taskIndex];
+        return {
+          stageIndex,
+          taskIndex,
+          stageTitle: stage.title,
+          weekLabel: formatWeekLabel(stageIndex),
+          title: item.title,
+          description: item.instructions[0] ?? item.doneDefinition,
+          effortLabel: getTaskEffortLabel(item),
+          completed: false
+        };
+      }
+    }
+  }
+
+  const lastStageIndex = Math.max(executionPlan.length - 1, 0);
+  const lastStage = executionPlan[lastStageIndex];
+  const lastTaskIndex = Math.max(lastStage.checklist.length - 1, 0);
+  const lastTask = lastStage.checklist[lastTaskIndex];
+
+  return {
+    stageIndex: lastStageIndex,
+    taskIndex: lastTaskIndex,
+    stageTitle: lastStage.title,
+    weekLabel: formatWeekLabel(lastStageIndex),
+    title: "Blueprint complete",
+    description: "All tracked blueprint tasks are complete. Review the system or move into execution support.",
+    effortLabel: "Locked in",
+    completed: true
+  };
+}
+
+export function getMilestoneState(progress: boolean[], taskProgress: boolean[][]) {
+  const checklist = getChecklistCompletion(taskProgress);
+  const completedWeeks = getCompletedWeeks(progress);
+
+  return {
+    first_task_completed: checklist.completed >= 1,
+    first_week_completed: completedWeeks >= 1,
+    first_five_tasks_completed: checklist.completed >= 5,
+    first_phase_completed: Boolean(progress[0] && progress[1]),
+    full_blueprint_completed: checklist.total > 0 && checklist.completed === checklist.total
+  } satisfies Record<BlueprintMilestoneKey, boolean>;
 }
 
 export function getExecutionStageStatus(

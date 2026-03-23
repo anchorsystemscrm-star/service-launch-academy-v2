@@ -133,6 +133,64 @@ export function getCheckoutHref(plan: SubscriptionTier) {
   return `/api/checkout?plan=${plan}`;
 }
 
+export function getNextUpgradeTier(currentTier: SubscriptionTier): SubscriptionTier | null {
+  if (currentTier === "preview") {
+    return "core";
+  }
+
+  if (currentTier === "core") {
+    return "pro";
+  }
+
+  if (currentTier === "pro") {
+    return "elite";
+  }
+
+  return null;
+}
+
+export function getProgressUpgradePrompt(currentTier: SubscriptionTier, progressPercentage: number) {
+  const targetTier = getNextUpgradeTier(currentTier);
+
+  if (!targetTier || progressPercentage < 30) {
+    return null;
+  }
+
+  if (progressPercentage >= 80) {
+    return {
+      targetTier,
+      eyebrow: "High-intent upgrade",
+      title: `You are close. ${tierLabels[targetTier]} helps you turn progress into execution speed.`,
+      body:
+        currentTier === "core"
+          ? "Unlock AI guidance and tactical prompts so the final stretch moves faster and with less hesitation."
+          : "Unlock advanced systems and Anchor setup so this blueprint turns into a tighter operating machine."
+    };
+  }
+
+  if (progressPercentage >= 60) {
+    return {
+      targetTier,
+      eyebrow: "Upgrade available",
+      title: `You are halfway through. ${tierLabels[targetTier]} adds the next layer of execution support.`,
+      body:
+        currentTier === "core"
+          ? "Bring AI guidance into pricing, objections, marketing, and operations while your momentum is high."
+          : "Add advanced systems and operator-grade setup guidance to tighten what happens after the blueprint."
+    };
+  }
+
+  return {
+    targetTier,
+    eyebrow: "Momentum is building",
+    title: `You are making real progress. ${tierLabels[targetTier]} can help you move faster.`,
+    body:
+      currentTier === "core"
+        ? "Unlock AI guidance to sharpen decisions while you are still building the operating rhythm."
+        : "Unlock Elite systems and Anchor setup when you are ready to systemize what is starting to work."
+  };
+}
+
 export function getUpgradeMessage(requiredTier: SubscriptionTier) {
   if (requiredTier === "core") {
     return "Upgrade to Core to unlock the full launch operating system.";
