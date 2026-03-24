@@ -47,6 +47,8 @@ export interface ExecutionChecklistItem {
   documentation?: string;
   avoid?: string;
   example: string;
+  trackThis?: string[];
+  trackingToolHint?: string;
 }
 
 export interface BlueprintMilestone {

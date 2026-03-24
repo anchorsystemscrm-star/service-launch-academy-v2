@@ -16,6 +16,7 @@ import { getCheckoutHref, getPricingHref, getUpgradeMessage, hasTierAccess, isEx
 import {
   buildBlueprint,
   buildScripts,
+  getBlueprintAnchorStage,
   getChecklistCompletion,
   getExecutionStageStatus,
   getFallbackBusiness,
@@ -53,6 +54,8 @@ export default function BlueprintPage() {
   const coreCheckoutHref = getCheckoutHref("core");
   const checklistStats = getChecklistCompletion(taskProgress);
   const nextAction = getNextActionSuggestion(business.executionPlan, taskProgress);
+  const anchorStage = getBlueprintAnchorStage(taskProgress, taskOutputMap);
+  const visibleTabs = tabs.filter((tab) => tab.id !== "anchor" || anchorStage >= 4);
   const stageStatuses = business.executionPlan.map((stage, stageIndex) => ({
     stage,
     stageIndex,
@@ -81,10 +84,10 @@ export default function BlueprintPage() {
       setActiveTab("plan");
     }
 
-    if (activeTab === "anchor" && !canAccessAnchor) {
+    if (activeTab === "anchor" && (anchorStage < 4 || !canAccessAnchor)) {
       setActiveTab(hasProAccess ? "prompts" : "plan");
     }
-  }, [activeTab, canAccessAnchor, hasCoreAccess, hasProAccess]);
+  }, [activeTab, anchorStage, canAccessAnchor, hasCoreAccess, hasProAccess]);
 
   function renderPreviewExperience() {
     return (
@@ -262,7 +265,7 @@ export default function BlueprintPage() {
           </div>
 
           <div className="flex w-full max-w-full flex-wrap gap-2">
-            {tabs.map((tab) => (
+            {visibleTabs.map((tab) => (
               hasTierAccess(profile.tier, tab.minTier) ? (
                 <button
                   key={tab.id}
@@ -302,7 +305,7 @@ export default function BlueprintPage() {
                       description={nextAction.description}
                       effortLabel={nextAction.effortLabel}
                       completed={nextAction.completed}
-                      buttonLabel={nextAction.completed ? "Review Blueprint" : "Continue"}
+                      buttonLabel={nextAction.completed ? "Review Blueprint" : "Open task"}
                       onStart={() => {
                         setActiveTab("plan");
                         setFocusRequest({
@@ -348,6 +351,8 @@ export default function BlueprintPage() {
                 onToggleWeek={setWeekComplete}
                 onTaskOutputGenerated={setTaskHasOutput}
                 hasProAccess={hasProAccess}
+                canAccessAnchor={canAccessAnchor}
+                onOpenAnchor={() => setActiveTab("anchor")}
                 focusRequest={focusRequest}
               />
 
@@ -416,6 +421,9 @@ export default function BlueprintPage() {
                       status={status}
                       milestoneText={milestoneTemplate[Math.min(stageIndex, milestoneTemplate.length - 1)]}
                       hasAiAccess={hasProAccess}
+                      anchorStage={anchorStage}
+                      canAccessAnchor={canAccessAnchor}
+                      onOpenAnchor={() => setActiveTab("anchor")}
                       onTaskOutputGenerated={setTaskHasOutput}
                       onToggleTask={setTaskComplete}
                     />
@@ -729,11 +737,11 @@ export default function BlueprintPage() {
             </div>
           )}
 
-          {activeTab === "anchor" && canAccessAnchor && (
+          {activeTab === "anchor" && canAccessAnchor && anchorStage >= 4 && (
             <div className="mt-6 grid gap-6">
               <p className="section-copy break-words">
-                Anchor Systems keeps your launch simple: track leads in a pipeline, send missed-call text-back, automate
-                follow-ups, handle scheduling, and collect invoices from one place.
+                Once lead handling, quote follow-up, scheduling, and reminders are happening every week, Anchor Systems can
+                take the manual admin load out of the workflow and run it in one place.
               </p>
 
               <div className="grid gap-3 md:grid-cols-2">
@@ -790,21 +798,6 @@ export default function BlueprintPage() {
             </div>
           )}
 
-          {!canAccessAnchor && (
-            <div className="mt-6">
-              <LockedFeatureCard
-                title="Elite access unlocks advanced Anchor setup"
-                requiredTier="elite"
-                description="The launch plan, cost model, and scripts remain available at your current tier. Elite unlocks advanced automation previews and system setup details."
-                bullets={[
-                  "Advanced Anchor Systems integration previews",
-                  "Automation and systemization content for scaling operators",
-                  "Premium CRM and operating-system visibility"
-                ]}
-                ctaHref={getCheckoutHref("elite")}
-              />
-            </div>
-          )}
         </section>
       </div>
       )}

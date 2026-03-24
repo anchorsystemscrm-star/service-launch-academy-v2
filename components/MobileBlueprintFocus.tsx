@@ -10,6 +10,7 @@ import {
   ExecutionStageStatus,
   blueprintMilestones,
   executionStageWeekMap,
+  getBlueprintAnchorStage,
   getBlueprintGuidedAction,
   getBlueprintTaskCoachHref,
   getChecklistCompletion,
@@ -47,6 +48,8 @@ interface MobileBlueprintFocusProps {
   onToggleWeek: (weekIndex: number, checked: boolean) => void;
   onTaskOutputGenerated: (taskId: string) => void;
   hasProAccess: boolean;
+  canAccessAnchor?: boolean;
+  onOpenAnchor?: () => void;
   focusRequest?: { stageIndex: number; taskIndex: number; token: number } | null;
 }
 
@@ -69,15 +72,6 @@ const sparkleOffsets = [
   { top: "74%", left: "58%" }
 ] as const;
 
-function flattenTasks(executionPlan: ExecutionStage[]) {
-  return executionPlan.flatMap((stage, stageIndex) =>
-    stage.checklist.map((_, taskIndex) => ({
-      stageIndex,
-      taskIndex
-    }))
-  );
-}
-
 function getFallbackPosition(executionPlan: ExecutionStage[]): TaskPosition {
   const lastStageIndex = Math.max(executionPlan.length - 1, 0);
   const lastTaskIndex = Math.max((executionPlan[lastStageIndex]?.checklist.length ?? 1) - 1, 0);
@@ -99,19 +93,6 @@ function getFirstIncompletePosition(executionPlan: ExecutionStage[], taskProgres
   return getFallbackPosition(executionPlan);
 }
 
-function getNextPosition(current: TaskPosition, executionPlan: ExecutionStage[]): TaskPosition {
-  const allTasks = flattenTasks(executionPlan);
-  const flatIndex = allTasks.findIndex(
-    (item) => item.stageIndex === current.stageIndex && item.taskIndex === current.taskIndex
-  );
-
-  if (flatIndex === -1 || flatIndex === allTasks.length - 1) {
-    return current;
-  }
-
-  return allTasks[flatIndex + 1];
-}
-
 export function MobileBlueprintFocus({
   businessId,
   executionPlan,
@@ -123,6 +104,8 @@ export function MobileBlueprintFocus({
   onToggleWeek,
   onTaskOutputGenerated,
   hasProAccess,
+  canAccessAnchor = false,
+  onOpenAnchor,
   focusRequest
 }: MobileBlueprintFocusProps) {
   const [view, setView] = useState<MobileView>("focus");
@@ -143,6 +126,7 @@ export function MobileBlueprintFocus({
 
   const checklistStats = getChecklistCompletion(taskProgress);
   const nextAction = getNextActionSuggestion(executionPlan, taskProgress);
+  const anchorStage = getBlueprintAnchorStage(taskProgress, taskOutputMap);
   const stageStatuses = useMemo(
     () =>
       executionPlan.map((stage, stageIndex) => ({
@@ -238,11 +222,6 @@ export function MobileBlueprintFocus({
     setExpandedStageIndex(celebration.advanceTarget.stageIndex);
     setView(nextView);
     setCelebration(null);
-  }
-
-  function handleNextStep() {
-    const nextPosition = getNextPosition(activeTask, executionPlan);
-    setFocusedTask(nextPosition);
   }
 
   function handleReopenTask(stageIndex: number, taskIndex: number) {
@@ -503,7 +482,12 @@ export function MobileBlueprintFocus({
                   aiHref={getBlueprintTaskCoachHref(activeTaskItem.aiPrompt)}
                   hasAiAccess={hasProAccess}
                   aiUpgradeHref={getCheckoutHref("pro")}
+                  stageIndex={activeTask.stageIndex}
+                  anchorStage={anchorStage}
+                  canAccessAnchor={canAccessAnchor}
+                  anchorUpgradeHref={getCheckoutHref("elite")}
                   highlightPrimary={guidedAction === "generate_ai"}
+                  onAnchorAction={onOpenAnchor}
                   onPrimaryAction={() => onTaskOutputGenerated(activeTaskItem.id)}
                   compact
                 />
@@ -523,20 +507,6 @@ export function MobileBlueprintFocus({
                     }`}
                   >
                     {activeTaskComplete ? "Completed" : "Mark Complete"}
-                  </button>
-                </div>
-                <div className="grid gap-2">
-                  {guidedAction === "next_step" ? (
-                    <p className="text-center text-[11px] font-semibold uppercase tracking-[0.16em] text-accentSecondary">Next step</p>
-                  ) : null}
-                  <button
-                    type="button"
-                    onClick={handleNextStep}
-                    className={`inline-flex w-full max-w-full items-center justify-center rounded-[22px] border border-white/10 bg-white/5 px-4 py-3 text-sm font-semibold text-white transition hover:border-white/20 hover:bg-white/10 ${
-                      guidedAction === "next_step" ? "glow-next" : ""
-                    }`}
-                  >
-                    Next Step
                   </button>
                 </div>
                 <div className="grid w-full max-w-full grid-cols-1 gap-3 sm:grid-cols-2">
@@ -777,6 +747,9 @@ export function MobileBlueprintFocus({
                 status={status}
                 milestoneText={milestoneTemplate[Math.min(stageIndex, milestoneTemplate.length - 1)]}
                 hasAiAccess={hasProAccess}
+                anchorStage={anchorStage}
+                canAccessAnchor={canAccessAnchor}
+                onOpenAnchor={onOpenAnchor}
                 onTaskOutputGenerated={onTaskOutputGenerated}
                 onToggleTask={onToggleTask}
               />

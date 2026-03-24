@@ -109,7 +109,9 @@ function createChecklistItem(
   title: string,
   instructions: string[],
   doneDefinition: string,
-  options: Partial<Pick<ExecutionChecklistItem, "documentation" | "avoid" | "example">> = {}
+  options: Partial<
+    Pick<ExecutionChecklistItem, "documentation" | "avoid" | "example" | "trackThis" | "trackingToolHint">
+  > = {}
 ): ExecutionChecklistItem {
   return {
     id: `${slugify(stageTitle)}-${slugify(title)}`,
@@ -132,6 +134,58 @@ function createMomentumMessages(stageTitle: string, nextAction: string): Momentu
     nearComplete: `You are close. Finish the last task in ${stageTitle} so ${nextAction.toLowerCase()} happens without hesitation.`,
     complete: `${stageTitle} is complete. Lock the win, document it, and roll straight into ${nextAction.toLowerCase()}.`
   };
+}
+
+function buildChecklistTracking(item: ExecutionChecklistItem): Pick<ExecutionChecklistItem, "trackThis" | "trackingToolHint"> {
+  switch (item.title) {
+    case "Install the response standard":
+      return {
+        trackThis: ["Customer name", "Lead source", "Response time", "Next action"],
+        trackingToolHint: "Use Notes or a simple spreadsheet until the volume earns something more structured."
+      };
+    case "Run one outreach play every day":
+      return {
+        trackThis: ["Outreach sent", "Replies", "Quotes created", "Booked jobs"],
+        trackingToolHint: "A one-tab spreadsheet is enough here. You only need simple counts and the winning channel."
+      };
+    case "Track quality, not just activity":
+      return {
+        trackThis: ["Customer name", "Lead source", "Quote speed", "Lost reason"],
+        trackingToolHint: "Keep one running lead log so you can cut weak channels early instead of guessing."
+      };
+    case "Run same-day quotes":
+      return {
+        trackThis: ["Customer name", "Quote amount", "Date sent", "Next follow-up date"],
+        trackingToolHint: "A note or spreadsheet works. The point is to keep every open quote visible."
+      };
+    case "Capture proof and job notes":
+      return {
+        trackThis: ["Customer name", "Job value", "Before/after saved", "Best upsell next time"],
+        trackingToolHint: "Save this in the job note or spreadsheet right after the visit so the lesson is not lost."
+      };
+    case "Install quote and review follow-up":
+      return {
+        trackThis: ["Customer name", "Open quote status", "Next follow-up date", "Review requested"],
+        trackingToolHint: "Use one list for open quotes and completed jobs so follow-up never depends on memory."
+      };
+    case "Review the first-month numbers":
+      return {
+        trackThis: ["Lead source", "Average ticket", "Close rate", "Booked jobs"],
+        trackingToolHint: "A simple weekly scorecard is enough. You do not need a dashboard to spot the bottleneck."
+      };
+    case "Review like an operator every week":
+      return {
+        trackThis: ["Leads", "Booked jobs", "Average ticket", "Money collected"],
+        trackingToolHint: "Run this in a spreadsheet or notes doc every week so the business is measured the same way each time."
+      };
+    case "Automate the obvious reminders":
+      return {
+        trackThis: ["Trigger name", "Sent status", "Reply outcome", "Owner of the workflow"],
+        trackingToolHint: "Even if the reminders are still manual, log the trigger and outcome so you know what deserves automation later."
+      };
+    default:
+      return {};
+  }
 }
 
 function buildChecklistTemplate(seed: ServiceSeed, stageTitle: string, item: ExecutionChecklistItem): string {
@@ -636,6 +690,9 @@ function buildChecklistAiPrompt(seed: ServiceSeed, stageTitle: string, item: Exe
   const template = item.template || buildChecklistTemplate(seed, stageTitle, item);
   const example = item.example || buildChecklistExample(seed, stageTitle, item);
   const ifStuck = item.ifStuck || buildChecklistIfStuck(seed, item);
+  const trackingBlock = item.trackThis?.length
+    ? ["", "Track this while you do the task:", ...item.trackThis.map((entry) => `- ${entry}`)].join("\n")
+    : "";
 
   return [
     "Help me complete one Blueprint task inside Service Launch Academy.",
@@ -653,6 +710,7 @@ function buildChecklistAiPrompt(seed: ServiceSeed, stageTitle: string, item: Exe
     example,
     "",
     `If I am stuck, use this rule: ${ifStuck}`,
+    trackingBlock,
     "",
     "Give me:",
     "1. the completed version for my business",
@@ -666,6 +724,7 @@ function enrichExecutionPlan(seed: ServiceSeed, executionPlan: ExecutionStage[])
   return executionPlan.map((stage) => ({
     ...stage,
     checklist: stage.checklist.map((item) => {
+      const tracking = buildChecklistTracking(item);
       const template = buildChecklistTemplate(seed, stage.title, item);
       const example = buildChecklistExample(seed, stage.title, item);
       const ifStuck = buildChecklistIfStuck(seed, item);
@@ -673,6 +732,7 @@ function enrichExecutionPlan(seed: ServiceSeed, executionPlan: ExecutionStage[])
 
       return {
         ...item,
+        ...tracking,
         instruction,
         template,
         example,

@@ -1,7 +1,7 @@
 import { BlueprintTaskSupportPanel } from "@/components/BlueprintTaskSupportPanel";
 import { ExecutionStage } from "@/types/business";
 import { getCheckoutHref } from "@/utils/access";
-import { getBlueprintTaskCoachHref } from "@/utils/benchmarks";
+import { BlueprintAnchorStage, getBlueprintTaskCoachHref } from "@/utils/benchmarks";
 import { ExecutionStageStatus } from "@/utils/benchmarks";
 
 interface ExecutionStageCardProps {
@@ -11,6 +11,9 @@ interface ExecutionStageCardProps {
   status: ExecutionStageStatus;
   milestoneText: string;
   hasAiAccess: boolean;
+  anchorStage?: BlueprintAnchorStage;
+  canAccessAnchor?: boolean;
+  onOpenAnchor?: () => void;
   onTaskOutputGenerated?: (taskId: string) => void;
   onToggleTask: (stageIndex: number, taskIndex: number, checked: boolean) => void;
 }
@@ -34,6 +37,9 @@ export function ExecutionStageCard({
   status,
   milestoneText,
   hasAiAccess,
+  anchorStage = 0,
+  canAccessAnchor = false,
+  onOpenAnchor,
   onTaskOutputGenerated,
   onToggleTask
 }: ExecutionStageCardProps) {
@@ -136,6 +142,11 @@ export function ExecutionStageCard({
                       aiHref={getBlueprintTaskCoachHref(item.aiPrompt)}
                       hasAiAccess={hasAiAccess}
                       aiUpgradeHref={getCheckoutHref("pro")}
+                      stageIndex={stageIndex}
+                      anchorStage={anchorStage}
+                      canAccessAnchor={canAccessAnchor}
+                      anchorUpgradeHref={getCheckoutHref("elite")}
+                      onAnchorAction={onOpenAnchor}
                       onPrimaryAction={() => onTaskOutputGenerated?.(item.id)}
                     />
                   </div>

@@ -27,6 +27,7 @@ export interface NextActionSuggestion {
 }
 
 export type BlueprintGuidedAction = "generate_ai" | "mark_complete" | "next_step";
+export type BlueprintAnchorStage = 0 | 1 | 2 | 3 | 4;
 
 export const weekGroups: WeekGroup[] = [
   { title: "Weeks 1-2: Foundation", weeks: [1, 2] },
@@ -229,6 +230,64 @@ export function getBlueprintGuidedAction(hasOutput: boolean, completed: boolean)
   }
 
   return "mark_complete";
+}
+
+function getCurrentIncompleteStageIndex(taskProgress: boolean[][]) {
+  const firstIncompleteIndex = taskProgress.findIndex((stageTasks) => stageTasks.some((taskDone) => !taskDone));
+  return firstIncompleteIndex >= 0 ? firstIncompleteIndex : Math.max(taskProgress.length - 1, 0);
+}
+
+export function getBlueprintBuildStage(taskProgress: boolean[][]): BlueprintAnchorStage {
+  const currentStageIndex = getCurrentIncompleteStageIndex(taskProgress);
+
+  if (currentStageIndex <= 0) {
+    return 0;
+  }
+
+  if (currentStageIndex <= 1) {
+    return 1;
+  }
+
+  if (currentStageIndex <= 3) {
+    return 2;
+  }
+
+  if (currentStageIndex <= 4) {
+    return 3;
+  }
+
+  return 4;
+}
+
+export function getBlueprintAnchorStage(
+  taskProgress: boolean[][],
+  taskOutputMap: Record<string, boolean>
+): BlueprintAnchorStage {
+  const buildStage = getBlueprintBuildStage(taskProgress);
+  const completedTasks = getChecklistCompletion(taskProgress).completed;
+  const userActivity = Object.values(taskOutputMap).filter(Boolean).length;
+  let anchorStage = buildStage;
+
+  if (completedTasks >= 14 || userActivity >= 5) {
+    anchorStage = (Math.max(anchorStage, 3) as BlueprintAnchorStage);
+  }
+
+  if (completedTasks >= 18 || userActivity >= 7) {
+    anchorStage = (Math.max(anchorStage, 4) as BlueprintAnchorStage);
+  }
+
+  return Math.min(anchorStage, 4) as BlueprintAnchorStage;
+}
+
+export function getBlueprintOperationalNote(anchorStage: BlueprintAnchorStage): string | null {
+  switch (anchorStage) {
+    case 2:
+      return "Once you are juggling multiple leads, quotes, or follow-ups, missed details usually come from inconsistent tracking.";
+    case 3:
+      return "This becomes harder to manage manually once volume increases.";
+    default:
+      return null;
+  }
 }
 
 export function getMilestoneState(progress: boolean[], taskProgress: boolean[][]) {
