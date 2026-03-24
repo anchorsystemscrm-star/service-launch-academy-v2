@@ -1,4 +1,5 @@
 import { SubscriptionTier } from "@/types/business";
+import { CoachMode } from "@/lib/ai/coachTypes";
 
 export interface AccessProfile {
   onboardingComplete: boolean;
@@ -201,4 +202,40 @@ export function getUpgradeMessage(requiredTier: SubscriptionTier) {
   }
 
   return "Upgrade to Elite to unlock advanced systems and Anchor integration previews.";
+}
+
+export function getRequiredTierForCoachMode(mode: CoachMode): SubscriptionTier {
+  if (mode === "marketing" || mode === "sop" || mode === "image") {
+    return "elite";
+  }
+
+  return "pro";
+}
+
+export function canUseCoachMode(currentTier: SubscriptionTier, mode: CoachMode) {
+  return hasTierAccess(currentTier, getRequiredTierForCoachMode(mode));
+}
+
+export function getCoachSaveLimit(currentTier: SubscriptionTier) {
+  if (currentTier === "elite") {
+    return 50;
+  }
+
+  if (currentTier === "pro") {
+    return 12;
+  }
+
+  return 0;
+}
+
+export function canSaveCoachOutput(currentTier: SubscriptionTier, mode: CoachMode) {
+  if (!hasTierAccess(currentTier, "pro")) {
+    return false;
+  }
+
+  if (mode === "image") {
+    return hasTierAccess(currentTier, "elite");
+  }
+
+  return true;
 }

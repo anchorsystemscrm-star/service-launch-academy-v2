@@ -3,6 +3,13 @@
 import { useEffect, useState } from "react";
 import type { Session } from "@supabase/supabase-js";
 
+import {
+  CoachContext,
+  CoachConversationMessage,
+  CoachConversationMessageInput,
+  CoachMode,
+  SavedCoachOutput
+} from "@/lib/ai/coachTypes";
 import { SubscriptionTier, ChatMessage, KPIData, ExecutionStage, BlueprintMilestoneKey } from "@/types/business";
 import { AccessProfile, normalizeSubscriptionTier } from "@/utils/access";
 
@@ -13,6 +20,9 @@ export const STORAGE_KEYS = {
   milestoneMap: "sla_milestone_map",
   kpiMap: "sla_kpi_map",
   chatMap: "sla_chat_map",
+  coachConversationMap: "sla_coach_conversation_map",
+  coachSummaryMap: "sla_coach_summary_map",
+  coachSavedOutputMap: "sla_coach_saved_output_map",
   onboardingComplete: "sla_onboarding_complete",
   subscriptionTier: "sla_subscription_tier"
 } as const;
@@ -380,4 +390,187 @@ export function useChatHistory(businessId: string, initialMessage: ChatMessage) 
   }
 
   return { hydrated, history, replaceHistory };
+}
+
+export function useCoachSummary(businessId: string) {
+  const { hydrated, value, setValue } = usePersistentState<Record<string, string>>(
+    STORAGE_KEYS.coachSummaryMap,
+    {}
+  );
+
+  const summary = value[businessId] ?? "";
+
+  function setSummary(nextSummary: string) {
+    setValue((previous) => ({
+      ...previous,
+      [businessId]: nextSummary
+    }));
+  }
+
+  return { hydrated, summary, setSummary };
+}
+
+function mapLegacyChatMessage(message: ChatMessage, businessId: string, index: number): CoachConversationMessage {
+  return {
+    id: `${businessId}-legacy-${index}`,
+    role: message.role,
+    content: message.text,
+    createdAt: new Date(0).toISOString()
+  };
+}
+
+export function useCoachConversation(
+  businessId: string,
+  initialMessage: CoachConversationMessage
+) {
+  const { hydrated, value, setValue } = usePersistentState<Record<string, CoachConversationMessage[]>>(
+    STORAGE_KEYS.coachConversationMap,
+    {}
+  );
+
+  useEffect(() => {
+    if (!hydrated) {
+      return;
+    }
+
+    const existing = value[businessId];
+    if (Array.isArray(existing) && existing.length > 0) {
+      return;
+    }
+
+    const legacyChatMap = readStorage<Record<string, ChatMessage[]>>(STORAGE_KEYS.chatMap, {});
+    const legacyMessages = legacyChatMap[businessId];
+
+    setValue((previous) => ({
+      ...previous,
+      [businessId]:
+        Array.isArray(legacyMessages) && legacyMessages.length > 0
+          ? legacyMessages.map((message, index) => mapLegacyChatMessage(message, businessId, index))
+          : [initialMessage]
+    }));
+  }, [businessId, hydrated, initialMessage, setValue, value]);
+
+  const messages = value[businessId] ?? [initialMessage];
+
+  function replaceMessages(nextMessages: CoachConversationMessage[]) {
+    setValue((previous) => ({
+      ...previous,
+      [businessId]: nextMessages
+    }));
+  }
+
+  function appendMessage(message: CoachConversationMessage) {
+    replaceMessages([...messages, message]);
+  }
+
+  return { hydrated, messages, replaceMessages, appendMessage };
+}
+
+export function getRecentCoachMessages(
+  messages: CoachConversationMessage[],
+  limit = 6
+): CoachConversationMessageInput[] {
+  return messages
+    .slice(-limit)
+    .map((message) => ({
+      role: message.role,
+      content: message.content
+    }));
+}
+
+export function useSavedCoachOutputs(businessId: string) {
+  const { hydrated, value, setValue } = usePersistentState<Record<string, SavedCoachOutput[]>>(
+    STORAGE_KEYS.coachSavedOutputMap,
+    {}
+  );
+
+  const savedOutputs = value[businessId] ?? [];
+
+  function saveOutput(output: SavedCoachOutput) {
+    setValue((previous) => ({
+      ...previous,
+      [businessId]: [output, ...(previous[businessId] ?? [])]
+    }));
+  }
+
+  function deleteOutput(outputId: string) {
+    setValue((previous) => ({
+      ...previous,
+      [businessId]: (previous[businessId] ?? []).filter((item) => item.id !== outputId)
+    }));
+  }
+
+  return { hydrated, savedOutputs, saveOutput, deleteOutput };
+}
+
+export function createCoachMessage(params: {
+  role: CoachConversationMessage["role"];
+  content: string;
+  buildStage?: CoachConversationMessage["buildStage"];
+  mode?: CoachMode;
+  title?: string;
+  structured?: CoachConversationMessage["structured"];
+  image?: CoachConversationMessage["image"];
+  suggestions?: string[];
+  primaryAction?: CoachConversationMessage["primaryAction"];
+  actions?: CoachConversationMessage["actions"];
+  nextStep?: CoachConversationMessage["nextStep"];
+  secondaryNextSteps?: CoachConversationMessage["secondaryNextSteps"];
+  anchorBridge?: string;
+}): CoachConversationMessage {
+  return {
+    id: crypto.randomUUID(),
+    role: params.role,
+    content: params.content,
+    createdAt: new Date().toISOString(),
+    buildStage: params.buildStage,
+    mode: params.mode,
+    title: params.title,
+    structured: params.structured,
+    image: params.image,
+    suggestions: params.suggestions,
+    primaryAction: params.primaryAction,
+    actions: params.actions,
+    nextStep: params.nextStep,
+    secondaryNextSteps: params.secondaryNextSteps,
+    anchorBridge: params.anchorBridge
+  };
+}
+
+export function createSavedCoachOutput(params: {
+  businessId: string;
+  businessContext: CoachContext;
+  mode: CoachMode;
+  buildStage?: SavedCoachOutput["buildStage"];
+  title: string;
+  prompt: string;
+  text?: string;
+  structured?: SavedCoachOutput["structured"];
+  image?: SavedCoachOutput["image"];
+  userId?: string | null;
+  primaryAction?: SavedCoachOutput["primaryAction"];
+  actions?: SavedCoachOutput["actions"];
+  nextStep?: SavedCoachOutput["nextStep"];
+  secondaryNextSteps?: SavedCoachOutput["secondaryNextSteps"];
+  anchorBridge?: SavedCoachOutput["anchorBridge"];
+}): SavedCoachOutput {
+  return {
+    id: crypto.randomUUID(),
+    createdAt: new Date().toISOString(),
+    userId: params.userId ?? null,
+    businessId: params.businessId,
+    businessContext: params.businessContext,
+    mode: params.mode,
+    buildStage: params.buildStage,
+    title: params.title,
+    prompt: params.prompt,
+    text: params.text,
+    structured: params.structured,
+    image: params.image,
+    primaryAction: params.primaryAction,
+    actions: params.actions,
+    nextStep: params.nextStep,
+    secondaryNextSteps: params.secondaryNextSteps,
+    anchorBridge: params.anchorBridge
+  };
 }

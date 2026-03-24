@@ -2,76 +2,159 @@
 
 import { useState } from "react";
 
-import { ChatWindow } from "@/components/ChatWindow";
+import { CoachComposer } from "@/components/ai-coach/CoachComposer";
+import { CoachResponseRenderer } from "@/components/ai-coach/CoachResponseRenderer";
+import { CoachAction, CoachMode } from "@/lib/ai/coachTypes";
 import { LockedFeatureCard } from "@/components/LockedFeatureCard";
-import { getCheckoutHref, hasTierAccess, tierLabels } from "@/utils/access";
+import { getFallbackBusiness, getPhaseIndexByProgress } from "@/utils/benchmarks";
 import {
-  buildBlueprint,
-  defaultChatIntro,
-  getFallbackBusiness,
-  getPhaseIndexByProgress,
-} from "@/utils/benchmarks";
+  canSaveCoachOutput,
+  canUseCoachMode,
+  getCheckoutHref,
+  getCoachSaveLimit,
+  hasTierAccess,
+  tierLabels
+} from "@/utils/access";
 import {
+  createCoachMessage,
+  createSavedCoachOutput,
+  getRecentCoachMessages,
   useAccessProfile,
   useBlueprintProgress,
-  useChatHistory,
+  useCoachConversation,
+  useCoachSummary,
+  useSavedCoachOutputs
 } from "@/utils/storage";
 
 export default function AICoachPage() {
   const { profile } = useAccessProfile();
   const business = getFallbackBusiness(profile.selectedBusinessId);
-  const { progress } = useBlueprintProgress(business.id, business.executionPlan);
-  const initialMessage = defaultChatIntro(business);
-  const { history, replaceHistory } = useChatHistory(business.id, initialMessage);
+  const { progress, taskProgress } = useBlueprintProgress(business.id, business.executionPlan);
+  const currentPhase = business.blueprintPhases[getPhaseIndexByProgress(progress)];
+  const initialMessage = createCoachMessage({
+    role: "assistant",
+    buildStage: "pricing",
+    content:
+      `You're coaching for ${business.name}. Ask for pricing, scripts, checklists, SOPs, follow-up plans, or creative assets.\n` +
+      "The coach will use your current business and blueprint phase as context."
+  });
+  const { messages, replaceMessages } = useCoachConversation(business.id, initialMessage);
+  const { summary, setSummary } = useCoachSummary(business.id);
+  const { savedOutputs, saveOutput, deleteOutput } = useSavedCoachOutputs(business.id);
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [selectedSavedOutputId, setSelectedSavedOutputId] = useState<string | null>(null);
+  const [saveNotice, setSaveNotice] = useState<string | null>(null);
 
   const hasProAccess = hasTierAccess(profile.tier, "pro");
+  const hasEliteAccess = hasTierAccess(profile.tier, "elite");
 
-  const phases = buildBlueprint(business);
-  const currentPhase = phases[getPhaseIndexByProgress(progress)];
+  const completedTasks = business.executionPlan.flatMap((stage, stageIndex) =>
+    stage.checklist
+      .filter((_, taskIndex) => taskProgress[stageIndex]?.[taskIndex])
+      .map((item) => item.title)
+  );
 
-  const promptGroups = [
-    { title: "Setup", prompts: business.promptSuggestions.setup },
-    { title: "Pricing", prompts: business.promptSuggestions.pricing },
-    { title: "Marketing", prompts: business.promptSuggestions.marketing },
-    { title: "Operations", prompts: business.promptSuggestions.operations },
-    { title: "Sales", prompts: business.promptSuggestions.sales },
+  const quickActions = [
+    {
+      label: "Build Pricing",
+      mode: "pricing" as const,
+      prompt: `Build a premium 3-tier pricing plan for ${business.name} around "${business.recommended_first_offer}".`
+    },
+    {
+      label: "Write Script",
+      mode: "script" as const,
+      prompt: `Write a sales script for ${business.name} that sells "${business.recommended_first_offer}" without sounding generic.`
+    },
+    {
+      label: "Generate Checklist",
+      mode: "checklist" as const,
+      prompt: `Create a tactical launch checklist for my current ${business.name} phase.`
+    },
+    {
+      label: "Follow-Up Plan",
+      mode: "followup" as const,
+      prompt: `Create a quote follow-up sequence for ${business.name} leads that did not book right away.`
+    },
+    {
+      label: "Marketing Plan",
+      mode: "marketing" as const,
+      prompt: `Build a 14-day local marketing plan for ${business.name} using realistic lead channels.`,
+      locked: !canUseCoachMode(profile.tier, "marketing")
+    },
+    {
+      label: "SOP Builder",
+      mode: "sop" as const,
+      prompt: `Build an intake-to-invoice SOP for my ${business.name} business.`,
+      locked: !canUseCoachMode(profile.tier, "sop")
+    },
+    {
+      label: "Generate Logo",
+      mode: "image" as const,
+      prompt: `Generate a premium logo concept for my ${business.name} business.`,
+      locked: !canUseCoachMode(profile.tier, "image")
+    }
   ];
 
-  async function handleSendMessage(message: string) {
+  const latestAssistantMessage = [...messages]
+    .reverse()
+    .find((message) => message.role === "assistant");
+  const selectedSavedOutput = savedOutputs.find((item) => item.id === selectedSavedOutputId) ?? null;
+  const activeResponse = selectedSavedOutput ?? latestAssistantMessage ?? null;
+
+  async function handleSendMessage(
+    message: string,
+    requestedMode?: CoachMode,
+    action?: CoachAction
+  ) {
     const trimmed = message.trim();
 
-    if (!trimmed || isLoading) return;
+    if (!trimmed || isLoading) {
+      return;
+    }
 
-    const optimisticHistory = [
-      ...history,
-      { role: "user" as const, text: trimmed },
+    setError(null);
+    setSaveNotice(null);
+    setSelectedSavedOutputId(null);
+
+    const optimisticMessages = [
+      ...messages,
+      createCoachMessage({
+        role: "user",
+        content: trimmed,
+        mode: requestedMode
+      })
     ];
 
-    replaceHistory(optimisticHistory);
+    replaceMessages(optimisticMessages);
     setIsLoading(true);
 
     try {
       const response = await fetch("/api/ai-coach", {
         method: "POST",
         headers: {
-          "Content-Type": "application/json",
+          "Content-Type": "application/json"
         },
         body: JSON.stringify({
           message: trimmed,
-          business: {
-            id: business.id,
-            name: business.name,
-            summary: business.summary,
+          requestedMode,
+          context: {
+            businessId: business.id,
+            businessType: business.name,
+            phase: currentPhase.title,
+            entryOffer: business.recommended_first_offer,
+            budgetRange: business.startup_cost_range,
+            accessTier: profile.tier,
+            completedTasks,
+            selectedCategory: requestedMode,
+            preferredPositioning: "premium, fast-response, trustworthy, professionally run"
           },
-          currentPhase: {
-            title: currentPhase.title,
-            tasks: currentPhase.tasks,
+          conversation: {
+            summary,
+            recentMessages: getRecentCoachMessages(messages, 6)
           },
-          progress,
-          tier: profile.tier,
-          history,
-        }),
+          imageRefinement: action?.imageRefinement
+        })
       });
 
       const data = await response.json();
@@ -80,27 +163,105 @@ export default function AICoachPage() {
         throw new Error(data?.error || "AI coach request failed.");
       }
 
-      replaceHistory([
-        ...optimisticHistory,
-        {
-          role: "assistant" as const,
-          text: data.reply || data.text || "I couldn't generate a useful answer.",
-        },
-      ]);
-    } catch (error) {
-      const errorMessage =
-        error instanceof Error ? error.message : "The AI coach ran into an error.";
+      if (typeof data.updatedSummary === "string") {
+        setSummary(data.updatedSummary);
+      }
 
-      replaceHistory([
-        ...optimisticHistory,
-        {
-          role: "assistant" as const,
-          text: `I hit an error while generating a response: ${errorMessage}`,
-        },
+      replaceMessages([
+        ...optimisticMessages,
+        createCoachMessage({
+          role: "assistant",
+          content: data.text || "The coach returned an empty response.",
+          buildStage: data.buildStage,
+          mode: data.mode,
+          title: data.title,
+          structured: data.structured,
+          image: data.image,
+          suggestions: data.suggestions,
+          primaryAction: data.primaryAction,
+          actions: data.actions,
+          nextStep: data.nextStep,
+          secondaryNextSteps: data.secondaryNextSteps,
+          anchorBridge: data.anchorBridge
+        })
+      ]);
+    } catch (requestError) {
+      const errorMessage =
+        requestError instanceof Error ? requestError.message : "The AI coach ran into an error.";
+
+      setError(errorMessage);
+      replaceMessages([
+        ...optimisticMessages,
+        createCoachMessage({
+          role: "assistant",
+          content: `I hit an error while generating this output: ${errorMessage}`
+        })
       ]);
     } finally {
       setIsLoading(false);
     }
+  }
+
+  function handleSaveCurrent() {
+    if (!activeResponse || !("mode" in activeResponse) || !activeResponse.mode) {
+      return;
+    }
+
+    if (!canSaveCoachOutput(profile.tier, activeResponse.mode)) {
+      setSaveNotice(
+        activeResponse.mode === "image"
+          ? "Image assets save with Elite."
+          : "Saving coach outputs unlocks with Pro."
+      );
+      return;
+    }
+
+    const saveLimit = getCoachSaveLimit(profile.tier);
+
+    if (savedOutputs.length >= saveLimit) {
+      setSaveNotice(`Saved output limit reached for ${tierLabels[profile.tier]}.`);
+      return;
+    }
+
+    const saved = createSavedCoachOutput({
+      businessId: business.id,
+      businessContext: {
+        businessId: business.id,
+        businessType: business.name,
+        phase: currentPhase.title,
+        entryOffer: business.recommended_first_offer,
+        budgetRange: business.startup_cost_range,
+        accessTier: profile.tier,
+        completedTasks
+      },
+      mode: activeResponse.mode,
+      buildStage: activeResponse.buildStage,
+      title:
+        activeResponse.title ||
+        `${business.name} ${activeResponse.mode ? activeResponse.mode.charAt(0).toUpperCase() + activeResponse.mode.slice(1) : "Coach"} Output`,
+      prompt:
+        "prompt" in activeResponse
+          ? activeResponse.prompt
+          : messages[messages.length - 1]?.role === "user"
+            ? messages[messages.length - 1].content
+            : "Saved from AI Coach",
+      text: "content" in activeResponse ? activeResponse.content : activeResponse.text,
+      structured: activeResponse.structured,
+      image: activeResponse.image,
+      primaryAction: activeResponse.primaryAction,
+      actions: activeResponse.actions,
+      nextStep: activeResponse.nextStep,
+      secondaryNextSteps: activeResponse.secondaryNextSteps,
+      anchorBridge: activeResponse.anchorBridge
+    });
+
+    saveOutput(saved);
+    setSelectedSavedOutputId(saved.id);
+    setSaveNotice("Saved to your coach workspace.");
+  }
+
+  function handleActionClick(action: CoachAction) {
+    handleSendMessage(action.prompt, action.mode, action);
   }
 
   if (!hasProAccess) {
@@ -109,11 +270,11 @@ export default function AICoachPage() {
         <LockedFeatureCard
           title="AI Coach unlocks with Pro"
           requiredTier="pro"
-          description="Core gives you the full playbook. Pro adds guided AI help so pricing, marketing, operations, and follow-up stop feeling blank."
+          description="Core gives you the full playbook. Pro adds tactical AI help so pricing, scripts, follow-up, and launch decisions stop feeling blank."
           bullets={[
-            business.promptSuggestions.setup[0],
-            business.promptSuggestions.pricing[0],
-            business.promptSuggestions.sales[0],
+            `Build structured pricing for ${business.name}`,
+            `Generate scripts and checklists for ${business.recommended_first_offer}`,
+            "Use Elite to unlock SOP planning, marketing strategy, and image generation"
           ]}
           ctaHref={getCheckoutHref("pro")}
         />
@@ -124,76 +285,197 @@ export default function AICoachPage() {
   return (
     <div className="mx-auto max-w-7xl animate-fade-up">
       <section className="panel-surface p-6 sm:p-8">
-        <p className="text-sm font-semibold uppercase tracking-[0.18em] text-accent">
-          AI Coach
-        </p>
+        <p className="text-sm font-semibold uppercase tracking-[0.18em] text-accent">AI Coach</p>
         <h1 className="mt-3 text-3xl font-semibold text-white sm:text-4xl">
-          Tactical guidance for the current phase.
+          Premium in-app business assistant
         </h1>
-        <p className="mt-4 max-w-3xl text-base leading-7 text-muted">
-          Ask anything about pricing, setup, marketing, operations, scripts, objections,
-          lead handling, fulfillment, or growth. Responses are tailored to the selected
-          business and current phase.
+        <p className="mt-4 max-w-4xl text-base leading-7 text-muted">
+          Generate operator-grade outputs for the business you selected. The coach uses your current blueprint phase, offer, and progress so the guidance stays specific instead of generic.
         </p>
-        {isLoading && (
-          <p className="mt-4 text-sm text-accent">Generating response...</p>
-        )}
       </section>
 
       <div className="mt-6 grid gap-6 xl:grid-cols-[1.15fr_0.85fr]">
-        <ChatWindow
-          history={history}
-          onSendMessage={handleSendMessage}
-          promptGroups={promptGroups}
-        />
+        <div className="grid gap-6">
+          <CoachComposer
+            loading={isLoading}
+            onSendMessage={handleSendMessage}
+            quickActions={quickActions}
+          />
 
-        <aside className="panel-surface p-6">
-          <h2 className="text-xl font-semibold text-white">Context</h2>
+          {error ? (
+            <div className="rounded-[24px] border border-warning/40 bg-warning/10 px-5 py-4 text-sm text-white">
+              {error}
+            </div>
+          ) : null}
 
-          <div className="mt-5 grid gap-4">
-            <div className="rounded-[20px] border border-white/10 bg-white/5 p-4">
-              <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted">
-                Access Tier
-              </p>
-              <p className="mt-2 text-sm text-white">{tierLabels[profile.tier]}</p>
+          {activeResponse ? (
+            <section className="grid gap-4">
+              <div className="flex flex-col gap-3 rounded-[24px] border border-white/10 bg-black/20 p-5 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-[0.16em] text-muted">
+                    {selectedSavedOutput ? "Saved output" : "Latest output"}
+                  </p>
+                  <p className="mt-2 text-sm text-slate-200">
+                    {selectedSavedOutput
+                      ? `Saved ${new Date(selectedSavedOutput.createdAt).toLocaleString()}`
+                      : "Generated from your active blueprint context"}
+                  </p>
+                </div>
+                <div className="flex flex-wrap gap-3">
+                  {!selectedSavedOutput ? (
+                    <button
+                      type="button"
+                      onClick={handleSaveCurrent}
+                      className="inline-flex items-center justify-center rounded-2xl border border-accent/40 bg-accent/10 px-4 py-3 text-sm font-semibold text-white transition hover:border-accent/80 hover:bg-accent/15"
+                    >
+                      Save Output
+                    </button>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => setSelectedSavedOutputId(null)}
+                      className="inline-flex items-center justify-center rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm font-semibold text-white transition hover:border-white/20 hover:bg-white/10"
+                    >
+                      Return to latest
+                    </button>
+                  )}
+                </div>
+              </div>
+
+              {saveNotice ? (
+                <div className="rounded-[22px] border border-accent/20 bg-accent/5 px-4 py-3 text-sm text-slate-100">
+                  {saveNotice}
+                </div>
+              ) : null}
+
+              <CoachResponseRenderer response={activeResponse} onActionClick={handleActionClick} />
+            </section>
+          ) : null}
+
+          <section className="panel-surface p-6">
+            <div className="flex items-center justify-between gap-3">
+              <h2 className="text-xl font-semibold text-white">Recent conversation</h2>
+              <span className="rounded-full border border-white/10 bg-white/5 px-3 py-2 text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-200">
+                {messages.length} messages
+              </span>
+            </div>
+            <div className="mt-5 grid gap-3">
+              {messages.slice(-6).map((message) => (
+                <article
+                  key={message.id}
+                  className={`rounded-[22px] border px-4 py-4 text-sm leading-6 ${
+                    message.role === "user"
+                      ? "border-accent/30 bg-accent/10 text-white"
+                      : "border-white/10 bg-black/20 text-slate-100"
+                  }`}
+                >
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted">
+                    {message.role === "user" ? "You" : message.title || "Coach"}
+                  </p>
+                  <p className="mt-2 whitespace-pre-wrap">{message.content}</p>
+                </article>
+              ))}
+            </div>
+          </section>
+        </div>
+
+        <aside className="grid gap-6">
+          <section className="panel-surface p-6">
+            <h2 className="text-xl font-semibold text-white">Current context</h2>
+            <div className="mt-5 grid gap-4">
+              <div className="rounded-[20px] border border-white/10 bg-white/5 p-4">
+                <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted">Selected business</p>
+                <p className="mt-2 text-sm text-white">{business.name}</p>
+              </div>
+              <div className="rounded-[20px] border border-white/10 bg-white/5 p-4">
+                <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted">Current phase</p>
+                <p className="mt-2 text-sm text-white">{currentPhase.title}</p>
+              </div>
+              <div className="rounded-[20px] border border-white/10 bg-white/5 p-4">
+                <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted">Entry offer</p>
+                <p className="mt-2 text-sm text-white">{business.recommended_first_offer}</p>
+              </div>
+              <div className="rounded-[20px] border border-white/10 bg-white/5 p-4">
+                <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted">Access tier</p>
+                <p className="mt-2 text-sm text-white">{tierLabels[profile.tier]}</p>
+              </div>
+              <div className="rounded-[20px] border border-white/10 bg-white/5 p-4">
+                <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted">Completed tasks tracked</p>
+                <p className="mt-2 text-sm text-white">{completedTasks.length}</p>
+              </div>
+              <div className="rounded-[20px] border border-white/10 bg-white/5 p-4">
+                <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted">Build stage</p>
+                <p className="mt-2 text-sm capitalize text-white">{activeResponse?.buildStage || "pricing"}</p>
+              </div>
+            </div>
+          </section>
+
+          <section className="panel-surface p-6">
+            <div className="flex items-center justify-between gap-3">
+              <h2 className="text-xl font-semibold text-white">Saved outputs</h2>
+              <span className="rounded-full border border-white/10 bg-white/5 px-3 py-2 text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-200">
+                {savedOutputs.length}/{getCoachSaveLimit(profile.tier)}
+              </span>
             </div>
 
-            <div className="rounded-[20px] border border-white/10 bg-white/5 p-4">
-              <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted">
-                Selected Business
-              </p>
-              <p className="mt-2 text-sm text-white">{business.name}</p>
-            </div>
-
-            <div className="rounded-[20px] border border-white/10 bg-white/5 p-4">
-              <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted">
-                Current Phase
-              </p>
-              <p className="mt-2 text-sm text-white">{currentPhase.title}</p>
-            </div>
-
-            <div className="rounded-[20px] border border-white/10 bg-white/5 p-4">
-              <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted">
-                Prompt categories
-              </p>
-              <ul className="mt-3 grid gap-2 pl-5 text-sm leading-6 text-slate-200">
-                {Object.keys(business.promptSuggestions).map((item) => (
-                  <li key={item}>{item}</li>
+            {savedOutputs.length ? (
+              <div className="mt-5 grid gap-3">
+                {savedOutputs.map((item) => (
+                  <article
+                    key={item.id}
+                    className={`rounded-[22px] border p-4 ${
+                      selectedSavedOutputId === item.id
+                        ? "border-accent/40 bg-accent/10"
+                        : "border-white/10 bg-white/5"
+                    }`}
+                  >
+                    <div className="flex items-start justify-between gap-3">
+                      <div>
+                        <p className="text-sm font-semibold text-white">{item.title}</p>
+                        <p className="mt-2 text-xs uppercase tracking-[0.14em] text-muted">
+                          {item.mode} • {new Date(item.createdAt).toLocaleDateString()}
+                        </p>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => deleteOutput(item.id)}
+                        className="text-xs font-semibold uppercase tracking-[0.14em] text-muted transition hover:text-white"
+                      >
+                        Delete
+                      </button>
+                    </div>
+                    <p className="mt-3 text-sm leading-6 text-slate-200">{item.prompt}</p>
+                    <button
+                      type="button"
+                      onClick={() => setSelectedSavedOutputId(item.id)}
+                      className="mt-4 inline-flex items-center justify-center rounded-2xl border border-white/10 bg-black/20 px-4 py-2.5 text-xs font-semibold uppercase tracking-[0.14em] text-white transition hover:border-white/20 hover:bg-white/10"
+                    >
+                      Open
+                    </button>
+                  </article>
                 ))}
-              </ul>
-            </div>
-
-            <div className="rounded-[20px] border border-white/10 bg-white/5 p-4">
-              <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted">
-                Next 3 Recommended Actions
+              </div>
+            ) : (
+              <p className="mt-5 text-sm leading-6 text-muted">
+                Save strong outputs here so pricing, scripts, and creative assets stay reusable instead of disappearing into chat history.
               </p>
-              <ul className="mt-3 grid gap-2 pl-5 text-sm leading-6 text-slate-200">
-                {currentPhase.tasks.slice(0, 3).map((task) => (
-                  <li key={task}>{task}</li>
-                ))}
-              </ul>
-            </div>
-          </div>
+            )}
+          </section>
+
+          <section className="panel-surface p-6">
+            <h2 className="text-xl font-semibold text-white">Working memory</h2>
+            <p className="mt-4 whitespace-pre-wrap text-sm leading-6 text-muted">
+              {summary || "The coach will start building lightweight working memory after your first real request."}
+            </p>
+            {!hasEliteAccess ? (
+              <div className="mt-5 rounded-[22px] border border-accent/20 bg-accent/5 p-4">
+                <p className="text-sm font-semibold text-white">Elite unlocks advanced planning + image generation</p>
+                <p className="mt-2 text-sm leading-6 text-muted">
+                  Use Elite for marketing plans, SOP builders, logo concepts, flyer directions, truck wraps, and other higher-leverage assets.
+                </p>
+              </div>
+            ) : null}
+          </section>
         </aside>
       </div>
     </div>
