@@ -69,10 +69,15 @@ export function BusinessPanel({
   if (!collapsible) {
     return (
       <section className="panel-surface w-full max-w-full overflow-hidden p-5">
-        <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-accentSecondary">Business Panel</p>
-        <p className="mt-2 break-words text-sm leading-6 text-muted">
-          Lightweight business workspace. It updates from Blueprint progress and stays editable when you need to tighten details.
-        </p>
+        <div className="flex w-full max-w-full items-start justify-between gap-3">
+          <div className="min-w-0">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-accentSecondary">View Your Business</p>
+            <p className="mt-2 break-words text-sm leading-6 text-muted">
+              Your offer, pricing, and setup in one place.
+            </p>
+          </div>
+          <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-sm text-slate-300">→</span>
+        </div>
         <div className="mt-4">
           <BusinessPanelContent panel={panel} onFieldChange={onFieldChange} />
         </div>
@@ -82,14 +87,19 @@ export function BusinessPanel({
 
   return (
     <details className="panel-surface w-full max-w-full overflow-hidden p-5" open={defaultOpen}>
-      <summary className="flex w-full max-w-full cursor-pointer list-none flex-wrap items-center justify-between gap-3">
-        <div className="min-w-0">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-accentSecondary">Business Panel</p>
-          <p className="mt-2 break-words text-sm leading-6 text-muted">View Business</p>
+      <summary className="list-none">
+        <div className="flex w-full max-w-full cursor-pointer flex-wrap items-center justify-between gap-3 rounded-[22px] border border-white/10 bg-white/5 px-4 py-4 transition hover:border-accent/30 hover:bg-white/10 active:scale-[0.99]">
+          <div className="min-w-0">
+            <p className="text-sm font-semibold text-white">View Your Business</p>
+            <p className="mt-1 break-words text-sm leading-6 text-muted">Your offer, pricing, and setup in one place</p>
+          </div>
+          <div className="flex items-center gap-3">
+            <span className="rounded-full border border-white/10 bg-black/20 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-200">
+              {panel.currentPhase}
+            </span>
+            <span className="text-lg text-slate-300">→</span>
+          </div>
         </div>
-        <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-200">
-          {panel.currentPhase}
-        </span>
       </summary>
       <div className="mt-4">
         <BusinessPanelContent panel={panel} onFieldChange={onFieldChange} />

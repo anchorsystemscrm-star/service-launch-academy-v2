@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 
@@ -28,6 +28,7 @@ export function Navbar({ profile }: NavbarProps) {
   const router = useRouter();
   const [modalOpen, setModalOpen] = useState(false);
   const [loggingOut, setLoggingOut] = useState(false);
+  const mobileNavRef = useRef<HTMLDivElement | null>(null);
   const normalizedPathname = pathname ?? "";
 
   const setupComplete = isSetupComplete(profile);
@@ -52,6 +53,22 @@ export function Navbar({ profile }: NavbarProps) {
     }
   }
 
+  useEffect(() => {
+    const scroller = mobileNavRef.current;
+
+    if (!scroller || typeof window === "undefined" || window.innerWidth >= 1024) {
+      return;
+    }
+
+    const timeoutId = window.setTimeout(() => {
+      if (scroller.scrollWidth > scroller.clientWidth + 12) {
+        scroller.scrollTo({ left: 18, behavior: "smooth" });
+      }
+    }, 180);
+
+    return () => window.clearTimeout(timeoutId);
+  }, []);
+
   function renderNavItem(
     href: string,
     label: string,
@@ -61,7 +78,7 @@ export function Navbar({ profile }: NavbarProps) {
     const active = normalizedPathname.startsWith(href);
     const enabled = setupComplete && hasTierAccess(profile.tier, minTier);
     const baseClass = compact
-      ? "rounded-xl px-3 py-2 text-sm font-medium"
+      ? "whitespace-nowrap rounded-xl px-3.5 py-2 text-sm font-medium"
       : "rounded-2xl px-4 py-3 text-sm font-medium";
 
     if (!enabled) {
@@ -230,7 +247,11 @@ export function Navbar({ profile }: NavbarProps) {
         </div>
 
         <div className="border-t border-white/5 bg-slate-950/88 px-4 pb-3 pt-2 backdrop-blur lg:hidden">
-          <div className="flex gap-2 overflow-x-auto pb-1">
+          <div className="relative">
+            <div
+              ref={mobileNavRef}
+              className="flex flex-nowrap gap-2 overflow-x-auto scroll-smooth pb-1 pr-12 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
+            >
             <Link
               href="/start"
               className={`whitespace-nowrap rounded-xl px-3 py-2 text-sm font-medium transition ${
@@ -242,6 +263,10 @@ export function Navbar({ profile }: NavbarProps) {
               Get Started
             </Link>
             {navItems.map((item) => renderNavItem(item.href, item.label, item.minTier, true))}
+            </div>
+            <div className="pointer-events-none absolute inset-y-0 right-0 flex w-14 items-center justify-end bg-gradient-to-l from-slate-950/95 via-slate-950/78 to-transparent">
+              <span className="pr-2 text-base text-slate-300/80">→</span>
+            </div>
           </div>
         </div>
       </header>
