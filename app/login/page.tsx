@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
 import { BrandBlock } from "@/components/BrandBlock";
+import { businesses } from "@/data/businesses";
 import { getSupabaseBrowserClient, isSupabaseConfigured } from "@/lib/supabaseClient";
 import { getFirstAvailableAppPath } from "@/utils/access";
 import { readClientAccessProfile, setAccessCookie, syncTierFromSession } from "@/utils/storage";
@@ -149,7 +150,7 @@ export default function LoginPage() {
 
           <div className="mt-10 grid gap-4 sm:grid-cols-3">
             {[
-              { label: "Business Models", value: "20+" },
+              { label: "Business Models", value: String(businesses.length) },
               { label: "Weekly Milestones", value: "13" },
               { label: "Launch Horizon", value: "90 Days" },
             ].map((item) => (

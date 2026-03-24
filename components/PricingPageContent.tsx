@@ -2,6 +2,7 @@ import Link from "next/link";
 
 import { BrandBlock } from "@/components/BrandBlock";
 import { PricingCard } from "@/components/PricingCard";
+import { businesses } from "@/data/businesses";
 import { SubscriptionTier } from "@/types/business";
 import { getCheckoutHref, getPricingHref, isExternalHref, tierDescriptions, tierLabels } from "@/utils/access";
 
@@ -16,7 +17,7 @@ const planContent: Array<{
     audience: "Explore the opportunity",
     description: "Built for founders who are still deciding which service business fits their market, skills, and economics.",
     features: [
-      "Browse all 20 service opportunities",
+      `Browse all ${businesses.length} service opportunities`,
       "Compare startup cost, margins, demand, and recurring potential",
       "Read teaser summaries and operator-fit guidance",
       "Use Preview as the conversion layer before committing to execution"
