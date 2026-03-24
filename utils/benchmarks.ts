@@ -138,8 +138,7 @@ export function getTaskEffortLabel(item: ExecutionChecklistItem): string {
   const complexityScore =
     item.instructions.length +
     (item.documentation ? 1 : 0) +
-    (item.avoid ? 1 : 0) +
-    (item.example ? 1 : 0);
+    (item.avoid ? 1 : 0);
 
   if (complexityScore <= 2) {
     return "5 min";
@@ -183,7 +182,7 @@ export function getNextActionSuggestion(
           stageTitle: stage.title,
           weekLabel: formatWeekLabel(stageIndex),
           title: item.title,
-          description: item.instructions[0] ?? item.doneDefinition,
+          description: item.instruction || item.instructions[0] || item.doneDefinition,
           effortLabel: getTaskEffortLabel(item),
           completed: false
         };
@@ -206,6 +205,16 @@ export function getNextActionSuggestion(
     effortLabel: "Locked in",
     completed: true
   };
+}
+
+export function getBlueprintTaskCoachHref(prompt: string): string {
+  const params = new URLSearchParams({
+    autoprompt: prompt,
+    mode: "checklist",
+    source: "blueprint"
+  });
+
+  return `/ai-coach?${params.toString()}`;
 }
 
 export function getMilestoneState(progress: boolean[], taskProgress: boolean[][]) {

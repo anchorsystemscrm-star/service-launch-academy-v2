@@ -38,11 +38,15 @@ export interface Script {
 export interface ExecutionChecklistItem {
   id: string;
   title: string;
+  instruction: string;
   instructions: string[];
+  template: string;
   doneDefinition: string;
+  ifStuck: string;
+  aiPrompt: string;
   documentation?: string;
   avoid?: string;
-  example?: string;
+  example: string;
 }
 
 export interface BlueprintMilestone {

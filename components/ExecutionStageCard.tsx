@@ -1,4 +1,7 @@
+import { BlueprintTaskSupportPanel } from "@/components/BlueprintTaskSupportPanel";
 import { ExecutionStage } from "@/types/business";
+import { getCheckoutHref } from "@/utils/access";
+import { getBlueprintTaskCoachHref } from "@/utils/benchmarks";
 import { ExecutionStageStatus } from "@/utils/benchmarks";
 
 interface ExecutionStageCardProps {
@@ -7,6 +10,7 @@ interface ExecutionStageCardProps {
   taskProgress: boolean[];
   status: ExecutionStageStatus;
   milestoneText: string;
+  hasAiAccess: boolean;
   onToggleTask: (stageIndex: number, taskIndex: number, checked: boolean) => void;
 }
 
@@ -28,6 +32,7 @@ export function ExecutionStageCard({
   taskProgress,
   status,
   milestoneText,
+  hasAiAccess,
   onToggleTask
 }: ExecutionStageCardProps) {
   const completedTasks = taskProgress.filter(Boolean).length;
@@ -106,7 +111,7 @@ export function ExecutionStageCard({
                 checked ? "border-emerald-400/30 bg-emerald-500/10" : "border-white/10 bg-slate-950/35"
               }`}
             >
-              <label className="flex w-full max-w-full cursor-pointer gap-4">
+              <div className="flex w-full max-w-full gap-4">
                 <input
                   type="checkbox"
                   checked={checked}
@@ -121,11 +126,27 @@ export function ExecutionStageCard({
                     </span>
                   </div>
 
-                  <ul className="mt-3 grid gap-2 pl-5 text-sm leading-6 text-slate-200">
-                    {item.instructions.map((instruction) => (
+                  <div className="mt-3 rounded-[18px] border border-white/10 bg-black/20 p-3">
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-accentSecondary">Instruction</p>
+                    <p className="mt-2 break-words text-sm leading-6 text-slate-100">{item.instruction}</p>
+                  </div>
+
+                  {item.instructions.length > 1 ? (
+                    <ul className="mt-3 grid gap-2 pl-5 text-sm leading-6 text-slate-200">
+                      {item.instructions.slice(1).map((instruction) => (
                       <li key={instruction} className="break-words whitespace-normal">{instruction}</li>
-                    ))}
-                  </ul>
+                      ))}
+                    </ul>
+                  ) : null}
+
+                  <div className="mt-4">
+                    <BlueprintTaskSupportPanel
+                      item={item}
+                      aiHref={getBlueprintTaskCoachHref(item.aiPrompt)}
+                      hasAiAccess={hasAiAccess}
+                      aiUpgradeHref={getCheckoutHref("pro")}
+                    />
+                  </div>
 
                   <div className="mt-4 grid w-full max-w-full gap-3 lg:grid-cols-2">
                     <div className="w-full max-w-full rounded-2xl border border-white/10 bg-white/5 p-3">
@@ -144,15 +165,9 @@ export function ExecutionStageCard({
                         <p className="mt-2 break-words text-sm leading-6 text-slate-100">{item.avoid}</p>
                       </div>
                     ) : null}
-                    {item.example ? (
-                      <div className="w-full max-w-full rounded-2xl border border-cyan-400/20 bg-cyan-500/5 p-3">
-                        <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-cyan-100">Example</p>
-                        <p className="mt-2 break-words text-sm leading-6 text-slate-100">{item.example}</p>
-                      </div>
-                    ) : null}
                   </div>
                 </div>
-              </label>
+              </div>
             </div>
           );
         })}

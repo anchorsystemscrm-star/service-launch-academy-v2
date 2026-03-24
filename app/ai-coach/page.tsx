@@ -1,6 +1,7 @@
 "use client";
 
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { useSearchParams } from "next/navigation";
 
 import { CoachComposer } from "@/components/ai-coach/CoachComposer";
 import { CoachResponseRenderer } from "@/components/ai-coach/CoachResponseRenderer";
@@ -29,6 +30,7 @@ import { CoachResponse } from "@/lib/ai/coachTypes";
 
 export default function AICoachPage() {
   const isDev = process.env.NODE_ENV !== "production";
+  const searchParams = useSearchParams();
   const { profile } = useAccessProfile();
   const business = getFallbackBusiness(profile.selectedBusinessId);
   const { progress, taskProgress } = useBlueprintProgress(business.id, business.executionPlan);
@@ -50,6 +52,7 @@ export default function AICoachPage() {
   const [saveNotice, setSaveNotice] = useState<string | null>(null);
   const [liveResponse, setLiveResponse] = useState<CoachResponse | null>(null);
   const requestInFlightRef = useRef(false);
+  const autoRunKeyRef = useRef<string | null>(null);
 
   const hasProAccess = hasTierAccess(profile.tier, "pro");
   const hasEliteAccess = hasTierAccess(profile.tier, "elite");
@@ -128,6 +131,8 @@ export default function AICoachPage() {
   const activeResponse = selectedSavedOutput ?? liveResponse ?? persistedLatestResponse ?? null;
   const recentConversation = messages.slice(-6);
   const isImageLoading = isLoading && loadingMode === "image";
+  const autoPrompt = searchParams.get("autoprompt");
+  const autoPromptMode = searchParams.get("mode");
 
   async function handleSendMessage(
     message: string,
@@ -319,6 +324,32 @@ export default function AICoachPage() {
   function handleActionClick(action: CoachAction) {
     void handleSendMessage(action.prompt, action.mode, action);
   }
+
+  useEffect(() => {
+    if (!hasProAccess || !autoPrompt) {
+      return;
+    }
+
+    const autoRunKey = `${autoPromptMode ?? "general"}:${autoPrompt}`;
+
+    if (autoRunKeyRef.current === autoRunKey) {
+      return;
+    }
+
+    autoRunKeyRef.current = autoRunKey;
+
+    const requestedMode =
+      autoPromptMode &&
+      ["general", "pricing", "checklist", "script", "marketing", "sop", "followup", "image"].includes(autoPromptMode)
+        ? (autoPromptMode as CoachMode)
+        : undefined;
+
+    void handleSendMessage(autoPrompt, requestedMode).finally(() => {
+      if (typeof window !== "undefined") {
+        window.history.replaceState({}, "", "/ai-coach");
+      }
+    });
+  }, [autoPrompt, autoPromptMode, hasProAccess]);
 
   if (!hasProAccess) {
     return (

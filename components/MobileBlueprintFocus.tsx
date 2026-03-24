@@ -1,13 +1,16 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 
 import { BlueprintCelebrationOverlay } from "@/components/BlueprintCelebrationOverlay";
+import { BlueprintTaskSupportPanel } from "@/components/BlueprintTaskSupportPanel";
 import { ExecutionStageCard } from "@/components/ExecutionStageCard";
 import { PhaseCard } from "@/components/PhaseCard";
 import { ExecutionStage, Phase } from "@/types/business";
+import { getCheckoutHref } from "@/utils/access";
 import {
   ExecutionStageStatus,
   blueprintMilestones,
   executionStageWeekMap,
+  getBlueprintTaskCoachHref,
   getChecklistCompletion,
   getExecutionStageStatus,
   getMilestoneState,
@@ -485,8 +488,6 @@ export function MobileBlueprintFocus({
                 </div>
               </div>
 
-              <p className="mt-4 break-words text-sm leading-6 text-slate-200">{activeTaskItem.instructions[0]}</p>
-
               {activeTaskItem.instructions.length > 1 ? (
                 <ul className="mt-4 grid gap-2 pl-5 text-sm leading-6 text-slate-300">
                   {activeTaskItem.instructions.slice(1, 3).map((instruction) => (
@@ -496,6 +497,10 @@ export function MobileBlueprintFocus({
               ) : null}
 
               <div className="mt-4 grid gap-3">
+                <div className="rounded-[22px] border border-white/10 bg-black/20 p-4">
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-accentSecondary">Instruction</p>
+                  <p className="mt-2 break-words text-sm leading-6 text-slate-100">{activeTaskItem.instruction}</p>
+                </div>
                 <div className="rounded-[22px] border border-white/10 bg-black/20 p-4">
                   <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-muted">Why it matters</p>
                   <p className="mt-2 break-words text-sm leading-6 text-slate-100">{activeTaskItem.doneDefinition}</p>
@@ -507,6 +512,16 @@ export function MobileBlueprintFocus({
                     <p className="mt-2 break-words text-sm leading-6 text-slate-100">{activeTaskItem.documentation}</p>
                   </div>
                 ) : null}
+              </div>
+
+              <div className="mt-4">
+                <BlueprintTaskSupportPanel
+                  item={activeTaskItem}
+                  aiHref={getBlueprintTaskCoachHref(activeTaskItem.aiPrompt)}
+                  hasAiAccess={hasProAccess}
+                  aiUpgradeHref={getCheckoutHref("pro")}
+                  compact
+                />
               </div>
 
               <div className="mt-5 grid gap-3">
@@ -762,6 +777,7 @@ export function MobileBlueprintFocus({
                 taskProgress={taskProgress[stageIndex] ?? []}
                 status={status}
                 milestoneText={milestoneTemplate[Math.min(stageIndex, milestoneTemplate.length - 1)]}
+                hasAiAccess={hasProAccess}
                 onToggleTask={onToggleTask}
               />
             ))}

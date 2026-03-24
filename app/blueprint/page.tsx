@@ -404,6 +404,7 @@ export default function BlueprintPage() {
                       taskProgress={taskProgress[stageIndex] ?? []}
                       status={status}
                       milestoneText={milestoneTemplate[Math.min(stageIndex, milestoneTemplate.length - 1)]}
+                      hasAiAccess={hasProAccess}
                       onToggleTask={setTaskComplete}
                     />
                   ))}

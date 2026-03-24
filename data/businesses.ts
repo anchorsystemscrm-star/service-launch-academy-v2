@@ -114,8 +114,13 @@ function createChecklistItem(
   return {
     id: `${slugify(stageTitle)}-${slugify(title)}`,
     title,
+    instruction: instructions[0] ?? doneDefinition,
     instructions,
+    template: `Task: ${title}\nCurrent phase: ${stageTitle}\nWrite the exact version you will use in the business.`,
     doneDefinition,
+    ifStuck: `Finish the smallest usable version of ${title.toLowerCase()} today, then improve it after the next real customer interaction.`,
+    aiPrompt: `Help me complete this Blueprint task: ${title}`,
+    example: options.example ?? doneDefinition,
     ...options
   };
 }
@@ -127,6 +132,562 @@ function createMomentumMessages(stageTitle: string, nextAction: string): Momentu
     nearComplete: `You are close. Finish the last task in ${stageTitle} so ${nextAction.toLowerCase()} happens without hesitation.`,
     complete: `${stageTitle} is complete. Lock the win, document it, and roll straight into ${nextAction.toLowerCase()}.`
   };
+}
+
+function buildChecklistTemplate(seed: ServiceSeed, stageTitle: string, item: ExecutionChecklistItem): string {
+  switch (item.title) {
+    case "Lock the starter offer":
+      return [
+        `Starter offer: ${seed.starterOffer}`,
+        "Includes:",
+        "- [core deliverable 1]",
+        "- [core deliverable 2]",
+        "Excludes:",
+        "- [items not included]",
+        "Minimum price: $[amount]",
+        "Service radius: [city / miles]",
+        "Travel rule: [fee or minimum outside core area]"
+      ].join("\n");
+    case "Set the commercial rails":
+      return [
+        "Business email: [name@domain.com]",
+        "Business phone: [number]",
+        "CRM stages: New Lead > Contacted > Quoted > Booked > Completed > Follow-up",
+        "Payment link: [Stripe / invoice link]",
+        "Invoice sender name: [business name]",
+        "Appointment confirmation link or script: [saved location]"
+      ].join("\n");
+    case "Stage the field setup":
+      return [
+        "Launch loadout checklist:",
+        "- [core tool 1]",
+        "- [core tool 2]",
+        "- [PPE / supplies]",
+        "- [payment / phone / charger]",
+        "Setup time target: [minutes]",
+        "Restock point: [garage / shelf / bin]"
+      ].join("\n");
+    case "Write the customer-facing templates":
+      return [
+        "Quote template:",
+        "- Offer: [starter offer]",
+        "- Includes: [scope]",
+        "- Excludes: [scope]",
+        "- Price: $[amount]",
+        "- Acceptance line: [reply or link]",
+        "Confirmation text: [date / window / prep note]",
+        "Review request: [short ask + review link]"
+      ].join("\n");
+    case "Build the launch proof pack":
+      return [
+        "Proof folder contents:",
+        "- Offer graphic or simple headline",
+        "- 3 photos / mockups that show the result",
+        "- Google review link",
+        "- Short service-area description",
+        "- Contact method: [call / text / form]"
+      ].join("\n");
+    case "Publish the visible launch offer":
+      return [
+        "Channels to publish this week:",
+        "1. Google Business Profile post",
+        "2. One neighborhood platform",
+        "3. One social profile",
+        "Headline: [problem solved]",
+        "Offer: [starter offer]",
+        "Call to action: [send photos / request quote / call now]"
+      ].join("\n");
+    case "Install the response standard":
+      return [
+        "Lead intake script:",
+        "- Name:",
+        "- Address:",
+        "- Photos received: yes / no",
+        "- Scope needed:",
+        "- Urgency:",
+        "- Lead source:",
+        "- Next action:",
+        "Response time standard: [under 5 minutes]"
+      ].join("\n");
+    case "Run one outreach play every day":
+      return [
+        "Chosen outreach play: [route drop / partner visit / direct message / same-street offer]",
+        "Daily volume target: [number]",
+        "Offer used: [starter offer]",
+        "Call to action: [text / quote / book]",
+        "What I will track: replies / quotes / booked jobs"
+      ].join("\n");
+    case "Track quality, not just activity":
+      return [
+        "Lead review sheet:",
+        "- Source:",
+        "- Inside radius: yes / no",
+        "- Quote sent in under 24h: yes / no",
+        "- Job fit: strong / weak",
+        "- Booked: yes / no",
+        "- Lost reason:"
+      ].join("\n");
+    case "Finish the week with proof":
+      return [
+        "Weekly proof recap:",
+        "- Best photo or screenshot:",
+        "- Best outreach message:",
+        "- Best objection handled:",
+        "- One booked job lesson:",
+        "- What to reuse next week:"
+      ].join("\n");
+    case "Run same-day quotes":
+      return [
+        "Same-day quote format:",
+        "- Scope:",
+        "- Includes:",
+        "- Excludes:",
+        "- Assumptions:",
+        "- Price:",
+        "- Earliest opening:",
+        "- Acceptance step:"
+      ].join("\n");
+    case "Time the work honestly":
+      return [
+        "Job timing log:",
+        "- Drive time:",
+        "- Setup:",
+        "- Production:",
+        "- Cleanup:",
+        "- Payment collection:",
+        "- Total time:",
+        "- Price charged:"
+      ].join("\n");
+    case "Tighten the sales language":
+      return [
+        "Objection bank:",
+        "Price objection: [response]",
+        "Trust objection: [response]",
+        "Timing objection: [response]",
+        "Closing line: [one next opening + one approval step]"
+      ].join("\n");
+    case "Capture proof and job notes":
+      return [
+        "Job closeout note:",
+        "- Before photos saved: yes / no",
+        "- After photos saved: yes / no",
+        "- What sold the job:",
+        "- What slowed the job:",
+        "- Likely upsell next time:",
+        "- Testimonial or text screenshot saved: yes / no"
+      ].join("\n");
+    case "Improve the next quote immediately":
+      return [
+        "Quote improvement note:",
+        "- Wording removed:",
+        "- Wording added:",
+        "- New minimum or exclusion:",
+        "- Schedule promise updated to:",
+        "- Effective date: today"
+      ].join("\n");
+    case "Write the production checklist":
+      return [
+        "Job checklist:",
+        "1. Intake confirmed",
+        "2. Prep / materials ready",
+        "3. Work completed",
+        "4. Photos saved",
+        "5. Payment collected",
+        "6. Review requested",
+        "7. Follow-up date set"
+      ].join("\n");
+    case "Install quote and review follow-up":
+      return [
+        "Follow-up schedule:",
+        "Day 2 quote follow-up: [message]",
+        "Day 7 quote follow-up: [message]",
+        "Review request trigger: [when sent]",
+        "Review request text: [message + link]"
+      ].join("\n");
+    case "Review the first-month numbers":
+      return [
+        "Month 1 scorecard:",
+        "- Best lead source:",
+        "- Weakest lead source:",
+        "- Average ticket:",
+        "- Close rate:",
+        "- Real minimum price needed:",
+        "- One change for Month 2:"
+      ].join("\n");
+    case "Cut the weak operating habits":
+      return [
+        "What gets cut now:",
+        "- Weak lead source:",
+        "- Weak offer / exception:",
+        "- Underpriced rule:",
+        "- Confusing wording:",
+        "What stays: [best channel / best offer / best process]"
+      ].join("\n");
+    case "Prepare the Month 2 operating rhythm":
+      return [
+        "Weekly calendar blocks:",
+        "- Marketing:",
+        "- Estimates:",
+        "- Admin / invoicing:",
+        "- Production:",
+        "- Follow-up:",
+        "Repeat-work motion: [maintenance reminder / recurring pitch / reactivation]"
+      ].join("\n");
+    case "Run the calendar by operating blocks":
+      return [
+        "Default week structure:",
+        "Monday: [marketing / admin]",
+        "Tuesday: [estimates / production]",
+        "Wednesday: [production]",
+        "Thursday: [follow-up / partner outreach]",
+        "Friday: [collections / weekly review]"
+      ].join("\n");
+    case "Tighten pricing and repeat-work logic":
+      return [
+        "Pricing update sheet:",
+        "- New minimum:",
+        "- Travel rule:",
+        "- Repeat-work offer:",
+        "- Add-on kept:",
+        "- Add-on removed:",
+        "- Effective date:"
+      ].join("\n");
+    case "Add one dependable partner channel":
+      return [
+        "Partner outreach template:",
+        "Partner type: [realtor / landscaper / property manager / other]",
+        "Why we help their clients: [one line]",
+        "Proof example: [job or result]",
+        "Ask: [send overview / quick call / coffee / trial referral]",
+        "Next follow-up date:"
+      ].join("\n");
+    case "Protect density and job quality":
+      return [
+        "Work quality filter:",
+        "Good jobs:",
+        "- [job type 1]",
+        "- [job type 2]",
+        "Bad jobs:",
+        "- [outlier / low-margin work]",
+        "- [scope that creates friction]",
+        "Rule to enforce this week: [written rule]"
+      ].join("\n");
+    case "Review like an operator every week":
+      return [
+        "Weekly operator review:",
+        "- Leads:",
+        "- Booked jobs:",
+        "- Average ticket:",
+        "- Reviews requested:",
+        "- Money collected:",
+        "- One improvement for next week:"
+      ].join("\n");
+    case "Document the core SOPs":
+      return [
+        "Core SOP list:",
+        "1. Intake",
+        "2. Quote",
+        "3. Schedule",
+        "4. Job prep",
+        "5. Completion",
+        "6. Invoice",
+        "7. Follow-up",
+        "Owner: [you / team role]"
+      ].join("\n");
+    case "Automate the obvious reminders":
+      return [
+        "Automation list:",
+        "- Missed-call text-back:",
+        "- Quote follow-up Day 2:",
+        "- Quote follow-up Day 7:",
+        "- Appointment confirmation:",
+        "- Review request:",
+        "Each trigger tested: yes / no"
+      ].join("\n");
+    case "Set the next 30-day targets":
+      return [
+        "Next 30-day scorecard:",
+        "- Leads target:",
+        "- Close rate target:",
+        "- Average ticket target:",
+        "- Repeat work target:",
+        "- Reviews target:",
+        "- Weekly action that supports each target:"
+      ].join("\n");
+    case "Choose the next bottleneck":
+      return [
+        "Bottleneck review:",
+        "Primary bottleneck: [lead volume / close rate / pricing / follow-up / schedule / labor]",
+        "Reason this is the bottleneck:",
+        "30-day fix to test:",
+        "Metric to watch:"
+      ].join("\n");
+    case "Prepare for cleaner scale":
+      return [
+        "Next scale move:",
+        "- Better pricing / denser routes / stronger follow-up / selective labor support",
+        "Why this is next:",
+        "What must be documented first:",
+        "What will stay intentionally simple:"
+      ].join("\n");
+    default:
+      return [
+        `Task: ${item.title}`,
+        `Business: ${seed.name}`,
+        `Current offer: ${seed.starterOffer}`,
+        "Fill in the exact scope, timing, pricing rule, and next action for this step."
+      ].join("\n");
+  }
+}
+
+function buildChecklistExample(seed: ServiceSeed, stageTitle: string, item: ExecutionChecklistItem): string {
+  if (item.example && item.example !== item.doneDefinition) {
+    return item.example;
+  }
+
+  switch (item.title) {
+    case "Set the commercial rails":
+      return [
+        "Business email: hello@servicebrand.com",
+        "Business phone: (555) 014-2281",
+        "CRM stages: New Lead > Contacted > Quoted > Booked > Completed > Follow-up",
+        "Payment link: stripe.com/pay/servicebrand",
+        "Invoice sender: billing@servicebrand.com"
+      ].join("\n");
+    case "Stage the field setup":
+      return [
+        `Loadout built around "${seed.starterOffer}".`,
+        "Vehicle bins labeled by setup order, PPE packed in one grab bag, payment reader charged, and mock setup completed in 12 minutes."
+      ].join("\n");
+    case "Build the launch proof pack":
+      return [
+        `Google profile updated with "${seed.starterOffer}", three proof images saved, one service-area graphic built, review link stored in notes, and a simple quote CTA live.`
+      ].join("\n");
+    case "Publish the visible launch offer":
+      return [
+        `Published "${seed.starterOffer}" on Google Business Profile, one neighborhood Facebook group, and one Instagram post with a simple "text photos for a quote" CTA.`
+      ].join("\n");
+    case "Run one outreach play every day":
+      return [
+        "Chosen play: same-street offer.",
+        "Daily target: 15 doors or messages.",
+        "Result after five days: 7 replies, 4 quotes, 2 booked jobs."
+      ].join("\n");
+    case "Track quality, not just activity":
+      return [
+        "Best source: Google Business Profile.",
+        "Weak source: cold social posts outside the service radius.",
+        "Average quote speed: 2 hours.",
+        "Common lost reason: unclear scope before quote."
+      ].join("\n");
+    case "Finish the week with proof":
+      return [
+        "Saved one before/after photo set, one customer text screenshot, one outreach script that got replies, and one note explaining why the best lead converted."
+      ].join("\n");
+    case "Run same-day quotes":
+      return [
+        `Quote sent same day for "${seed.starterOffer}" with scope, exclusions, price, and one acceptance line: "Reply book it and I will hold Thursday at 2 PM."`
+      ].join("\n");
+    case "Time the work honestly":
+      return [
+        "Drive: 22 minutes | Setup: 14 minutes | Production: 78 minutes | Cleanup: 12 minutes | Payment: 6 minutes | Total: 132 minutes."
+      ].join("\n");
+    case "Capture proof and job notes":
+      return [
+        "Before/after photos saved, customer said the response speed sold the job, setup took longer than expected, and the best upsell next time is a higher-tier package."
+      ].join("\n");
+    case "Improve the next quote immediately":
+      return [
+        "Added one exclusion line, raised the minimum by $35, changed arrival wording from exact time to arrival window, and removed a confusing add-on option."
+      ].join("\n");
+    case "Write the production checklist":
+      return [
+        "Checklist lives in Notes and inside CRM: intake confirmed, materials staged, photos captured, invoice sent, review requested, follow-up date added."
+      ].join("\n");
+    case "Install quote and review follow-up":
+      return [
+        "Day 2 follow-up scheduled for every open quote, Day 7 reminder queued, and review request sent within one hour of completion with direct link."
+      ].join("\n");
+    case "Review the first-month numbers":
+      return [
+        "Best lead source: Google. Weakest source: generic cold outreach. Average ticket: $420. Close rate: 38%. Minimum price needs to move from $199 to $249."
+      ].join("\n");
+    case "Cut the weak operating habits":
+      return [
+        "Paused the lowest-quality channel, removed one confusing custom option, and stopped accepting jobs outside the preferred radius unless they met the travel rule."
+      ].join("\n");
+    case "Prepare the Month 2 operating rhythm":
+      return [
+        "Monday = admin + follow-up, Tuesday/Wednesday = production, Thursday = estimates + partner outreach, Friday = collections + weekly review."
+      ].join("\n");
+    case "Run the calendar by operating blocks":
+      return [
+        "The week now runs in fixed blocks instead of reacting live: mornings for production, afternoons for quotes and follow-up, Friday for review and planning."
+      ].join("\n");
+    case "Tighten pricing and repeat-work logic":
+      return [
+        `Raised the starter minimum, added a repeat-service reminder around "${seed.starterOffer}", and removed one low-margin add-on that slowed delivery.`
+      ].join("\n");
+    case "Add one dependable partner channel":
+      return [
+        "Target partner: property managers. Sent a short intro with one proof example, one service summary, and one next-step ask. Logged all follow-up dates in CRM."
+      ].join("\n");
+    case "Protect density and job quality":
+      return [
+        "Defined preferred jobs inside the core radius, declined two weak outlier jobs, and wrote a simple list of work to avoid repeating."
+      ].join("\n");
+    case "Review like an operator every week":
+      return [
+        "Weekly review note completed: 18 leads, 6 booked jobs, $510 average ticket, 4 review asks, $3,060 collected, next fix = faster quote follow-up."
+      ].join("\n");
+    case "Document the core SOPs":
+      return [
+        "One-page SOPs now exist for intake, quote, schedule, job prep, completion, invoice, and follow-up with exact owner and message at each step."
+      ].join("\n");
+    case "Automate the obvious reminders":
+      return [
+        "Missed-call text-back, Day 2 quote follow-up, appointment confirmation, and review request are live and tested with clean copy."
+      ].join("\n");
+    case "Set the next 30-day targets":
+      return [
+        "Targets set: 30 leads, 40% close rate, $550 average ticket, 4 repeat jobs, 8 reviews, with one weekly action assigned to each number."
+      ].join("\n");
+    case "Choose the next bottleneck":
+      return [
+        "Primary bottleneck: close rate. Reason: enough leads but too many open quotes. 30-day test: quote within 2 hours and install Day 2 / Day 7 follow-up."
+      ].join("\n");
+    case "Prepare for cleaner scale":
+      return [
+        "Next move chosen: stronger follow-up before hiring. Documentation updated first, then reminders tightened so growth comes from a cleaner system."
+      ].join("\n");
+    default:
+      return `Completed version for ${seed.name}: ${item.doneDefinition}`;
+  }
+}
+
+function buildChecklistIfStuck(seed: ServiceSeed, item: ExecutionChecklistItem): string {
+  switch (item.title) {
+    case "Lock the starter offer":
+      return `If the offer still feels messy, shrink it to the smallest version of "${seed.starterOffer}" that you can describe in one sentence and price with confidence.`;
+    case "Set the commercial rails":
+      return "If setup feels scattered, pick one phone number, one email inbox, one CRM pipeline, and one payment link. Simple and live beats perfect and unfinished.";
+    case "Stage the field setup":
+      return "If you are unsure what belongs in the loadout, include only what is required to deliver the starter offer once without borrowing or improvising.";
+    case "Write the customer-facing templates":
+      return "If you get stuck writing copy, start with short plain-English versions. The quote only needs scope, exclusions, price, and one acceptance step.";
+    case "Build the launch proof pack":
+      return "If you do not have real customer proof yet, use one strong service image, one simple offer graphic, and one clear service-area statement so the business can still launch.";
+    case "Publish the visible launch offer":
+      return "If you are overwhelmed by channels, publish only to Google Business Profile and one place where local customers already pay attention.";
+    case "Install the response standard":
+      return "If the intake flow feels too long, keep only five fields: address, photos, scope, urgency, and source. That is enough to keep leads moving.";
+    case "Run one outreach play every day":
+      return "If you do not know which outreach play to pick, choose the one you can repeat daily for five straight days without extra tools or coordination.";
+    case "Track quality, not just activity":
+      return "If tracking feels annoying, log only source, quote speed, booked or lost, and lost reason. That is enough to spot the weak channel.";
+    case "Finish the week with proof":
+      return "If the week felt messy, save just one thing from it: best proof, best script, and one lesson worth repeating next week.";
+    case "Run same-day quotes":
+      return "If a lead is too vague to quote cleanly, ask for better photos or schedule a quick estimate. Do not guess and create scope problems.";
+    case "Time the work honestly":
+      return "If you forget timing details, use your phone timer for drive, setup, work, and cleanup on the next job. One honest data point is enough to start.";
+    case "Tighten the sales language":
+      return "If you freeze during objections, write one short response for price, timing, and trust today and reuse it until it improves.";
+    case "Capture proof and job notes":
+      return "If you skip notes after jobs, create a two-minute closeout rule: save photos, write one lesson, note one upsell opportunity before driving away.";
+    case "Improve the next quote immediately":
+      return "If you are not sure what to change, fix the last thing that confused the customer or cost you margin. Start there.";
+    case "Write the production checklist":
+      return "If documentation feels heavy, write the checklist on one phone note first. If you would use it in the field, it is good enough to start.";
+    case "Install quote and review follow-up":
+      return "If follow-up feels inconsistent, schedule Day 2 and Day 7 now, then write one review request message you can reuse immediately.";
+    case "Review the first-month numbers":
+      return "If the numbers feel incomplete, review only lead source, quote speed, booked jobs, and average ticket. That is enough to spot the next fix.";
+    case "Cut the weak operating habits":
+      return "If you are unsure what to cut, remove the channel, offer, or exception that creates the most friction and the least profit.";
+    case "Prepare the Month 2 operating rhythm":
+      return "If planning the month feels big, block the next week first. Repeat that structure before redesigning the whole calendar.";
+    case "Run the calendar by operating blocks":
+      return "If fixed blocks feel unrealistic, start with two protected blocks: one for admin/follow-up and one for marketing/outreach.";
+    case "Tighten pricing and repeat-work logic":
+      return "If pricing still feels fuzzy, raise the weakest minimum first and add only one repeat-work offer instead of redesigning the whole menu.";
+    case "Add one dependable partner channel":
+      return "If partner outreach feels awkward, pick one partner type and send one short intro with one proof example. Do not build a full partnership deck.";
+    case "Protect density and job quality":
+      return "If every job feels tempting, write down one rule for work you will no longer accept unless it clears a higher minimum.";
+    case "Review like an operator every week":
+      return "If weekly review keeps slipping, do it with five numbers and one improvement. The review only needs to be honest, not fancy.";
+    case "Document the core SOPs":
+      return "If SOPs feel too big, document the workflow you repeated most often first. One clear page per process is enough.";
+    case "Automate the obvious reminders":
+      return "If automation feels risky, automate one reminder at a time and test it on yourself before switching on the rest.";
+    case "Set the next 30-day targets":
+      return "If targets feel random, use the recent average and increase it slightly. Targets should be specific enough to run the week, not impress anyone.";
+    case "Choose the next bottleneck":
+      return "If everything looks broken, choose the one issue that is blocking revenue right now. Solve the bottleneck before the secondary problems.";
+    case "Prepare for cleaner scale":
+      return "If scale feels abstract, choose the next move that removes friction without adding chaos. Usually that means better pricing or better follow-up before more complexity.";
+    default:
+      return `If you are stuck, finish the smallest usable version of this step for ${seed.name} today, document it, and improve it after the next real customer interaction.`;
+  }
+}
+
+function buildChecklistAiPrompt(seed: ServiceSeed, stageTitle: string, item: ExecutionChecklistItem): string {
+  const template = item.template || buildChecklistTemplate(seed, stageTitle, item);
+  const example = item.example || buildChecklistExample(seed, stageTitle, item);
+  const ifStuck = item.ifStuck || buildChecklistIfStuck(seed, item);
+
+  return [
+    "Help me complete one Blueprint task inside Service Launch Academy.",
+    `Business type: ${seed.name}`,
+    `Current phase: ${stageTitle}`,
+    `Current offer: ${seed.starterOffer}`,
+    `Task objective: ${item.title}`,
+    `Primary instruction: ${item.instruction || item.instructions[0] || item.doneDefinition}`,
+    `Done when: ${item.doneDefinition}`,
+    "",
+    "Fill-in template:",
+    template,
+    "",
+    "Reference example:",
+    example,
+    "",
+    `If I am stuck, use this rule: ${ifStuck}`,
+    "",
+    "Give me:",
+    "1. the completed version for my business",
+    "2. the exact wording or filled-in template I can use now",
+    "3. the fastest next action to finish this today",
+    "4. what not to overbuild"
+  ].join("\n");
+}
+
+function enrichExecutionPlan(seed: ServiceSeed, executionPlan: ExecutionStage[]): ExecutionStage[] {
+  return executionPlan.map((stage) => ({
+    ...stage,
+    checklist: stage.checklist.map((item) => {
+      const template = buildChecklistTemplate(seed, stage.title, item);
+      const example = buildChecklistExample(seed, stage.title, item);
+      const ifStuck = buildChecklistIfStuck(seed, item);
+      const instruction = item.instruction || item.instructions[0] || item.doneDefinition;
+
+      return {
+        ...item,
+        instruction,
+        template,
+        example,
+        ifStuck,
+        aiPrompt: buildChecklistAiPrompt(seed, stage.title, {
+          ...item,
+          instruction,
+          template,
+          example,
+          ifStuck,
+          aiPrompt: item.aiPrompt || ""
+        })
+      };
+    })
+  }));
 }
 
 function buildBlueprintPhases(seed: ServiceSeed): Phase[] {
@@ -215,7 +776,7 @@ function buildExecutionPlan(seed: ServiceSeed): ExecutionStage[] {
   const week4Title = "Month 2";
   const month2Title = "Month 3";
 
-  return [
+  return enrichExecutionPlan(seed, [
     {
       title: "Week 1",
       summary: `${week1} Choose the offer, set the minimums, and make the business operational before any real push for leads.`,
@@ -732,7 +1293,7 @@ function buildExecutionPlan(seed: ServiceSeed): ExecutionStage[] {
       nextAction: "the next 30-day operating cycle",
       momentumMessages: createMomentumMessages("Month 3", "the next 30-day operating cycle")
     }
-  ];
+  ]);
 }
 
 function buildScripts(seed: ServiceSeed): Script[] {
