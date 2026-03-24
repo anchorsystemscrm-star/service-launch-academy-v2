@@ -33,40 +33,42 @@ export function CoachComposer({ loading, onSendMessage, quickActions }: CoachCom
   }
 
   return (
-    <section className="panel-surface p-6 sm:p-8">
+    <section className="panel-surface p-5 sm:p-8">
       <p className="text-sm font-semibold uppercase tracking-[0.18em] text-accent">Prompt Builder</p>
       <h2 className="mt-3 text-2xl font-semibold text-white">Ask for a real output, not a generic answer.</h2>
       <p className="mt-3 max-w-3xl text-sm leading-6 text-muted">
         Use a quick action to generate a structured asset, or type a custom request about pricing, scripts, fulfillment, local growth, or launch sequencing.
       </p>
 
-      <div className="mt-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-        {quickActions.map((action) => (
-          <button
-            key={action.label}
-            type="button"
-            disabled={loading || action.locked}
-            onClick={() => onSendMessage(action.prompt, action.mode)}
-            className={`rounded-[22px] border px-4 py-4 text-left transition ${
-              action.locked
-                ? "cursor-not-allowed border-white/10 bg-black/20 text-muted opacity-70"
-                : "border-white/10 bg-black/20 text-white hover:border-accent/40 hover:bg-accent/10"
-            }`}
-          >
-            <p className="text-sm font-semibold">{action.label}</p>
-            <p className="mt-2 text-xs uppercase tracking-[0.14em] text-muted">
-              {action.locked ? "Elite required" : action.mode}
-            </p>
-          </button>
-        ))}
+      <div className="mt-5 -mx-1 overflow-x-auto pb-1 md:mx-0 md:overflow-visible md:pb-0">
+        <div className="flex gap-3 px-1 md:grid md:grid-cols-2 xl:grid-cols-4 md:px-0">
+          {quickActions.map((action) => (
+            <button
+              key={action.label}
+              type="button"
+              disabled={loading || action.locked}
+              onClick={() => onSendMessage(action.prompt, action.mode)}
+              className={`min-w-[172px] rounded-[20px] border px-4 py-3 text-left transition md:min-w-0 md:py-4 ${
+                action.locked
+                  ? "cursor-not-allowed border-white/10 bg-black/20 text-muted opacity-70"
+                  : "border-white/10 bg-black/20 text-white hover:border-accent/40 hover:bg-accent/10"
+              }`}
+            >
+              <p className="text-sm font-semibold">{action.label}</p>
+              <p className="mt-2 text-xs uppercase tracking-[0.14em] text-muted">
+                {action.locked ? "Elite required" : action.mode}
+              </p>
+            </button>
+          ))}
+        </div>
       </div>
 
-      <form onSubmit={handleSubmit} className="mt-6 grid gap-3">
+      <form onSubmit={handleSubmit} className="mt-5 grid gap-3">
         <textarea
           value={message}
           onChange={(event) => setMessage(event.target.value)}
           placeholder="Example: Build a 3-tier pricing plan for my starter offer and include upsells."
-          rows={5}
+          rows={4}
           className="rounded-[24px] border border-white/10 bg-slate-950 px-4 py-4 text-white outline-none transition focus:border-accent/70 focus:ring-2 focus:ring-accent/20"
         />
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">

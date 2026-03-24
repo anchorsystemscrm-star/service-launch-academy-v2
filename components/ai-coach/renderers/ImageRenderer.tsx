@@ -30,7 +30,15 @@ export function ImageRenderer({ data }: ImageRendererProps) {
             </span>
           ) : null}
         </div>
-        <p className="mt-3 text-sm leading-6 text-slate-100">{data.prompt}</p>
+        <p className="mt-3 text-sm leading-6 text-muted">
+          Premium creative direction is ready. Use the actions below to refine the asset without restarting the request.
+        </p>
+        <details className="mt-4 rounded-[18px] border border-white/10 bg-white/5 p-3">
+          <summary className="cursor-pointer list-none text-xs font-semibold uppercase tracking-[0.14em] text-slate-200">
+            Prompt details
+          </summary>
+          <p className="mt-3 text-sm leading-6 text-slate-100">{data.prompt}</p>
+        </details>
       </article>
 
       {images.length ? (

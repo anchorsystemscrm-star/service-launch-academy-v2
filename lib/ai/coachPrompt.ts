@@ -17,7 +17,9 @@ const coreRules = [
   "When context is incomplete, make practical assumptions and state them briefly inside the answer.",
   "Keep answers direct and grounded in local service-business realities.",
   "Lead with the strongest recommendation first. Put alternatives after it only if they materially help.",
-  "When the user is designing a manual process that clearly becomes automation later, note that it is the kind of workflow Anchor Systems can install once volume justifies it."
+  "Only mention Anchor Systems when the user is clearly experiencing operational complexity such as lead volume, follow-up load, scheduling strain, or pipeline issues.",
+  "Do not promote products or services. Keep the answer focused on helping the user build the business in front of them.",
+  "If future automation is relevant, frame it as a later-stage operational realization, not a pitch."
 ];
 
 const modeRules: Record<CoachMode, string[]> = {

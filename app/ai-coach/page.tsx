@@ -27,6 +27,7 @@ import {
 } from "@/utils/storage";
 
 export default function AICoachPage() {
+  const isDev = process.env.NODE_ENV !== "production";
   const { profile } = useAccessProfile();
   const business = getFallbackBusiness(profile.selectedBusinessId);
   const { progress, taskProgress } = useBlueprintProgress(business.id, business.executionPlan);
@@ -101,6 +102,7 @@ export default function AICoachPage() {
     .find((message) => message.role === "assistant");
   const selectedSavedOutput = savedOutputs.find((item) => item.id === selectedSavedOutputId) ?? null;
   const activeResponse = selectedSavedOutput ?? latestAssistantMessage ?? null;
+  const recentConversation = messages.slice(-6);
 
   async function handleSendMessage(
     message: string,
@@ -294,8 +296,8 @@ export default function AICoachPage() {
         </p>
       </section>
 
-      <div className="mt-6 grid gap-6 xl:grid-cols-[1.15fr_0.85fr]">
-        <div className="grid gap-6">
+      <div className="mt-6 grid gap-6 xl:grid-cols-[minmax(0,1fr)_320px]">
+        <div className="grid gap-5 sm:gap-6">
           <CoachComposer
             loading={isLoading}
             onSendMessage={handleSendMessage}
@@ -310,36 +312,24 @@ export default function AICoachPage() {
 
           {activeResponse ? (
             <section className="grid gap-4">
-              <div className="flex flex-col gap-3 rounded-[24px] border border-white/10 bg-black/20 p-5 sm:flex-row sm:items-center sm:justify-between">
-                <div>
-                  <p className="text-xs font-semibold uppercase tracking-[0.16em] text-muted">
-                    {selectedSavedOutput ? "Saved output" : "Latest output"}
-                  </p>
-                  <p className="mt-2 text-sm text-slate-200">
-                    {selectedSavedOutput
-                      ? `Saved ${new Date(selectedSavedOutput.createdAt).toLocaleString()}`
-                      : "Generated from your active blueprint context"}
-                  </p>
-                </div>
-                <div className="flex flex-wrap gap-3">
-                  {!selectedSavedOutput ? (
-                    <button
-                      type="button"
-                      onClick={handleSaveCurrent}
-                      className="inline-flex items-center justify-center rounded-2xl border border-accent/40 bg-accent/10 px-4 py-3 text-sm font-semibold text-white transition hover:border-accent/80 hover:bg-accent/15"
-                    >
-                      Save Output
-                    </button>
-                  ) : (
-                    <button
-                      type="button"
-                      onClick={() => setSelectedSavedOutputId(null)}
-                      className="inline-flex items-center justify-center rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm font-semibold text-white transition hover:border-white/20 hover:bg-white/10"
-                    >
-                      Return to latest
-                    </button>
-                  )}
-                </div>
+              <div className="flex flex-wrap items-center gap-3 text-sm">
+                <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1.5 font-medium text-slate-200">
+                  {selectedSavedOutput ? "Saved output" : "Latest output"}
+                </span>
+                <span className="text-muted">
+                  {selectedSavedOutput
+                    ? `Saved ${new Date(selectedSavedOutput.createdAt).toLocaleDateString()}`
+                    : "Generated from your current business context"}
+                </span>
+                {selectedSavedOutput ? (
+                  <button
+                    type="button"
+                    onClick={() => setSelectedSavedOutputId(null)}
+                    className="inline-flex items-center justify-center rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.14em] text-white transition hover:border-white/20 hover:bg-white/10"
+                  >
+                    Return to latest
+                  </button>
+                ) : null}
               </div>
 
               {saveNotice ? (
@@ -348,75 +338,28 @@ export default function AICoachPage() {
                 </div>
               ) : null}
 
-              <CoachResponseRenderer response={activeResponse} onActionClick={handleActionClick} />
+              <CoachResponseRenderer
+                response={activeResponse}
+                onActionClick={handleActionClick}
+                onSave={!selectedSavedOutput ? handleSaveCurrent : undefined}
+              />
             </section>
           ) : null}
-
-          <section className="panel-surface p-6">
-            <div className="flex items-center justify-between gap-3">
-              <h2 className="text-xl font-semibold text-white">Recent conversation</h2>
-              <span className="rounded-full border border-white/10 bg-white/5 px-3 py-2 text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-200">
-                {messages.length} messages
-              </span>
-            </div>
-            <div className="mt-5 grid gap-3">
-              {messages.slice(-6).map((message) => (
-                <article
-                  key={message.id}
-                  className={`rounded-[22px] border px-4 py-4 text-sm leading-6 ${
-                    message.role === "user"
-                      ? "border-accent/30 bg-accent/10 text-white"
-                      : "border-white/10 bg-black/20 text-slate-100"
-                  }`}
-                >
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted">
-                    {message.role === "user" ? "You" : message.title || "Coach"}
-                  </p>
-                  <p className="mt-2 whitespace-pre-wrap">{message.content}</p>
-                </article>
-              ))}
-            </div>
-          </section>
         </div>
 
         <aside className="grid gap-6">
-          <section className="panel-surface p-6">
-            <h2 className="text-xl font-semibold text-white">Current context</h2>
-            <div className="mt-5 grid gap-4">
-              <div className="rounded-[20px] border border-white/10 bg-white/5 p-4">
-                <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted">Selected business</p>
-                <p className="mt-2 text-sm text-white">{business.name}</p>
+          <details className="panel-surface overflow-hidden p-5 sm:p-6" open={false}>
+            <summary className="flex cursor-pointer list-none items-center justify-between gap-3">
+              <div>
+                <p className="text-sm font-semibold uppercase tracking-[0.16em] text-accent">Saved outputs</p>
+                <p className="mt-2 text-sm text-muted">
+                  Reopen strong work without keeping it in the main flow.
+                </p>
               </div>
-              <div className="rounded-[20px] border border-white/10 bg-white/5 p-4">
-                <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted">Current phase</p>
-                <p className="mt-2 text-sm text-white">{currentPhase.title}</p>
-              </div>
-              <div className="rounded-[20px] border border-white/10 bg-white/5 p-4">
-                <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted">Entry offer</p>
-                <p className="mt-2 text-sm text-white">{business.recommended_first_offer}</p>
-              </div>
-              <div className="rounded-[20px] border border-white/10 bg-white/5 p-4">
-                <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted">Access tier</p>
-                <p className="mt-2 text-sm text-white">{tierLabels[profile.tier]}</p>
-              </div>
-              <div className="rounded-[20px] border border-white/10 bg-white/5 p-4">
-                <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted">Completed tasks tracked</p>
-                <p className="mt-2 text-sm text-white">{completedTasks.length}</p>
-              </div>
-              <div className="rounded-[20px] border border-white/10 bg-white/5 p-4">
-                <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted">Build stage</p>
-                <p className="mt-2 text-sm capitalize text-white">{activeResponse?.buildStage || "pricing"}</p>
-              </div>
-            </div>
-          </section>
-
-          <section className="panel-surface p-6">
-            <div className="flex items-center justify-between gap-3">
-              <h2 className="text-xl font-semibold text-white">Saved outputs</h2>
-              <span className="rounded-full border border-white/10 bg-white/5 px-3 py-2 text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-200">
-                {savedOutputs.length}/{getCoachSaveLimit(profile.tier)}
+              <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-200">
+                {savedOutputs.length}
               </span>
-            </div>
+            </summary>
 
             {savedOutputs.length ? (
               <div className="mt-5 grid gap-3">
@@ -430,7 +373,7 @@ export default function AICoachPage() {
                     }`}
                   >
                     <div className="flex items-start justify-between gap-3">
-                      <div>
+                      <div className="min-w-0">
                         <p className="text-sm font-semibold text-white">{item.title}</p>
                         <p className="mt-2 text-xs uppercase tracking-[0.14em] text-muted">
                           {item.mode} • {new Date(item.createdAt).toLocaleDateString()}
@@ -444,11 +387,11 @@ export default function AICoachPage() {
                         Delete
                       </button>
                     </div>
-                    <p className="mt-3 text-sm leading-6 text-slate-200">{item.prompt}</p>
+                    <p className="mt-3 max-h-[4.5rem] overflow-hidden text-sm leading-6 text-slate-200">{item.prompt}</p>
                     <button
                       type="button"
                       onClick={() => setSelectedSavedOutputId(item.id)}
-                      className="mt-4 inline-flex items-center justify-center rounded-2xl border border-white/10 bg-black/20 px-4 py-2.5 text-xs font-semibold uppercase tracking-[0.14em] text-white transition hover:border-white/20 hover:bg-white/10"
+                      className="mt-4 inline-flex w-full items-center justify-center rounded-2xl border border-white/10 bg-black/20 px-4 py-2.5 text-xs font-semibold uppercase tracking-[0.14em] text-white transition hover:border-white/20 hover:bg-white/10"
                     >
                       Open
                     </button>
@@ -457,25 +400,104 @@ export default function AICoachPage() {
               </div>
             ) : (
               <p className="mt-5 text-sm leading-6 text-muted">
-                Save strong outputs here so pricing, scripts, and creative assets stay reusable instead of disappearing into chat history.
+                Save pricing, scripts, and creative assets here when you want them reusable later.
               </p>
             )}
-          </section>
+          </details>
 
-          <section className="panel-surface p-6">
-            <h2 className="text-xl font-semibold text-white">Working memory</h2>
-            <p className="mt-4 whitespace-pre-wrap text-sm leading-6 text-muted">
-              {summary || "The coach will start building lightweight working memory after your first real request."}
-            </p>
-            {!hasEliteAccess ? (
-              <div className="mt-5 rounded-[22px] border border-accent/20 bg-accent/5 p-4">
-                <p className="text-sm font-semibold text-white">Elite unlocks advanced planning + image generation</p>
-                <p className="mt-2 text-sm leading-6 text-muted">
-                  Use Elite for marketing plans, SOP builders, logo concepts, flyer directions, truck wraps, and other higher-leverage assets.
+          <details className="panel-surface overflow-hidden p-5 sm:p-6" open={false}>
+            <summary className="flex cursor-pointer list-none items-center justify-between gap-3">
+              <div>
+                <p className="text-sm font-semibold uppercase tracking-[0.16em] text-accent">Coach details</p>
+                <p className="mt-2 text-sm text-muted">
+                  Context, memory, and recent messages stay here when you need them.
                 </p>
               </div>
-            ) : null}
-          </section>
+              <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-200">
+                Hidden by default
+              </span>
+            </summary>
+
+            <div className="mt-5 grid gap-4">
+              <div className="grid gap-3 sm:grid-cols-2">
+                <div className="rounded-[20px] border border-white/10 bg-white/5 p-4">
+                  <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted">Selected business</p>
+                  <p className="mt-2 text-sm text-white">{business.name}</p>
+                </div>
+                <div className="rounded-[20px] border border-white/10 bg-white/5 p-4">
+                  <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted">Current phase</p>
+                  <p className="mt-2 text-sm text-white">{currentPhase.title}</p>
+                </div>
+                <div className="rounded-[20px] border border-white/10 bg-white/5 p-4">
+                  <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted">Entry offer</p>
+                  <p className="mt-2 text-sm text-white">{business.recommended_first_offer}</p>
+                </div>
+                <div className="rounded-[20px] border border-white/10 bg-white/5 p-4">
+                  <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted">Access tier</p>
+                  <p className="mt-2 text-sm text-white">{tierLabels[profile.tier]}</p>
+                </div>
+                <div className="rounded-[20px] border border-white/10 bg-white/5 p-4">
+                  <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted">Completed tasks tracked</p>
+                  <p className="mt-2 text-sm text-white">{completedTasks.length}</p>
+                </div>
+                <div className="rounded-[20px] border border-white/10 bg-white/5 p-4">
+                  <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted">Build stage</p>
+                  <p className="mt-2 text-sm capitalize text-white">{activeResponse?.buildStage || "pricing"}</p>
+                </div>
+              </div>
+
+              <div className="rounded-[22px] border border-white/10 bg-black/20 p-4">
+                <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted">Working memory</p>
+                <p className="mt-3 whitespace-pre-wrap text-sm leading-6 text-slate-100">
+                  {summary || "The coach will start building lightweight memory after your first request."}
+                </p>
+              </div>
+
+              <div className="rounded-[22px] border border-white/10 bg-black/20 p-4">
+                <div className="flex items-center justify-between gap-3">
+                  <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted">Recent conversation</p>
+                  <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-200">
+                    {recentConversation.length}
+                  </span>
+                </div>
+                <div className="mt-4 grid gap-3">
+                  {recentConversation.map((message) => (
+                    <article
+                      key={message.id}
+                      className={`rounded-[18px] border px-4 py-3 text-sm leading-6 ${
+                        message.role === "user"
+                          ? "border-accent/30 bg-accent/10 text-white"
+                          : "border-white/10 bg-white/5 text-slate-100"
+                      }`}
+                    >
+                      <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted">
+                        {message.role === "user" ? "You" : message.title || "Coach"}
+                      </p>
+                      <p className="mt-2 whitespace-pre-wrap">{message.content}</p>
+                    </article>
+                  ))}
+                </div>
+              </div>
+
+              {isDev ? (
+                <div className="rounded-[22px] border border-dashed border-white/10 bg-black/20 p-4">
+                  <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted">Dev diagnostics</p>
+                  <p className="mt-3 text-sm leading-6 text-slate-100">
+                    Save capacity: {savedOutputs.length}/{getCoachSaveLimit(profile.tier)}
+                  </p>
+                </div>
+              ) : null}
+
+              {!hasEliteAccess ? (
+                <div className="rounded-[22px] border border-accent/20 bg-accent/5 p-4">
+                  <p className="text-sm font-semibold text-white">Elite unlocks advanced planning + image generation</p>
+                  <p className="mt-2 text-sm leading-6 text-muted">
+                    Use Elite for marketing plans, SOP builders, logo concepts, flyer directions, truck wraps, and other higher-leverage assets.
+                  </p>
+                </div>
+              ) : null}
+            </div>
+          </details>
         </aside>
       </div>
     </div>

@@ -233,29 +233,43 @@ export function buildNextBestStep(
 
 export function buildAnchorBridge(mode: CoachMode, userMessage: string, response: CoachResponse) {
   const combinedText = `${userMessage} ${response.text || ""}`.toLowerCase();
-  const automationSignals = [
+  const complexitySignals = [
+    "too many leads",
+    "high lead volume",
+    "can't keep up",
+    "hard to manage",
     "missed call",
+    "response time",
     "follow up",
     "follow-up",
-    "response time",
+    "scheduling",
+    "calendar",
     "pipeline",
     "booking",
     "review request",
     "reminder",
     "automation",
-    "invoicing"
+    "dispatch"
   ];
-
-  if (
-    mode === "followup" ||
-    automationSignals.some((signal) => combinedText.includes(signal)) ||
+  const strongAutomationNeed =
+    complexitySignals.some((signal) => combinedText.includes(signal)) ||
     (mode === "sop" &&
-      ["intake", "dispatch", "booking", "reminder", "review", "pipeline"].some((signal) =>
+      ["pipeline", "booking", "scheduling", "dispatch", "review", "follow up", "follow-up"].some((signal) =>
         combinedText.includes(signal)
-      ))
-  ) {
-    return "When this process starts happening repeatedly, it is the kind of workflow Anchor Systems can automate for you later so missed calls, follow-up, booking, reminders, and review requests stop depending on memory.";
+      ));
+
+  if (!strongAutomationNeed) {
+    return undefined;
   }
 
-  return undefined;
+  if (
+    ["anchor systems", "anchor"].some((signal) => combinedText.includes(signal)) ||
+    ["crm", "automation", "pipeline", "response time", "lead volume"].some((signal) =>
+      combinedText.includes(signal)
+    )
+  ) {
+    return "Once this starts happening consistently, this part usually becomes harder to manage manually. That is usually the point where a dedicated operating system or a later Anchor Systems setup starts to make sense.";
+  }
+
+  return "Once this starts happening consistently, this part usually becomes harder to manage manually. At that point, it is worth turning it into a real system instead of relying on memory and manual follow-up.";
 }

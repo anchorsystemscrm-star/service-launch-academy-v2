@@ -10,8 +10,7 @@ export function MarketingRenderer({ data }: MarketingRendererProps) {
   return (
     <div className="grid gap-4">
       <article className="rounded-[24px] border border-white/10 bg-black/20 p-5">
-        <p className="text-xs font-semibold uppercase tracking-[0.16em] text-accent">Marketing Plan</p>
-        <h3 className="mt-3 text-xl font-semibold text-white">{data.title}</h3>
+        <h3 className="text-lg font-semibold text-white sm:text-xl">{data.title}</h3>
       </article>
 
       <div className="grid gap-4">

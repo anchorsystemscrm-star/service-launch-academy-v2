@@ -16,7 +16,7 @@ export function PricingRenderer({ data }: PricingRendererProps) {
   return (
     <div className="grid gap-4 xl:grid-cols-3">
       {packages.map((item) => (
-        <article key={item.label} className={`rounded-[24px] border p-5 ${item.recommended ? "border-accent/30 bg-accent/5" : "border-white/10 bg-black/20"}`}>
+        <article key={item.label} className={`rounded-[24px] border p-4 sm:p-5 ${item.recommended ? "border-accent/30 bg-accent/5" : "border-white/10 bg-black/20"}`}>
           <div className="flex items-center justify-between gap-3">
             <p className="text-xs font-semibold uppercase tracking-[0.16em] text-accent">{item.label}</p>
             {item.recommended ? (
