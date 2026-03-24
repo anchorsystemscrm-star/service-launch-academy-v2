@@ -93,6 +93,7 @@ export const defaultKpiData: KPIData = {
   leads: 0,
   quotes: 0,
   jobs: 0,
+  completed: 0,
   revenue: 0,
   reviews: 0
 };

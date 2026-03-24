@@ -224,6 +224,7 @@ export interface KPIData {
   leads: number;
   quotes: number;
   jobs: number;
+  completed: number;
   revenue: number;
   reviews: number;
 }
@@ -234,11 +235,16 @@ export interface BusinessPanelData {
   serviceArea: string;
   starterOffer: string;
   priceFloor: string;
+  keyInclusions: string;
   phone: string;
   bookingMethod: string;
   paymentMethod: string;
   currentPhase: string;
   completedTasks: number;
+  leads: number;
+  quoted: number;
+  booked: number;
+  completed: number;
 }
 
 export interface ChatMessage {

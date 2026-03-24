@@ -11,13 +11,14 @@ const fieldConfig: Array<{ key: keyof KPIData; label: string; step: number }> = 
   { key: "leads", label: "Leads This Week", step: 1 },
   { key: "quotes", label: "Quotes This Week", step: 1 },
   { key: "jobs", label: "Jobs Won", step: 1 },
+  { key: "completed", label: "Jobs Completed", step: 1 },
   { key: "revenue", label: "Revenue ($)", step: 50 },
   { key: "reviews", label: "Reviews", step: 1 }
 ];
 
 export function KPIInputs({ value, onChange }: KPIInputsProps) {
   return (
-    <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
+    <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-6">
       {fieldConfig.map((field) => (
         <label key={field.key} className="rounded-[20px] border border-white/10 bg-white/5 p-4">
           <span className="mb-2 block text-xs font-semibold uppercase tracking-[0.14em] text-muted">{field.label}</span>

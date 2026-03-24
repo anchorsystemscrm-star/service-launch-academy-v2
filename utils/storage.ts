@@ -270,6 +270,7 @@ type BusinessPanelEditableField =
   | "serviceArea"
   | "starterOffer"
   | "priceFloor"
+  | "keyInclusions"
   | "phone"
   | "bookingMethod"
   | "paymentMethod";
@@ -384,10 +385,22 @@ function extractSuggestedPriceFloor(guidance: string) {
   return match?.[0] ?? guidance;
 }
 
+function deriveKeyInclusions(offer: string) {
+  const normalized = offer.replace(/\.$/, "");
+  const tokens = normalized
+    .split(/\s+with\s+|,\s*|\s+and\s+/i)
+    .map((part) => part.trim())
+    .filter((part) => part.length > 0);
+
+  const trimmed = tokens.slice(0, 3);
+  return trimmed.join("\n");
+}
+
 function getDerivedBusinessPanelData(
   business: Business,
   progress: boolean[],
-  taskProgress: boolean[][]
+  taskProgress: boolean[][],
+  kpis: KPIData
 ): BusinessPanelData {
   const starterOfferLocked = hasCompletedTask(taskProgress, business.executionPlan, "Lock the starter offer");
   const railsReady = hasCompletedTask(taskProgress, business.executionPlan, "Set the commercial rails");
@@ -400,11 +413,16 @@ function getDerivedBusinessPanelData(
     serviceArea: "",
     starterOffer: starterOfferLocked ? business.offerPricing.starterOffer : "",
     priceFloor: starterOfferLocked ? extractSuggestedPriceFloor(business.offerPricing.minimumPriceGuidance) : "",
+    keyInclusions: starterOfferLocked ? deriveKeyInclusions(business.offerPricing.starterOffer) : "",
     phone: railsReady ? "Business phone live" : "",
     bookingMethod: railsReady ? "Phone + text intake" : "",
     paymentMethod: railsReady ? "Invoice link or card on completion" : "",
     currentPhase: currentPhase?.title ?? business.blueprintPhases[0]?.title ?? "Phase 1",
-    completedTasks
+    completedTasks,
+    leads: kpis.leads,
+    quoted: kpis.quotes,
+    booked: kpis.jobs,
+    completed: kpis.completed
   };
 }
 
@@ -423,14 +441,14 @@ function mergeBusinessPanelData(
   return merged;
 }
 
-export function useBusinessPanel(business: Business, progress: boolean[], taskProgress: boolean[][]) {
+export function useBusinessPanel(business: Business, progress: boolean[], taskProgress: boolean[][], kpis: KPIData) {
   const { hydrated, value, setValue } = usePersistentState<Record<string, StoredBusinessPanel>>(
     STORAGE_KEYS.businessPanelMap,
     {}
   );
 
   const overrides = value[business.id] ?? {};
-  const derived = getDerivedBusinessPanelData(business, progress, taskProgress);
+  const derived = getDerivedBusinessPanelData(business, progress, taskProgress, kpis);
   const panel = mergeBusinessPanelData(derived, overrides);
 
   function setField(field: BusinessPanelEditableField, nextValue: string) {
@@ -477,7 +495,10 @@ export function useBlueprintTaskOutputState(businessId: string) {
 
 export function useKpiState(businessId: string, fallback: KPIData) {
   const { hydrated, value, setValue } = usePersistentState<Record<string, KPIData>>(STORAGE_KEYS.kpiMap, {});
-  const kpis = value[businessId] ?? fallback;
+  const kpis = {
+    ...fallback,
+    ...(value[businessId] ?? {})
+  };
 
   function updateKpis(next: KPIData) {
     setValue((previous) => ({

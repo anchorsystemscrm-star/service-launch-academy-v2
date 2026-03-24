@@ -20,11 +20,16 @@ export interface CoachContext {
   businessType?: string;
   phase?: string;
   entryOffer?: string;
+  keyInclusions?: string;
   serviceArea?: string;
   priceFloor?: string;
   phone?: string;
   bookingMethod?: string;
   paymentMethod?: string;
+  leadCount?: number;
+  quotedCount?: number;
+  bookedCount?: number;
+  completedCount?: number;
   budgetRange?: string;
   city?: string;
   state?: string;

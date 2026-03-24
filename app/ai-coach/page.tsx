@@ -7,7 +7,7 @@ import { CoachComposer } from "@/components/ai-coach/CoachComposer";
 import { CoachResponseRenderer } from "@/components/ai-coach/CoachResponseRenderer";
 import { CoachAction, CoachMode } from "@/lib/ai/coachTypes";
 import { LockedFeatureCard } from "@/components/LockedFeatureCard";
-import { getFallbackBusiness, getPhaseIndexByProgress } from "@/utils/benchmarks";
+import { defaultKpiData, getFallbackBusiness, getPhaseIndexByProgress } from "@/utils/benchmarks";
 import {
   canSaveCoachOutput,
   canUseCoachMode,
@@ -22,6 +22,7 @@ import {
   getRecentCoachMessages,
   useAccessProfile,
   useBusinessPanel,
+  useKpiState,
   useBlueprintProgress,
   useCoachConversation,
   useCoachSummary,
@@ -35,7 +36,8 @@ export default function AICoachPage() {
   const { profile } = useAccessProfile();
   const business = getFallbackBusiness(profile.selectedBusinessId);
   const { progress, taskProgress } = useBlueprintProgress(business.id, business.executionPlan);
-  const { panel: businessPanel } = useBusinessPanel(business, progress, taskProgress);
+  const { kpis } = useKpiState(business.id, defaultKpiData);
+  const { panel: businessPanel } = useBusinessPanel(business, progress, taskProgress, kpis);
   const currentPhase = business.blueprintPhases[getPhaseIndexByProgress(progress)];
   const initialMessage = createCoachMessage({
     role: "assistant",
@@ -179,12 +181,17 @@ export default function AICoachPage() {
             businessName: businessPanel.businessName || undefined,
             businessType: businessPanel.serviceType || business.name,
             phase: currentPhase.title,
-            entryOffer: business.recommended_first_offer,
+            entryOffer: businessPanel.starterOffer || business.recommended_first_offer,
+            keyInclusions: businessPanel.keyInclusions || undefined,
             serviceArea: businessPanel.serviceArea || undefined,
             priceFloor: businessPanel.priceFloor || undefined,
             phone: businessPanel.phone || undefined,
             bookingMethod: businessPanel.bookingMethod || undefined,
             paymentMethod: businessPanel.paymentMethod || undefined,
+            leadCount: businessPanel.leads,
+            quotedCount: businessPanel.quoted,
+            bookedCount: businessPanel.booked,
+            completedCount: businessPanel.completed,
             budgetRange: business.startup_cost_range,
             accessTier: profile.tier,
             completedTasks,
