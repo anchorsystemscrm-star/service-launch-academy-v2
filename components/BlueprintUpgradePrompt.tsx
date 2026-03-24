@@ -14,14 +14,14 @@ export function BlueprintUpgradePrompt({ tier, progressPercentage }: BlueprintUp
   }
 
   return (
-    <section className="rounded-[26px] border border-white/10 bg-white/5 p-5 shadow-card">
+    <section className="w-full max-w-full overflow-hidden rounded-[26px] border border-white/10 bg-white/5 p-5 shadow-card">
       <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-accentSecondary">{prompt.eyebrow}</p>
-      <h3 className="mt-3 text-lg font-semibold text-white">{prompt.title}</h3>
-      <p className="mt-3 text-sm leading-6 text-slate-200">{prompt.body}</p>
+      <h3 className="mt-3 break-words text-lg font-semibold text-white">{prompt.title}</h3>
+      <p className="mt-3 break-words text-sm leading-6 text-slate-200">{prompt.body}</p>
       <div className="mt-5 flex flex-wrap items-center gap-3">
         <a
           href={getCheckoutHref(prompt.targetTier)}
-          className="inline-flex items-center justify-center rounded-[20px] border border-accent/50 bg-accent/10 px-4 py-3 text-sm font-semibold text-white transition hover:border-accent/80 hover:bg-accent/20"
+          className="inline-flex w-full items-center justify-center rounded-[20px] border border-accent/50 bg-accent/10 px-4 py-3 text-sm font-semibold text-white transition hover:border-accent/80 hover:bg-accent/20 sm:w-auto"
         >
           Upgrade to {tierLabels[prompt.targetTier]}
         </a>

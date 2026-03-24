@@ -85,30 +85,30 @@ export default function BlueprintPage() {
 
   function renderPreviewExperience() {
     return (
-      <div className="mt-6 grid gap-6 xl:grid-cols-[360px_minmax(0,1fr)]">
+      <div className="mt-6 grid w-full max-w-full gap-6 overflow-x-hidden xl:grid-cols-[minmax(0,360px)_minmax(0,1fr)]">
         <div className="grid gap-6">
-          <section className="panel-surface p-6">
+          <section className="panel-surface w-full max-w-full overflow-hidden p-6">
             <h2 className="text-xl font-semibold text-white">At a glance</h2>
             <div className="mt-4 grid gap-3 text-sm text-slate-200">
-              <div className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3">
+              <div className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 break-words">
                 <span className="text-muted">Summary:</span> {business.teaser}
               </div>
-              <div className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3">
+              <div className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 break-words">
                 <span className="text-muted">Best for:</span> {business.bestFitOperatorType}
               </div>
-              <div className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3">
+              <div className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 break-words">
                 <span className="text-muted">Startup range:</span> {business.startup_cost_range}
               </div>
-              <div className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3">
+              <div className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 break-words">
                 <span className="text-muted">90-day revenue:</span> {business.revenue_90_range}
               </div>
-              <div className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3">
+              <div className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 break-words">
                 <span className="text-muted">Recurring potential:</span> {business.recurringRevenuePotential}
               </div>
             </div>
           </section>
 
-          <section className="panel-surface p-6">
+          <section className="panel-surface w-full max-w-full overflow-hidden p-6">
             <h2 className="text-xl font-semibold text-white">Why this business works</h2>
             <p className="mt-4 text-sm leading-6 text-muted">{business.whyAttractive}</p>
             <ul className="mt-4 grid gap-2 pl-5 text-sm leading-6 text-slate-200">
@@ -131,7 +131,7 @@ export default function BlueprintPage() {
             />
           ))}
 
-          <section className="panel-surface p-6 sm:p-8">
+          <section className="panel-surface w-full max-w-full overflow-hidden p-6 sm:p-8">
             <h2 className="text-2xl font-semibold text-white">Preview includes opportunity fit, not the full operating system.</h2>
             <p className="mt-4 text-sm leading-6 text-muted">
               {getUpgradeMessage("core")} Upgrade to unlock startup requirements, software stack, licensing guidance, insurance guidance,
@@ -139,12 +139,12 @@ export default function BlueprintPage() {
             </p>
             <div className="mt-6 grid gap-3 md:grid-cols-2">
               {business.goodFor.map((item) => (
-                <div key={item} className="rounded-[24px] border border-white/10 bg-white/5 p-4 text-sm text-slate-200">
+                <div key={item} className="rounded-[24px] border border-white/10 bg-white/5 p-4 text-sm text-slate-200 break-words">
                   {item}
                 </div>
               ))}
             </div>
-            <div className="mt-6 flex flex-col gap-3 sm:flex-row">
+            <div className="mt-6 flex w-full max-w-full flex-col gap-3 sm:flex-row sm:flex-wrap">
               {isExternalHref(coreCheckoutHref) ? (
                 <a
                   href={coreCheckoutHref}
@@ -174,19 +174,19 @@ export default function BlueprintPage() {
   }
 
   return (
-    <div className="mx-auto max-w-7xl animate-fade-up">
-      <section className="panel-surface p-6 sm:p-8">
+    <div className="mx-auto w-full max-w-7xl overflow-x-hidden animate-fade-up">
+      <section className="panel-surface w-full max-w-full overflow-hidden p-6 sm:p-8">
         <p className="text-sm font-semibold uppercase tracking-[0.18em] text-accent">Blueprint</p>
         <div className="mt-3 flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
-          <div>
+          <div className="min-w-0 max-w-full">
             <h1 className="text-3xl font-semibold text-white sm:text-4xl">90-day blueprint</h1>
-            <p className="mt-3 text-base leading-7 text-muted">Selected: {business.name}</p>
+            <p className="mt-3 break-words text-base leading-7 text-muted">Selected: {business.name}</p>
           </div>
 
-          <label className="flex items-center justify-between gap-4 rounded-[20px] border border-white/10 bg-white/5 px-5 py-4">
-            <div>
+          <label className="flex w-full max-w-full flex-wrap items-center justify-between gap-4 rounded-[20px] border border-white/10 bg-white/5 px-5 py-4 xl:w-auto">
+            <div className="min-w-0 max-w-full">
               <p className="text-sm font-semibold text-white">Set as my active blueprint</p>
-              <p className="mt-1 text-sm text-muted">Pin this launch so it stays at the center of the workspace.</p>
+              <p className="mt-1 break-words text-sm text-muted">Pin this launch so it stays at the center of the workspace.</p>
             </div>
             <button
               type="button"
@@ -213,9 +213,9 @@ export default function BlueprintPage() {
       {!hasCoreAccess ? (
         renderPreviewExperience()
       ) : (
-      <div className="mt-6 grid gap-6 lg:grid-cols-[320px_minmax(0,1fr)] xl:grid-cols-[360px_minmax(0,1fr)]">
-        <div className="hidden gap-6 lg:grid">
-          <section className="panel-surface p-6">
+      <div className="mt-6 grid w-full max-w-full gap-6 overflow-x-hidden lg:grid-cols-[320px_minmax(0,1fr)] xl:grid-cols-[360px_minmax(0,1fr)]">
+        <div className="hidden min-w-0 max-w-full gap-6 lg:grid">
+          <section className="panel-surface w-full max-w-full overflow-hidden p-6">
             <h2 className="text-lg font-semibold text-white">{business.name}</h2>
             <div className="mt-4 grid gap-3 text-sm text-slate-200">
               <div className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3">
@@ -251,15 +251,15 @@ export default function BlueprintPage() {
           />
         </div>
 
-        <section className="panel-surface p-6 sm:p-8">
-          <div className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-1">
+        <section className="panel-surface w-full min-w-0 max-w-full overflow-hidden p-6 sm:p-8">
+          <div className="flex w-full max-w-full flex-wrap gap-2">
             {tabs.map((tab) => (
               hasTierAccess(profile.tier, tab.minTier) ? (
                 <button
                   key={tab.id}
                   type="button"
                   onClick={() => setActiveTab(tab.id)}
-                  className={`rounded-2xl px-4 py-2.5 text-sm font-semibold transition ${
+                  className={`w-full max-w-full break-words rounded-2xl px-4 py-2.5 text-sm font-semibold transition sm:w-auto ${
                     activeTab === tab.id
                       ? "border border-accent/60 bg-accent/10 text-white"
                       : "border border-white/10 bg-white/5 text-slate-200 hover:border-white/20 hover:bg-white/10"
@@ -273,7 +273,7 @@ export default function BlueprintPage() {
                   type="button"
                   disabled
                   title={getUpgradeMessage(tab.minTier)}
-                  className="cursor-not-allowed rounded-2xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm font-semibold text-slate-500"
+                  className="w-full max-w-full cursor-not-allowed break-words rounded-2xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm font-semibold text-slate-500 sm:w-auto"
                 >
                   {tab.label}
                 </button>
@@ -284,8 +284,8 @@ export default function BlueprintPage() {
           {activeTab === "plan" && (
             <div className="mt-6 grid gap-4">
               {nextAction ? (
-                <div className="grid gap-4">
-                  <div className="grid gap-4 lg:grid-cols-[minmax(0,1.15fr)_minmax(260px,0.85fr)]">
+                <div className="grid w-full max-w-full gap-4">
+                  <div className="grid w-full max-w-full gap-4 lg:grid-cols-[minmax(0,1.15fr)_minmax(260px,0.85fr)]">
                     <NextActionCard
                       weekLabel={nextAction.weekLabel}
                       stageTitle={nextAction.stageTitle}
@@ -303,9 +303,9 @@ export default function BlueprintPage() {
                         });
                       }}
                     />
-                    <div className="rounded-[26px] border border-white/10 bg-white/5 p-5 shadow-card">
+                    <div className="w-full max-w-full overflow-hidden rounded-[26px] border border-white/10 bg-white/5 p-5 shadow-card">
                       <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-accentSecondary">Progress snapshot</p>
-                      <div className="mt-4 grid grid-cols-2 gap-3">
+                      <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
                         <div className="rounded-[20px] border border-white/10 bg-black/20 p-4">
                           <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-muted">Overall progress</p>
                           <p className="mt-2 text-2xl font-semibold text-white">{checklistStats.percentage}%</p>
@@ -340,12 +340,12 @@ export default function BlueprintPage() {
                 focusRequest={focusRequest}
               />
 
-              <section className="hidden rounded-[24px] border border-white/10 bg-panel-gradient p-5 lg:block">
-                <div className="grid gap-4 xl:grid-cols-[minmax(0,1.15fr)_minmax(260px,0.85fr)]">
-                  <div>
+              <section className="hidden w-full max-w-full overflow-hidden rounded-[24px] border border-white/10 bg-panel-gradient p-5 lg:block">
+                <div className="grid w-full max-w-full gap-4 xl:grid-cols-[minmax(0,1.15fr)_minmax(260px,0.85fr)]">
+                  <div className="min-w-0 max-w-full">
                     <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-accentSecondary">Current execution focus</p>
                     <h3 className="mt-2 text-2xl font-semibold text-white">{currentStage.stage.title}</h3>
-                    <p className="mt-3 max-w-3xl text-sm leading-6 text-slate-200">{currentStage.stage.summary}</p>
+                    <p className="mt-3 max-w-3xl break-words text-sm leading-6 text-slate-200">{currentStage.stage.summary}</p>
                     <div className="mt-4 grid gap-3 lg:grid-cols-2">
                       <div className="rounded-[20px] border border-white/10 bg-black/20 p-4">
                         <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-muted">Do this now</p>
@@ -358,7 +358,7 @@ export default function BlueprintPage() {
                     </div>
                   </div>
 
-                  <div className="grid gap-3">
+                  <div className="grid min-w-0 max-w-full gap-3">
                     <div className="rounded-[20px] border border-white/10 bg-black/20 p-4">
                       <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-muted">Completion snapshot</p>
                       <p className="mt-2 text-3xl font-semibold text-white">{checklistStats.percentage}%</p>
@@ -383,11 +383,11 @@ export default function BlueprintPage() {
                 </div>
               </section>
 
-              <section className="hidden rounded-[24px] border border-white/10 bg-white/5 p-5 lg:block">
-                <div className="flex flex-col gap-2 lg:flex-row lg:items-end lg:justify-between">
-                  <div>
+              <section className="hidden w-full max-w-full overflow-hidden rounded-[24px] border border-white/10 bg-white/5 p-5 lg:block">
+                <div className="flex flex-col gap-2 lg:flex-row lg:flex-wrap lg:items-end lg:justify-between">
+                  <div className="min-w-0 max-w-full">
                     <h3 className="text-lg font-semibold text-white">Detailed execution roadmap</h3>
-                    <p className="mt-2 text-sm leading-6 text-muted">
+                    <p className="mt-2 break-words text-sm leading-6 text-muted">
                       Finish the checklist inside each stage before marking the matching week complete in the milestone tracker.
                     </p>
                   </div>
@@ -409,7 +409,7 @@ export default function BlueprintPage() {
                   ))}
                 </div>
               </section>
-              <div className="hidden gap-4 lg:grid">
+              <div className="hidden w-full max-w-full gap-4 lg:grid">
                 {phases.map((phase) => (
                   <PhaseCard key={phase.title} phase={phase} />
                 ))}
@@ -419,10 +419,10 @@ export default function BlueprintPage() {
 
           {activeTab === "setup" && (
             <div className="mt-6 grid gap-6">
-              <section className="rounded-[24px] border border-white/10 bg-white/5 p-5">
+              <section className="w-full max-w-full overflow-hidden rounded-[24px] border border-white/10 bg-white/5 p-5">
                 <h3 className="text-lg font-semibold text-white">Startup requirements</h3>
                 <div className="mt-4 grid gap-4 lg:grid-cols-2">
-                  <div>
+                  <div className="min-w-0 max-w-full">
                     <p className="text-sm font-semibold text-white">Required items</p>
                     <ul className="mt-3 grid gap-2 pl-5 text-sm leading-6 text-slate-200">
                       {business.startupRequirements.requiredItems.map((item) => (
@@ -430,7 +430,7 @@ export default function BlueprintPage() {
                       ))}
                     </ul>
                   </div>
-                  <div>
+                  <div className="min-w-0 max-w-full">
                     <p className="text-sm font-semibold text-white">Optional upgrades</p>
                     <ul className="mt-3 grid gap-2 pl-5 text-sm leading-6 text-slate-200">
                       {business.startupRequirements.optionalItems.map((item) => (
@@ -441,7 +441,7 @@ export default function BlueprintPage() {
                 </div>
 
                 <div className="mt-5 grid gap-4 lg:grid-cols-2">
-                  <div>
+                  <div className="min-w-0 max-w-full">
                     <p className="text-sm font-semibold text-white">Vehicle needs</p>
                     <ul className="mt-3 grid gap-2 pl-5 text-sm leading-6 text-slate-200">
                       {business.startupRequirements.vehicleNeeds.map((item) => (
@@ -449,7 +449,7 @@ export default function BlueprintPage() {
                       ))}
                     </ul>
                   </div>
-                  <div>
+                  <div className="min-w-0 max-w-full">
                     <p className="text-sm font-semibold text-white">Core tools and equipment</p>
                     <ul className="mt-3 grid gap-2 pl-5 text-sm leading-6 text-slate-200">
                       {business.startupRequirements.tools.map((item) => (
@@ -460,32 +460,32 @@ export default function BlueprintPage() {
                 </div>
               </section>
 
-              <section className="rounded-[24px] border border-white/10 bg-white/5 p-5">
+              <section className="w-full max-w-full overflow-hidden rounded-[24px] border border-white/10 bg-white/5 p-5">
                 <h3 className="text-lg font-semibold text-white">Software / apps / tools stack</h3>
                 <div className="mt-4 grid gap-3">
                   {business.softwareStack.map((item) => (
-                    <div key={`${item.category}-${item.tool}`} className="rounded-[20px] border border-white/10 bg-slate-950/40 p-4">
+                    <div key={`${item.category}-${item.tool}`} className="w-full max-w-full overflow-hidden rounded-[20px] border border-white/10 bg-slate-950/40 p-4">
                       <div className="flex flex-wrap items-center justify-between gap-3">
                         <p className="text-sm font-semibold text-white">{item.category}</p>
                         <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs font-semibold uppercase tracking-[0.14em] text-slate-200">
                           {item.requirement}
                         </span>
                       </div>
-                      <p className="mt-2 text-sm text-slate-100">{item.tool}</p>
-                      <p className="mt-2 text-sm leading-6 text-muted">{item.notes}</p>
+                      <p className="mt-2 break-words text-sm text-slate-100">{item.tool}</p>
+                      <p className="mt-2 break-words text-sm leading-6 text-muted">{item.notes}</p>
                     </div>
                   ))}
                 </div>
               </section>
 
-              <section className="rounded-[24px] border border-white/10 bg-white/5 p-5">
+              <section className="w-full max-w-full overflow-hidden rounded-[24px] border border-white/10 bg-white/5 p-5">
                 <h3 className="text-lg font-semibold text-white">Startup budget buckets</h3>
                 <div className="mt-4 grid gap-3 md:grid-cols-2">
                   {business.startupRequirements.budgetBuckets.map((bucket) => (
-                    <div key={bucket.label} className="rounded-[20px] border border-white/10 bg-slate-950/40 p-4">
+                    <div key={bucket.label} className="w-full max-w-full overflow-hidden rounded-[20px] border border-white/10 bg-slate-950/40 p-4">
                       <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted">{bucket.label}</p>
                       <p className="mt-2 text-sm font-semibold text-white">{bucket.range}</p>
-                      <p className="mt-2 text-sm leading-6 text-muted">{bucket.note}</p>
+                      <p className="mt-2 break-words text-sm leading-6 text-muted">{bucket.note}</p>
                     </div>
                   ))}
                 </div>
@@ -495,24 +495,24 @@ export default function BlueprintPage() {
 
           {activeTab === "pricing" && (
             <div className="mt-6 grid gap-4">
-              <section className="rounded-[24px] border border-white/10 bg-white/5 p-5">
+              <section className="w-full max-w-full overflow-hidden rounded-[24px] border border-white/10 bg-white/5 p-5">
                 <h3 className="text-lg font-semibold text-white">Offer and pricing setup</h3>
                 <div className="mt-4 grid gap-4 lg:grid-cols-3">
-                  <div className="rounded-[20px] border border-white/10 bg-slate-950/40 p-4">
+                  <div className="w-full max-w-full overflow-hidden rounded-[20px] border border-white/10 bg-slate-950/40 p-4">
                     <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted">Starter</p>
-                    <p className="mt-2 text-sm text-white">{business.offerPricing.starterOffer}</p>
+                    <p className="mt-2 break-words text-sm text-white">{business.offerPricing.starterOffer}</p>
                   </div>
-                  <div className="rounded-[20px] border border-white/10 bg-slate-950/40 p-4">
+                  <div className="w-full max-w-full overflow-hidden rounded-[20px] border border-white/10 bg-slate-950/40 p-4">
                     <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted">Standard</p>
-                    <p className="mt-2 text-sm text-white">{business.offerPricing.standardOffer}</p>
+                    <p className="mt-2 break-words text-sm text-white">{business.offerPricing.standardOffer}</p>
                   </div>
-                  <div className="rounded-[20px] border border-white/10 bg-slate-950/40 p-4">
+                  <div className="w-full max-w-full overflow-hidden rounded-[20px] border border-white/10 bg-slate-950/40 p-4">
                     <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted">Premium</p>
-                    <p className="mt-2 text-sm text-white">{business.offerPricing.premiumOffer}</p>
+                    <p className="mt-2 break-words text-sm text-white">{business.offerPricing.premiumOffer}</p>
                   </div>
                 </div>
                 <div className="mt-5 grid gap-4 lg:grid-cols-2">
-                  <div>
+                  <div className="min-w-0 max-w-full">
                     <p className="text-sm font-semibold text-white">Add-ons and upsells</p>
                     <ul className="mt-3 grid gap-2 pl-5 text-sm leading-6 text-slate-200">
                       {[...business.offerPricing.addOns, ...business.offerPricing.sampleUpsells].map((item) => (
@@ -520,9 +520,9 @@ export default function BlueprintPage() {
                       ))}
                     </ul>
                   </div>
-                  <div>
+                  <div className="min-w-0 max-w-full">
                     <p className="text-sm font-semibold text-white">Pricing notes</p>
-                    <p className="mt-3 text-sm leading-6 text-muted">{business.offerPricing.minimumPriceGuidance}</p>
+                    <p className="mt-3 break-words text-sm leading-6 text-muted">{business.offerPricing.minimumPriceGuidance}</p>
                     <ul className="mt-3 grid gap-2 pl-5 text-sm leading-6 text-slate-200">
                       {business.offerPricing.pricingNotes.map((item) => (
                         <li key={item}>{item}</li>
@@ -532,7 +532,7 @@ export default function BlueprintPage() {
                 </div>
               </section>
 
-              <section className="rounded-[24px] border border-white/10 bg-white/5 p-5">
+              <section className="w-full max-w-full overflow-hidden rounded-[24px] border border-white/10 bg-white/5 p-5">
                 <h3 className="text-lg font-semibold text-white">Sales scripts</h3>
                 <div className="mt-4 grid gap-4">
                   {scripts.map((script) => (
@@ -545,7 +545,7 @@ export default function BlueprintPage() {
 
           {activeTab === "growth" && (
             <div className="mt-6 grid gap-6">
-              <section className="rounded-[24px] border border-white/10 bg-white/5 p-5">
+              <section className="w-full max-w-full overflow-hidden rounded-[24px] border border-white/10 bg-white/5 p-5">
                 <h3 className="text-lg font-semibold text-white">Customer acquisition</h3>
                 <div className="mt-4 grid gap-4 lg:grid-cols-2">
                   {[
@@ -558,7 +558,7 @@ export default function BlueprintPage() {
                     { title: "Social proof ideas", items: business.acquisitionPlan.socialProofIdeas },
                     { title: "Before / after content", items: business.acquisitionPlan.beforeAfterContentIdeas }
                   ].map(({ title, items }) => (
-                    <div key={title} className="rounded-[20px] border border-white/10 bg-slate-950/40 p-4">
+                    <div key={title} className="w-full max-w-full overflow-hidden rounded-[20px] border border-white/10 bg-slate-950/40 p-4">
                       <p className="text-sm font-semibold text-white">{title}</p>
                       <ul className="mt-3 grid gap-2 pl-5 text-sm leading-6 text-slate-200">
                         {items.map((item) => (
@@ -570,7 +570,7 @@ export default function BlueprintPage() {
                 </div>
               </section>
 
-              <section className="rounded-[24px] border border-white/10 bg-white/5 p-5">
+              <section className="w-full max-w-full overflow-hidden rounded-[24px] border border-white/10 bg-white/5 p-5">
                 <h3 className="text-lg font-semibold text-white">Operations setup</h3>
                 <div className="mt-4 grid gap-4 lg:grid-cols-2">
                   {[
@@ -583,7 +583,7 @@ export default function BlueprintPage() {
                     { title: "Review requests", items: business.operationsSetup.reviewRequestProcess },
                     { title: "Follow-up", items: business.operationsSetup.followUpProcess }
                   ].map(({ title, items }) => (
-                    <div key={title} className="rounded-[20px] border border-white/10 bg-slate-950/40 p-4">
+                    <div key={title} className="w-full max-w-full overflow-hidden rounded-[20px] border border-white/10 bg-slate-950/40 p-4">
                       <p className="text-sm font-semibold text-white">{title}</p>
                       <ul className="mt-3 grid gap-2 pl-5 text-sm leading-6 text-slate-200">
                         {items.map((item) => (
@@ -599,11 +599,11 @@ export default function BlueprintPage() {
 
           {activeTab === "compliance" && (
             <div className="mt-6 grid gap-6">
-              <section className="rounded-[24px] border border-white/10 bg-white/5 p-5">
+              <section className="w-full max-w-full overflow-hidden rounded-[24px] border border-white/10 bg-white/5 p-5">
                 <h3 className="text-lg font-semibold text-white">Licensing guidance</h3>
-                <p className="mt-4 text-sm leading-6 text-muted">{business.licensingGuidance.disclaimer}</p>
+                <p className="mt-4 break-words text-sm leading-6 text-muted">{business.licensingGuidance.disclaimer}</p>
                 <div className="mt-4 grid gap-4 lg:grid-cols-2">
-                  <div>
+                  <div className="min-w-0 max-w-full">
                     <p className="text-sm font-semibold text-white">Where to check</p>
                     <ul className="mt-3 grid gap-2 pl-5 text-sm leading-6 text-slate-200">
                       {business.licensingGuidance.whereToCheck.map((item) => (
@@ -611,7 +611,7 @@ export default function BlueprintPage() {
                       ))}
                     </ul>
                   </div>
-                  <div>
+                  <div className="min-w-0 max-w-full">
                     <p className="text-sm font-semibold text-white">Checklist</p>
                     <ul className="mt-3 grid gap-2 pl-5 text-sm leading-6 text-slate-200">
                       {business.licensingGuidance.checklist.map((item) => (
@@ -621,7 +621,7 @@ export default function BlueprintPage() {
                   </div>
                 </div>
                 <div className="mt-4 grid gap-4 lg:grid-cols-2">
-                  <div>
+                  <div className="min-w-0 max-w-full">
                     <p className="text-sm font-semibold text-white">Common categories</p>
                     <ul className="mt-3 grid gap-2 pl-5 text-sm leading-6 text-slate-200">
                       {business.licensingGuidance.commonCategories.map((item) => (
@@ -629,7 +629,7 @@ export default function BlueprintPage() {
                       ))}
                     </ul>
                   </div>
-                  <div>
+                  <div className="min-w-0 max-w-full">
                     <p className="text-sm font-semibold text-white">Questions for local agencies</p>
                     <ul className="mt-3 grid gap-2 pl-5 text-sm leading-6 text-slate-200">
                       {business.licensingGuidance.agencyPrompts.map((item) => (
@@ -640,7 +640,7 @@ export default function BlueprintPage() {
                 </div>
               </section>
 
-              <section className="rounded-[24px] border border-white/10 bg-white/5 p-5">
+              <section className="w-full max-w-full overflow-hidden rounded-[24px] border border-white/10 bg-white/5 p-5">
                 <h3 className="text-lg font-semibold text-white">Insurance guidance</h3>
                 <div className="mt-4 grid gap-4 lg:grid-cols-2">
                   {[
@@ -649,14 +649,14 @@ export default function BlueprintPage() {
                     ["Workers comp", business.insuranceGuidance.workersComp],
                     ["Equipment coverage", business.insuranceGuidance.equipmentCoverage]
                   ].map(([title, copy]) => (
-                    <div key={title} className="rounded-[20px] border border-white/10 bg-slate-950/40 p-4">
+                    <div key={title} className="w-full max-w-full overflow-hidden rounded-[20px] border border-white/10 bg-slate-950/40 p-4">
                       <p className="text-sm font-semibold text-white">{title}</p>
-                      <p className="mt-3 text-sm leading-6 text-muted">{copy}</p>
+                      <p className="mt-3 break-words text-sm leading-6 text-muted">{copy}</p>
                     </div>
                   ))}
                 </div>
                 <div className="mt-4 grid gap-4 lg:grid-cols-2">
-                  <div>
+                  <div className="min-w-0 max-w-full">
                     <p className="text-sm font-semibold text-white">Questions to ask your agent</p>
                     <ul className="mt-3 grid gap-2 pl-5 text-sm leading-6 text-slate-200">
                       {business.insuranceGuidance.questionsToAsk.map((item) => (
@@ -664,7 +664,7 @@ export default function BlueprintPage() {
                       ))}
                     </ul>
                   </div>
-                  <div>
+                  <div className="min-w-0 max-w-full">
                     <p className="text-sm font-semibold text-white">Documents to keep on file</p>
                     <ul className="mt-3 grid gap-2 pl-5 text-sm leading-6 text-slate-200">
                       {business.insuranceGuidance.documentsToKeep.map((item) => (
@@ -688,7 +688,7 @@ export default function BlueprintPage() {
                   ["sales", business.promptSuggestions.sales]
                 ] as const
               ).map(([category, prompts]) => (
-                <section key={category} className="rounded-[24px] border border-white/10 bg-white/5 p-5">
+                <section key={category} className="w-full max-w-full overflow-hidden rounded-[24px] border border-white/10 bg-white/5 p-5">
                   <h3 className="text-lg font-semibold capitalize text-white">{category} prompts</h3>
                   <ul className="mt-4 grid gap-3 pl-5 text-sm leading-6 text-slate-200">
                     {prompts.map((prompt) => (
@@ -718,7 +718,7 @@ export default function BlueprintPage() {
 
           {activeTab === "anchor" && canAccessAnchor && (
             <div className="mt-6 grid gap-6">
-              <p className="section-copy">
+              <p className="section-copy break-words">
                 Anchor Systems keeps your launch simple: track leads in a pipeline, send missed-call text-back, automate
                 follow-ups, handle scheduling, and collect invoices from one place.
               </p>
@@ -742,9 +742,9 @@ export default function BlueprintPage() {
                     body: "Book jobs, send confirmation reminders, and issue invoices after completion."
                   }
                 ].map((item) => (
-                  <article key={item.title} className="rounded-[24px] border border-white/10 bg-white/5 p-5">
+                  <article key={item.title} className="w-full max-w-full overflow-hidden rounded-[24px] border border-white/10 bg-white/5 p-5">
                     <h3 className="text-sm font-semibold text-white">{item.title}</h3>
-                    <p className="mt-3 text-sm leading-6 text-slate-200">{item.body}</p>
+                    <p className="mt-3 break-words text-sm leading-6 text-slate-200">{item.body}</p>
                   </article>
                 ))}
               </div>
@@ -768,9 +768,9 @@ export default function BlueprintPage() {
                     body: "One day after paid invoice, sends review request with direct review link and a short thank-you message."
                   }
                 ].map((automation) => (
-                  <details key={automation.title} className="rounded-[24px] border border-white/10 bg-white/5 px-5 py-4">
-                    <summary className="cursor-pointer text-sm font-semibold text-white">{automation.title}</summary>
-                    <p className="mt-3 text-sm leading-6 text-slate-200">{automation.body}</p>
+                  <details key={automation.title} className="w-full max-w-full overflow-hidden rounded-[24px] border border-white/10 bg-white/5 px-5 py-4">
+                    <summary className="cursor-pointer break-words text-sm font-semibold text-white">{automation.title}</summary>
+                    <p className="mt-3 break-words text-sm leading-6 text-slate-200">{automation.body}</p>
                   </details>
                 ))}
               </div>

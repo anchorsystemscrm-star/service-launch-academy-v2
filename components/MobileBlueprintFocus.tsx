@@ -361,18 +361,18 @@ export function MobileBlueprintFocus({
 
   return (
     <>
-      <div className="grid gap-4 lg:hidden">
+      <div className="grid w-full max-w-full gap-4 overflow-x-hidden lg:hidden">
         <div className="sticky top-3 z-20 grid gap-3">
-          <div className="overflow-hidden rounded-[26px] border border-white/10 bg-panel-gradient px-4 py-4 shadow-card backdrop-blur">
-            <div className="flex items-start justify-between gap-3">
-              <div>
+          <div className="w-full max-w-full overflow-hidden rounded-[26px] border border-white/10 bg-panel-gradient px-4 py-4 shadow-card backdrop-blur">
+            <div className="flex w-full max-w-full flex-wrap items-start justify-between gap-3">
+              <div className="min-w-0 max-w-full">
                 <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-accentSecondary">Focused mode</p>
-                <h2 className="mt-2 text-lg font-semibold text-white">{activeStage.title}</h2>
-                <p className="mt-1 text-xs uppercase tracking-[0.16em] text-muted">
+                <h2 className="mt-2 break-words text-lg font-semibold text-white">{activeStage.title}</h2>
+                <p className="mt-1 break-words text-xs uppercase tracking-[0.16em] text-muted">
                   Task {activeTask.taskIndex + 1} of {stageTaskTotal}
                 </p>
               </div>
-              <div className="rounded-2xl border border-white/10 bg-black/20 px-3 py-2 text-right">
+              <div className="w-full max-w-full rounded-2xl border border-white/10 bg-black/20 px-3 py-2 text-left sm:w-auto sm:text-right">
                 <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-muted">Overall</p>
                 <p className="mt-1 text-lg font-semibold text-white">{checklistStats.percentage}%</p>
               </div>
@@ -380,7 +380,7 @@ export function MobileBlueprintFocus({
 
             <div className="mt-4 space-y-3">
               <div>
-                <div className="mb-2 flex items-center justify-between text-[11px] font-semibold uppercase tracking-[0.16em] text-muted">
+                <div className="mb-2 flex flex-wrap items-center justify-between gap-2 text-[11px] font-semibold uppercase tracking-[0.16em] text-muted">
                   <span>Blueprint progress</span>
                   <span>
                     {checklistStats.completed}/{checklistStats.total}
@@ -398,17 +398,17 @@ export function MobileBlueprintFocus({
               </div>
 
               {nextAction ? (
-                <div className="rounded-2xl border border-white/10 bg-black/20 px-3 py-3">
-                  <div className="flex items-center justify-between gap-3">
+                <div className="w-full max-w-full rounded-2xl border border-white/10 bg-black/20 px-3 py-3">
+                  <div className="flex w-full max-w-full flex-wrap items-center justify-between gap-3">
                     <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-accentSecondary">Next action queued</p>
                     <span className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted">{nextAction.effortLabel}</span>
                   </div>
-                  <p className="mt-2 text-sm font-semibold text-white">{nextAction.title}</p>
-                  <p className="mt-1 text-sm leading-6 text-slate-300">{nextAction.description}</p>
+                  <p className="mt-2 break-words text-sm font-semibold text-white">{nextAction.title}</p>
+                  <p className="mt-1 break-words text-sm leading-6 text-slate-300">{nextAction.description}</p>
                 </div>
               ) : null}
 
-              <div className="grid grid-cols-3 gap-2">
+              <div className="grid w-full max-w-full grid-cols-1 gap-2 sm:grid-cols-3">
                 {(["focus", "checklist", "full"] as const).map((mode) => (
                   <button
                     key={mode}
@@ -448,7 +448,7 @@ export function MobileBlueprintFocus({
         {view === "focus" && (
           <div
             key={`${activeTask.stageIndex}-${activeTask.taskIndex}`}
-            className={`relative overflow-hidden rounded-[30px] border border-white/10 bg-panel-gradient p-5 shadow-card ${
+            className={`relative w-full max-w-full overflow-hidden rounded-[30px] border border-white/10 bg-panel-gradient p-5 shadow-card ${
               isAnimatingComplete ? "animate-blueprint-task-complete-strong" : "animate-blueprint-task-in-strong"
             }`}
           >
@@ -472,12 +472,12 @@ export function MobileBlueprintFocus({
             ) : null}
 
             <div className={isAnimatingComplete ? "opacity-10 transition-opacity duration-300" : "transition-opacity"}>
-              <div className="flex items-start justify-between gap-3">
-                <div>
+              <div className="flex w-full max-w-full flex-wrap items-start justify-between gap-3">
+                <div className="min-w-0 max-w-full">
                   <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-accentSecondary">Current step</p>
-                  <h3 className="mt-2 text-xl font-semibold text-white">{activeTaskItem.title}</h3>
+                  <h3 className="mt-2 break-words text-xl font-semibold text-white">{activeTaskItem.title}</h3>
                 </div>
-                <div className="rounded-2xl border border-white/10 bg-black/20 px-3 py-2 text-right">
+                <div className="w-full max-w-full rounded-2xl border border-white/10 bg-black/20 px-3 py-2 text-left sm:w-auto sm:text-right">
                   <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-muted">Week progress</p>
                   <p className="mt-1 text-sm font-semibold text-white">
                     {stageCompletedCount}/{stageTaskTotal}
@@ -485,12 +485,12 @@ export function MobileBlueprintFocus({
                 </div>
               </div>
 
-              <p className="mt-4 text-sm leading-6 text-slate-200">{activeTaskItem.instructions[0]}</p>
+              <p className="mt-4 break-words text-sm leading-6 text-slate-200">{activeTaskItem.instructions[0]}</p>
 
               {activeTaskItem.instructions.length > 1 ? (
                 <ul className="mt-4 grid gap-2 pl-5 text-sm leading-6 text-slate-300">
                   {activeTaskItem.instructions.slice(1, 3).map((instruction) => (
-                    <li key={instruction}>{instruction}</li>
+                    <li key={instruction} className="break-words">{instruction}</li>
                   ))}
                 </ul>
               ) : null}
@@ -498,13 +498,13 @@ export function MobileBlueprintFocus({
               <div className="mt-4 grid gap-3">
                 <div className="rounded-[22px] border border-white/10 bg-black/20 p-4">
                   <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-muted">Why it matters</p>
-                  <p className="mt-2 text-sm leading-6 text-slate-100">{activeTaskItem.doneDefinition}</p>
+                  <p className="mt-2 break-words text-sm leading-6 text-slate-100">{activeTaskItem.doneDefinition}</p>
                 </div>
 
                 {activeTaskItem.documentation ? (
                   <div className="rounded-[22px] border border-white/10 bg-black/20 p-4">
                     <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-muted">Document this</p>
-                    <p className="mt-2 text-sm leading-6 text-slate-100">{activeTaskItem.documentation}</p>
+                    <p className="mt-2 break-words text-sm leading-6 text-slate-100">{activeTaskItem.documentation}</p>
                   </div>
                 ) : null}
               </div>
@@ -514,29 +514,29 @@ export function MobileBlueprintFocus({
                   type="button"
                   onClick={handleCompleteTask}
                   disabled={activeTaskComplete || isAnimatingComplete}
-                  className="inline-flex items-center justify-center rounded-[22px] border border-emerald-400/30 bg-emerald-500/15 px-4 py-3 text-sm font-semibold text-white transition hover:border-emerald-300/50 hover:bg-emerald-500/20 disabled:cursor-not-allowed disabled:opacity-60"
+                  className="inline-flex w-full max-w-full items-center justify-center rounded-[22px] border border-emerald-400/30 bg-emerald-500/15 px-4 py-3 text-sm font-semibold text-white transition hover:border-emerald-300/50 hover:bg-emerald-500/20 disabled:cursor-not-allowed disabled:opacity-60"
                 >
                   {activeTaskComplete ? "Completed" : "Mark Complete"}
                 </button>
                 <button
                   type="button"
                   onClick={handleNextStep}
-                  className="inline-flex items-center justify-center rounded-[22px] border border-white/10 bg-white/5 px-4 py-3 text-sm font-semibold text-white transition hover:border-white/20 hover:bg-white/10"
+                  className="inline-flex w-full max-w-full items-center justify-center rounded-[22px] border border-white/10 bg-white/5 px-4 py-3 text-sm font-semibold text-white transition hover:border-white/20 hover:bg-white/10"
                 >
                   Next Step
                 </button>
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid w-full max-w-full grid-cols-1 gap-3 sm:grid-cols-2">
                   <button
                     type="button"
                     onClick={() => setView("checklist")}
-                    className="rounded-[20px] border border-white/10 bg-black/20 px-4 py-3 text-xs font-semibold uppercase tracking-[0.16em] text-slate-200 transition hover:border-white/20 hover:bg-white/10"
+                    className="w-full max-w-full rounded-[20px] border border-white/10 bg-black/20 px-4 py-3 text-xs font-semibold uppercase tracking-[0.16em] text-slate-200 transition hover:border-white/20 hover:bg-white/10"
                   >
                     View Week Checklist
                   </button>
                   <button
                     type="button"
                     onClick={() => setView("full")}
-                    className="rounded-[20px] border border-white/10 bg-black/20 px-4 py-3 text-xs font-semibold uppercase tracking-[0.16em] text-slate-200 transition hover:border-white/20 hover:bg-white/10"
+                    className="w-full max-w-full rounded-[20px] border border-white/10 bg-black/20 px-4 py-3 text-xs font-semibold uppercase tracking-[0.16em] text-slate-200 transition hover:border-white/20 hover:bg-white/10"
                   >
                     See Full Blueprint
                   </button>
@@ -544,11 +544,11 @@ export function MobileBlueprintFocus({
               </div>
 
               <div className="mt-5 rounded-[22px] border border-accent/20 bg-accent/5 p-4">
-                <div className="flex items-center justify-between gap-3">
+                <div className="flex w-full max-w-full flex-wrap items-center justify-between gap-3">
                   <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-accentSecondary">Momentum</p>
                   <p className="text-xs font-semibold text-slate-100">{stageProgressPercent}%</p>
                 </div>
-                <p className="mt-2 text-sm leading-6 text-slate-100">
+                <p className="mt-2 break-words text-sm leading-6 text-slate-100">
                   {remainingTasks <= 1
                     ? activeStage.momentumMessages.nearComplete
                     : currentStageData.status === "not_started"
@@ -558,19 +558,19 @@ export function MobileBlueprintFocus({
               </div>
 
               {completedTasks.length > 0 ? (
-                <div className="mt-5 rounded-[24px] border border-white/10 bg-black/20">
+                <div className="mt-5 w-full max-w-full overflow-hidden rounded-[24px] border border-white/10 bg-black/20">
                   <button
                     type="button"
                     onClick={() => setCompletedOpen((previous) => !previous)}
-                    className="flex w-full items-center justify-between gap-3 px-4 py-4 text-left"
+                    className="flex w-full max-w-full flex-wrap items-center justify-between gap-3 px-4 py-4 text-left"
                   >
-                    <div>
+                    <div className="min-w-0 max-w-full">
                       <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-accentSecondary">Completed tasks</p>
-                      <p className="mt-1 text-sm text-slate-200">
+                      <p className="mt-1 break-words text-sm text-slate-200">
                         Review completed work or reopen anything that was marked done by mistake.
                       </p>
                     </div>
-                    <div className="rounded-2xl border border-white/10 bg-white/5 px-3 py-2 text-xs font-semibold uppercase tracking-[0.14em] text-white">
+                    <div className="w-full max-w-full rounded-2xl border border-white/10 bg-white/5 px-3 py-2 text-xs font-semibold uppercase tracking-[0.14em] text-white sm:w-auto">
                       {completedTasks.length}
                     </div>
                   </button>
@@ -579,15 +579,15 @@ export function MobileBlueprintFocus({
                     <div className="border-t border-white/10 px-4 py-4 animate-blueprint-task-in">
                       <div className="grid gap-3">
                         {completedTasks.map(({ stageIndex, taskIndex, stageTitle, item }) => (
-                          <details key={`${item.id}-${taskIndex}`} className="rounded-[20px] border border-white/10 bg-white/5 px-4 py-3">
+                          <details key={`${item.id}-${taskIndex}`} className="w-full max-w-full overflow-hidden rounded-[20px] border border-white/10 bg-white/5 px-4 py-3">
                             <summary className="cursor-pointer list-none">
-                              <div className="flex items-start gap-3">
+                              <div className="flex w-full max-w-full items-start gap-3">
                                 <span className="mt-0.5 flex h-5 w-5 items-center justify-center rounded-full border border-emerald-300/40 bg-emerald-500/20 text-[11px] font-semibold text-emerald-100">
                                   ✓
                                 </span>
                                 <div className="min-w-0 flex-1">
                                   <p className="text-xs font-semibold uppercase tracking-[0.14em] text-accentSecondary">{stageTitle}</p>
-                                  <p className="mt-1 text-sm font-semibold text-white">{item.title}</p>
+                                  <p className="mt-1 break-words text-sm font-semibold text-white">{item.title}</p>
                                 </div>
                               </div>
                             </summary>
@@ -595,23 +595,23 @@ export function MobileBlueprintFocus({
                             <div className="mt-4 grid gap-3">
                               <ul className="grid gap-2 pl-5 text-sm leading-6 text-slate-200">
                                 {item.instructions.map((instruction) => (
-                                  <li key={instruction}>{instruction}</li>
+                                  <li key={instruction} className="break-words">{instruction}</li>
                                 ))}
                               </ul>
                               <div className="rounded-[18px] border border-white/10 bg-black/20 p-3">
                                 <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-muted">Done means</p>
-                                <p className="mt-2 text-sm leading-6 text-slate-100">{item.doneDefinition}</p>
+                                <p className="mt-2 break-words text-sm leading-6 text-slate-100">{item.doneDefinition}</p>
                               </div>
                               {item.documentation ? (
                                 <div className="rounded-[18px] border border-white/10 bg-black/20 p-3">
                                   <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-muted">What to document</p>
-                                  <p className="mt-2 text-sm leading-6 text-slate-100">{item.documentation}</p>
+                                  <p className="mt-2 break-words text-sm leading-6 text-slate-100">{item.documentation}</p>
                                 </div>
                               ) : null}
                               <button
                                 type="button"
                                 onClick={() => handleReopenTask(stageIndex, taskIndex)}
-                                className="inline-flex items-center justify-center rounded-[18px] border border-white/10 bg-white/5 px-4 py-3 text-xs font-semibold uppercase tracking-[0.16em] text-white"
+                                className="inline-flex w-full max-w-full items-center justify-center rounded-[18px] border border-white/10 bg-white/5 px-4 py-3 text-xs font-semibold uppercase tracking-[0.16em] text-white"
                               >
                                 Reopen Task
                               </button>
@@ -640,17 +640,17 @@ export function MobileBlueprintFocus({
               };
 
               return (
-                <div key={stage.title} className={`overflow-hidden rounded-[24px] border ${stageStatusClasses[status]}`}>
+                <div key={stage.title} className={`w-full max-w-full overflow-hidden rounded-[24px] border ${stageStatusClasses[status]}`}>
                   <button
                     type="button"
                     onClick={() => setExpandedStageIndex(isExpanded ? -1 : stageIndex)}
-                    className="flex w-full items-center justify-between gap-3 px-4 py-4 text-left"
+                    className="flex w-full max-w-full flex-wrap items-center justify-between gap-3 px-4 py-4 text-left"
                   >
-                    <div>
+                    <div className="min-w-0 max-w-full">
                       <p className="text-xs font-semibold uppercase tracking-[0.16em] text-accentSecondary">{stage.title}</p>
-                      <p className="mt-1 text-sm text-slate-100">{stage.rule}</p>
+                      <p className="mt-1 break-words text-sm text-slate-100">{stage.rule}</p>
                     </div>
-                    <div className="text-right">
+                    <div className="w-full max-w-full text-left sm:w-auto sm:text-right">
                       <p className="text-sm font-semibold text-white">
                         {completedCount}/{stage.checklist.length}
                       </p>
@@ -669,7 +669,7 @@ export function MobileBlueprintFocus({
                           return (
                             <div
                               key={item.id}
-                              className={`rounded-[20px] border px-4 py-3 transition ${
+                              className={`w-full max-w-full overflow-hidden rounded-[20px] border px-4 py-3 transition ${
                                 checked
                                   ? "border-emerald-400/30 bg-emerald-500/10"
                                   : activeTask.stageIndex === stageIndex && activeTask.taskIndex === taskIndex
@@ -680,7 +680,7 @@ export function MobileBlueprintFocus({
                               <button
                                 type="button"
                                 onClick={() => setFocusedTask({ stageIndex, taskIndex })}
-                                className="flex w-full items-start gap-3 text-left"
+                                className="flex w-full max-w-full items-start gap-3 text-left"
                               >
                                 <span
                                   className={`mt-0.5 flex h-5 w-5 items-center justify-center rounded-full border text-[11px] font-semibold ${
@@ -692,8 +692,8 @@ export function MobileBlueprintFocus({
                                   {checked ? "✓" : taskIndex + 1}
                                 </span>
                                 <div className="min-w-0 flex-1">
-                                  <p className="text-sm font-semibold text-white">{item.title}</p>
-                                  <p className="mt-1 text-sm leading-6 text-slate-300">{item.instructions[0]}</p>
+                                  <p className="break-words text-sm font-semibold text-white">{item.title}</p>
+                                  <p className="mt-1 break-words text-sm leading-6 text-slate-300">{item.instructions[0]}</p>
                                 </div>
                               </button>
 
@@ -711,21 +711,21 @@ export function MobileBlueprintFocus({
                         })}
                       </div>
 
-                      <div className="mt-4 grid grid-cols-2 gap-3">
+                      <div className="mt-4 grid w-full max-w-full grid-cols-1 gap-3 sm:grid-cols-2">
                         <button
                           type="button"
                           onClick={() => {
                             setView("focus");
                             setExpandedStageIndex(stageIndex);
                           }}
-                          className="rounded-[20px] border border-white/10 bg-black/20 px-4 py-3 text-xs font-semibold uppercase tracking-[0.16em] text-slate-200"
+                          className="w-full max-w-full rounded-[20px] border border-white/10 bg-black/20 px-4 py-3 text-xs font-semibold uppercase tracking-[0.16em] text-slate-200"
                         >
                           Back to focus
                         </button>
                         <button
                           type="button"
                           onClick={() => setView("full")}
-                          className="rounded-[20px] border border-white/10 bg-black/20 px-4 py-3 text-xs font-semibold uppercase tracking-[0.16em] text-slate-200"
+                          className="w-full max-w-full rounded-[20px] border border-white/10 bg-black/20 px-4 py-3 text-xs font-semibold uppercase tracking-[0.16em] text-slate-200"
                         >
                           Full blueprint
                         </button>
@@ -740,15 +740,15 @@ export function MobileBlueprintFocus({
 
         {view === "full" && (
           <div className="grid gap-4">
-            <div className="rounded-[24px] border border-white/10 bg-panel-gradient p-4">
+            <div className="w-full max-w-full overflow-hidden rounded-[24px] border border-white/10 bg-panel-gradient p-4">
               <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-accentSecondary">Full blueprint</p>
-              <p className="mt-2 text-sm leading-6 text-slate-200">
+              <p className="mt-2 break-words text-sm leading-6 text-slate-200">
                 Review the full roadmap when you need broader context, then jump back into Focus mode to execute the next step.
               </p>
               <button
                 type="button"
                 onClick={() => setView("focus")}
-                className="mt-4 inline-flex rounded-[20px] border border-white/10 bg-white/5 px-4 py-3 text-xs font-semibold uppercase tracking-[0.16em] text-white"
+                className="mt-4 inline-flex w-full max-w-full items-center justify-center rounded-[20px] border border-white/10 bg-white/5 px-4 py-3 text-xs font-semibold uppercase tracking-[0.16em] text-white sm:w-auto"
               >
                 Return to focus
               </button>

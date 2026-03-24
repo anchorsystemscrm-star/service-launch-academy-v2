@@ -44,10 +44,10 @@ export function ExecutionStageCard({
           : stage.momentumMessages.notStarted;
 
   return (
-    <article className="overflow-hidden rounded-[28px] border border-white/10 bg-white/5 shadow-card">
+    <article className="w-full max-w-full overflow-hidden rounded-[28px] border border-white/10 bg-white/5 shadow-card">
       <div className="border-b border-white/10 bg-panel-gradient px-5 py-5 sm:px-6">
-        <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-          <div>
+        <div className="flex flex-col gap-4 lg:flex-row lg:flex-wrap lg:items-start lg:justify-between">
+          <div className="min-w-0 max-w-full">
             <div className="flex flex-wrap items-center gap-2">
               <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-muted">
                 {stage.title}
@@ -56,11 +56,11 @@ export function ExecutionStageCard({
                 {statusLabels[status]}
               </span>
             </div>
-            <p className="mt-3 max-w-3xl text-sm leading-6 text-slate-200">{stage.summary}</p>
+            <p className="mt-3 max-w-3xl break-words text-sm leading-6 text-slate-200">{stage.summary}</p>
           </div>
 
-          <div className="min-w-[220px] rounded-[20px] border border-white/10 bg-black/20 p-4">
-            <div className="flex items-end justify-between gap-3">
+          <div className="w-full max-w-full rounded-[20px] border border-white/10 bg-black/20 p-4 lg:max-w-[220px]">
+            <div className="flex flex-wrap items-end justify-between gap-3">
               <div>
                 <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-muted">Stage progress</p>
                 <p className="mt-2 text-2xl font-semibold text-white">{completedTasks}/{totalTasks}</p>
@@ -77,36 +77,36 @@ export function ExecutionStageCard({
           </div>
         </div>
 
-        <div className="mt-4 grid gap-3 lg:grid-cols-[minmax(0,1fr)_260px]">
-          <div className="rounded-[20px] border border-white/10 bg-white/5 p-4">
+        <div className="mt-4 grid w-full max-w-full gap-3 lg:grid-cols-[minmax(0,1fr)_260px]">
+          <div className="w-full max-w-full rounded-[20px] border border-white/10 bg-white/5 p-4">
             <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-muted">Rule for this stage</p>
-            <p className="mt-2 text-sm leading-6 text-slate-100">{stage.rule}</p>
+            <p className="mt-2 break-words text-sm leading-6 text-slate-100">{stage.rule}</p>
           </div>
-          <div className="rounded-[20px] border border-white/10 bg-white/5 p-4">
+          <div className="w-full max-w-full rounded-[20px] border border-white/10 bg-white/5 p-4">
             <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-muted">Done means</p>
-            <p className="mt-2 text-sm leading-6 text-slate-100">{stage.successLooksLike}</p>
+            <p className="mt-2 break-words text-sm leading-6 text-slate-100">{stage.successLooksLike}</p>
           </div>
         </div>
 
-        <div className="mt-4 rounded-[20px] border border-accent/20 bg-accent/5 p-4">
+        <div className="mt-4 w-full max-w-full rounded-[20px] border border-accent/20 bg-accent/5 p-4">
           <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-accentSecondary">Momentum</p>
-          <p className="mt-2 text-sm leading-6 text-slate-100">{momentum}</p>
-          <p className="mt-3 text-xs font-semibold uppercase tracking-[0.16em] text-muted">Next action: {stage.nextAction}</p>
+          <p className="mt-2 break-words text-sm leading-6 text-slate-100">{momentum}</p>
+          <p className="mt-3 break-words text-xs font-semibold uppercase tracking-[0.16em] text-muted">Next action: {stage.nextAction}</p>
         </div>
       </div>
 
-      <div className="grid gap-4 p-5 sm:p-6">
+      <div className="grid w-full max-w-full gap-4 p-5 sm:p-6">
         {stage.checklist.map((item, taskIndex) => {
           const checked = taskProgress[taskIndex] ?? false;
 
           return (
             <div
               key={item.id}
-              className={`rounded-[24px] border p-4 transition ${
+              className={`w-full max-w-full overflow-hidden rounded-[24px] border p-4 transition ${
                 checked ? "border-emerald-400/30 bg-emerald-500/10" : "border-white/10 bg-slate-950/35"
               }`}
             >
-              <label className="flex cursor-pointer gap-4">
+              <label className="flex w-full max-w-full cursor-pointer gap-4">
                 <input
                   type="checkbox"
                   checked={checked}
@@ -115,7 +115,7 @@ export function ExecutionStageCard({
                 />
                 <div className="min-w-0 flex-1">
                   <div className="flex flex-wrap items-center justify-between gap-3">
-                    <p className="text-sm font-semibold text-white">{item.title}</p>
+                    <p className="break-words text-sm font-semibold text-white">{item.title}</p>
                     <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-muted">
                       {checked ? "Checked off" : "Open task"}
                     </span>
@@ -123,31 +123,31 @@ export function ExecutionStageCard({
 
                   <ul className="mt-3 grid gap-2 pl-5 text-sm leading-6 text-slate-200">
                     {item.instructions.map((instruction) => (
-                      <li key={instruction}>{instruction}</li>
+                      <li key={instruction} className="break-words whitespace-normal">{instruction}</li>
                     ))}
                   </ul>
 
-                  <div className="mt-4 grid gap-3 lg:grid-cols-2">
-                    <div className="rounded-2xl border border-white/10 bg-white/5 p-3">
+                  <div className="mt-4 grid w-full max-w-full gap-3 lg:grid-cols-2">
+                    <div className="w-full max-w-full rounded-2xl border border-white/10 bg-white/5 p-3">
                       <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-muted">Done when</p>
-                      <p className="mt-2 text-sm leading-6 text-slate-100">{item.doneDefinition}</p>
+                      <p className="mt-2 break-words text-sm leading-6 text-slate-100">{item.doneDefinition}</p>
                     </div>
                     {item.documentation ? (
-                      <div className="rounded-2xl border border-white/10 bg-white/5 p-3">
+                      <div className="w-full max-w-full rounded-2xl border border-white/10 bg-white/5 p-3">
                         <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-muted">What to document</p>
-                        <p className="mt-2 text-sm leading-6 text-slate-100">{item.documentation}</p>
+                        <p className="mt-2 break-words text-sm leading-6 text-slate-100">{item.documentation}</p>
                       </div>
                     ) : null}
                     {item.avoid ? (
-                      <div className="rounded-2xl border border-amber-400/20 bg-amber-500/5 p-3">
+                      <div className="w-full max-w-full rounded-2xl border border-amber-400/20 bg-amber-500/5 p-3">
                         <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-amber-100">What to avoid</p>
-                        <p className="mt-2 text-sm leading-6 text-slate-100">{item.avoid}</p>
+                        <p className="mt-2 break-words text-sm leading-6 text-slate-100">{item.avoid}</p>
                       </div>
                     ) : null}
                     {item.example ? (
-                      <div className="rounded-2xl border border-cyan-400/20 bg-cyan-500/5 p-3">
+                      <div className="w-full max-w-full rounded-2xl border border-cyan-400/20 bg-cyan-500/5 p-3">
                         <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-cyan-100">Example</p>
-                        <p className="mt-2 text-sm leading-6 text-slate-100">{item.example}</p>
+                        <p className="mt-2 break-words text-sm leading-6 text-slate-100">{item.example}</p>
                       </div>
                     ) : null}
                   </div>
