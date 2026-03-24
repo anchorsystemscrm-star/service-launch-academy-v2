@@ -10,6 +10,7 @@ import {
   ExecutionStageStatus,
   blueprintMilestones,
   executionStageWeekMap,
+  getBlueprintGuidedAction,
   getBlueprintTaskCoachHref,
   getChecklistCompletion,
   getExecutionStageStatus,
@@ -41,8 +42,10 @@ interface MobileBlueprintFocusProps {
   phases: Phase[];
   progress: boolean[];
   taskProgress: boolean[][];
+  taskOutputMap: Record<string, boolean>;
   onToggleTask: (stageIndex: number, taskIndex: number, checked: boolean) => void;
   onToggleWeek: (weekIndex: number, checked: boolean) => void;
+  onTaskOutputGenerated: (taskId: string) => void;
   hasProAccess: boolean;
   focusRequest?: { stageIndex: number; taskIndex: number; token: number } | null;
 }
@@ -115,8 +118,10 @@ export function MobileBlueprintFocus({
   phases,
   progress,
   taskProgress,
+  taskOutputMap,
   onToggleTask,
   onToggleWeek,
+  onTaskOutputGenerated,
   hasProAccess,
   focusRequest
 }: MobileBlueprintFocusProps) {
@@ -162,6 +167,8 @@ export function MobileBlueprintFocus({
   }
 
   const activeTaskComplete = activeStageTasks[activeTask.taskIndex] ?? false;
+  const activeTaskHasOutput = Boolean(taskOutputMap[activeTaskItem.id]);
+  const guidedAction = getBlueprintGuidedAction(activeTaskHasOutput, activeTaskComplete);
   const stageCompletedCount = activeStageTasks.filter(Boolean).length;
   const stageTaskTotal = activeStage.checklist.length;
   const stageProgressPercent = stageTaskTotal === 0 ? 0 : Math.round((stageCompletedCount / stageTaskTotal) * 100);
@@ -496,26 +503,42 @@ export function MobileBlueprintFocus({
                   aiHref={getBlueprintTaskCoachHref(activeTaskItem.aiPrompt)}
                   hasAiAccess={hasProAccess}
                   aiUpgradeHref={getCheckoutHref("pro")}
+                  highlightPrimary={guidedAction === "generate_ai"}
+                  onPrimaryAction={() => onTaskOutputGenerated(activeTaskItem.id)}
                   compact
                 />
               </div>
 
               <div className="mt-5 grid gap-3">
-                <button
-                  type="button"
-                  onClick={handleCompleteTask}
-                  disabled={activeTaskComplete || isAnimatingComplete}
-                  className="inline-flex w-full max-w-full items-center justify-center rounded-[22px] border border-emerald-400/30 bg-emerald-500/15 px-4 py-3 text-sm font-semibold text-white transition hover:border-emerald-300/50 hover:bg-emerald-500/20 disabled:cursor-not-allowed disabled:opacity-60"
-                >
-                  {activeTaskComplete ? "Completed" : "Mark Complete"}
-                </button>
-                <button
-                  type="button"
-                  onClick={handleNextStep}
-                  className="inline-flex w-full max-w-full items-center justify-center rounded-[22px] border border-white/10 bg-white/5 px-4 py-3 text-sm font-semibold text-white transition hover:border-white/20 hover:bg-white/10"
-                >
-                  Next Step
-                </button>
+                <div className="grid gap-2">
+                  {guidedAction === "mark_complete" ? (
+                    <p className="text-center text-[11px] font-semibold uppercase tracking-[0.16em] text-accentSecondary">Next step</p>
+                  ) : null}
+                  <button
+                    type="button"
+                    onClick={handleCompleteTask}
+                    disabled={activeTaskComplete || isAnimatingComplete}
+                    className={`inline-flex w-full max-w-full items-center justify-center rounded-[22px] border border-emerald-400/30 bg-emerald-500/15 px-4 py-3 text-sm font-semibold text-white transition hover:border-emerald-300/50 hover:bg-emerald-500/20 disabled:cursor-not-allowed disabled:opacity-60 ${
+                      guidedAction === "mark_complete" ? "glow-next" : ""
+                    }`}
+                  >
+                    {activeTaskComplete ? "Completed" : "Mark Complete"}
+                  </button>
+                </div>
+                <div className="grid gap-2">
+                  {guidedAction === "next_step" ? (
+                    <p className="text-center text-[11px] font-semibold uppercase tracking-[0.16em] text-accentSecondary">Next step</p>
+                  ) : null}
+                  <button
+                    type="button"
+                    onClick={handleNextStep}
+                    className={`inline-flex w-full max-w-full items-center justify-center rounded-[22px] border border-white/10 bg-white/5 px-4 py-3 text-sm font-semibold text-white transition hover:border-white/20 hover:bg-white/10 ${
+                      guidedAction === "next_step" ? "glow-next" : ""
+                    }`}
+                  >
+                    Next Step
+                  </button>
+                </div>
                 <div className="grid w-full max-w-full grid-cols-1 gap-3 sm:grid-cols-2">
                   <button
                     type="button"
@@ -754,6 +777,7 @@ export function MobileBlueprintFocus({
                 status={status}
                 milestoneText={milestoneTemplate[Math.min(stageIndex, milestoneTemplate.length - 1)]}
                 hasAiAccess={hasProAccess}
+                onTaskOutputGenerated={onTaskOutputGenerated}
                 onToggleTask={onToggleTask}
               />
             ))}

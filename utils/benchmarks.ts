@@ -26,6 +26,8 @@ export interface NextActionSuggestion {
   completed: boolean;
 }
 
+export type BlueprintGuidedAction = "generate_ai" | "mark_complete" | "next_step";
+
 export const weekGroups: WeekGroup[] = [
   { title: "Weeks 1-2: Foundation", weeks: [1, 2] },
   { title: "Weeks 3-4: Launch Motion", weeks: [3, 4] },
@@ -215,6 +217,18 @@ export function getBlueprintTaskCoachHref(prompt: string): string {
   });
 
   return `/ai-coach?${params.toString()}`;
+}
+
+export function getBlueprintGuidedAction(hasOutput: boolean, completed: boolean): BlueprintGuidedAction {
+  if (completed) {
+    return "next_step";
+  }
+
+  if (!hasOutput) {
+    return "generate_ai";
+  }
+
+  return "mark_complete";
 }
 
 export function getMilestoneState(progress: boolean[], taskProgress: boolean[][]) {

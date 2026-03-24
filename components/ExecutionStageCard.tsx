@@ -11,6 +11,7 @@ interface ExecutionStageCardProps {
   status: ExecutionStageStatus;
   milestoneText: string;
   hasAiAccess: boolean;
+  onTaskOutputGenerated?: (taskId: string) => void;
   onToggleTask: (stageIndex: number, taskIndex: number, checked: boolean) => void;
 }
 
@@ -33,6 +34,7 @@ export function ExecutionStageCard({
   status,
   milestoneText,
   hasAiAccess,
+  onTaskOutputGenerated,
   onToggleTask
 }: ExecutionStageCardProps) {
   const completedTasks = taskProgress.filter(Boolean).length;
@@ -134,6 +136,7 @@ export function ExecutionStageCard({
                       aiHref={getBlueprintTaskCoachHref(item.aiPrompt)}
                       hasAiAccess={hasAiAccess}
                       aiUpgradeHref={getCheckoutHref("pro")}
+                      onPrimaryAction={() => onTaskOutputGenerated?.(item.id)}
                     />
                   </div>
                 </div>

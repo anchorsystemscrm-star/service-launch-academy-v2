@@ -36,13 +36,16 @@ export function NextActionCard({
       <p className="mt-3 break-words text-sm leading-6 text-slate-200">{description}</p>
 
       {onStart ? (
-        <button
-          type="button"
-          onClick={onStart}
-          className="mt-5 inline-flex w-full max-w-full items-center justify-center rounded-[20px] border border-accent/50 bg-accent/10 px-4 py-3 text-sm font-semibold text-white transition hover:border-accent/80 hover:bg-accent/20 sm:w-auto"
-        >
-          {buttonLabel ?? (completed ? "Review Blueprint" : "Start Task")}
-        </button>
+        <div className="mt-5 grid gap-2">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-accentSecondary">Next step</p>
+          <button
+            type="button"
+            onClick={onStart}
+            className="glow-next inline-flex w-full max-w-full items-center justify-center rounded-[20px] border border-accent/50 bg-accent/10 px-4 py-3 text-sm font-semibold text-white transition hover:border-accent/80 hover:bg-accent/20 sm:w-auto"
+          >
+            {buttonLabel ?? (completed ? "Review Blueprint" : "Start Task")}
+          </button>
+        </div>
       ) : null}
     </section>
   );

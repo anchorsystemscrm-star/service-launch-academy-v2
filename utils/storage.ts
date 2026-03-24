@@ -33,6 +33,7 @@ export const STORAGE_KEYS = {
   coachSummaryMap: "sla_coach_summary_map",
   coachSavedOutputMap: "sla_coach_saved_output_map",
   businessPanelMap: "sla_business_panel_map",
+  blueprintTaskOutputMap: "sla_blueprint_task_output_map",
   onboardingComplete: "sla_onboarding_complete",
   subscriptionTier: "sla_subscription_tier"
 } as const;
@@ -273,6 +274,7 @@ type BusinessPanelEditableField =
   | "bookingMethod"
   | "paymentMethod";
 type StoredBusinessPanel = Partial<Record<BusinessPanelEditableField, string>>;
+type StoredBlueprintTaskOutputMap = Record<string, boolean>;
 
 function normalizeWeeks(raw: unknown): boolean[] {
   return Array.isArray(raw) && raw.length === 13 ? raw.map(Boolean) : new Array(13).fill(false);
@@ -445,6 +447,31 @@ export function useBusinessPanel(business: Business, progress: boolean[], taskPr
     hydrated,
     panel,
     setField
+  };
+}
+
+export function useBlueprintTaskOutputState(businessId: string) {
+  const { hydrated, value, setValue } = usePersistentState<Record<string, StoredBlueprintTaskOutputMap>>(
+    STORAGE_KEYS.blueprintTaskOutputMap,
+    {}
+  );
+
+  const outputMap = value[businessId] ?? {};
+
+  function setTaskHasOutput(taskId: string, hasOutput = true) {
+    setValue((previous) => ({
+      ...previous,
+      [businessId]: {
+        ...(previous[businessId] ?? {}),
+        [taskId]: hasOutput
+      }
+    }));
+  }
+
+  return {
+    hydrated,
+    outputMap,
+    setTaskHasOutput
   };
 }
 

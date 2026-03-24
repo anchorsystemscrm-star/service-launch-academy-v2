@@ -9,6 +9,8 @@ interface BlueprintTaskSupportPanelProps {
   aiHref: string;
   hasAiAccess: boolean;
   aiUpgradeHref: string;
+  highlightPrimary?: boolean;
+  onPrimaryAction?: () => void;
   compact?: boolean;
 }
 
@@ -17,6 +19,8 @@ export function BlueprintTaskSupportPanel({
   aiHref,
   hasAiAccess,
   aiUpgradeHref,
+  highlightPrimary = false,
+  onPrimaryAction,
   compact = false
 }: BlueprintTaskSupportPanelProps) {
   const ctaLabel = hasAiAccess ? "Generate with AI" : "Unlock AI Coach";
@@ -24,17 +28,26 @@ export function BlueprintTaskSupportPanel({
   return (
     <div className={`grid w-full max-w-full ${compact ? "gap-2" : "gap-3"}`}>
       <div className="grid w-full max-w-full gap-2">
+        {highlightPrimary ? (
+          <p className="text-center text-[11px] font-semibold uppercase tracking-[0.16em] text-accentSecondary">Next step</p>
+        ) : null}
         {hasAiAccess ? (
           <Link
             href={aiHref}
-            className="inline-flex w-full max-w-full items-center justify-center rounded-[18px] border border-accent/40 bg-accent/10 px-4 py-3 text-sm font-semibold text-white transition hover:border-accent/70 hover:bg-accent/15"
+            onClick={onPrimaryAction}
+            className={`inline-flex w-full max-w-full items-center justify-center rounded-[18px] border border-accent/40 bg-accent/10 px-4 py-3 text-sm font-semibold text-white transition hover:border-accent/70 hover:bg-accent/15 ${
+              highlightPrimary ? "glow-next" : ""
+            }`}
           >
             {ctaLabel}
           </Link>
         ) : (
           <a
             href={aiUpgradeHref}
-            className="inline-flex w-full max-w-full items-center justify-center rounded-[18px] border border-white/10 bg-white/5 px-4 py-3 text-sm font-semibold text-white transition hover:border-white/20 hover:bg-white/10"
+            onClick={onPrimaryAction}
+            className={`inline-flex w-full max-w-full items-center justify-center rounded-[18px] border border-white/10 bg-white/5 px-4 py-3 text-sm font-semibold text-white transition hover:border-white/20 hover:bg-white/10 ${
+              highlightPrimary ? "glow-next" : ""
+            }`}
           >
             {ctaLabel}
           </a>

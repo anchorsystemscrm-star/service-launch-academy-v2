@@ -22,7 +22,7 @@ import {
   getNextActionSuggestion,
   milestoneTemplate
 } from "@/utils/benchmarks";
-import { useAccessProfile, useActiveBlueprint, useBlueprintProgress, useBusinessPanel } from "@/utils/storage";
+import { useAccessProfile, useActiveBlueprint, useBlueprintProgress, useBlueprintTaskOutputState, useBusinessPanel } from "@/utils/storage";
 
 const tabs = [
   { id: "plan", label: "Launch Blueprint", minTier: "core" },
@@ -39,6 +39,7 @@ export default function BlueprintPage() {
   const { activeBlueprintId, setActiveBlueprintId } = useActiveBlueprint();
   const business = getFallbackBusiness(profile.selectedBusinessId);
   const { progress, taskProgress, setWeekComplete, setTaskComplete } = useBlueprintProgress(business.id, business.executionPlan);
+  const { outputMap: taskOutputMap, setTaskHasOutput } = useBlueprintTaskOutputState(business.id);
   const { panel: businessPanel, setField: setBusinessPanelField } = useBusinessPanel(business, progress, taskProgress);
   const [activeTab, setActiveTab] = useState<(typeof tabs)[number]["id"]>("plan");
   const [focusRequest, setFocusRequest] = useState<{ stageIndex: number; taskIndex: number; token: number } | null>(null);
@@ -342,8 +343,10 @@ export default function BlueprintPage() {
                 phases={phases}
                 progress={progress}
                 taskProgress={taskProgress}
+                taskOutputMap={taskOutputMap}
                 onToggleTask={setTaskComplete}
                 onToggleWeek={setWeekComplete}
+                onTaskOutputGenerated={setTaskHasOutput}
                 hasProAccess={hasProAccess}
                 focusRequest={focusRequest}
               />
@@ -413,6 +416,7 @@ export default function BlueprintPage() {
                       status={status}
                       milestoneText={milestoneTemplate[Math.min(stageIndex, milestoneTemplate.length - 1)]}
                       hasAiAccess={hasProAccess}
+                      onTaskOutputGenerated={setTaskHasOutput}
                       onToggleTask={setTaskComplete}
                     />
                   ))}
