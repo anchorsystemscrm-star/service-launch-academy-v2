@@ -16,9 +16,15 @@ export type CoachConversationRole = "user" | "assistant";
 
 export interface CoachContext {
   businessId?: string;
+  businessName?: string;
   businessType?: string;
   phase?: string;
   entryOffer?: string;
+  serviceArea?: string;
+  priceFloor?: string;
+  phone?: string;
+  bookingMethod?: string;
+  paymentMethod?: string;
   budgetRange?: string;
   city?: string;
   state?: string;

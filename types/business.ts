@@ -226,6 +226,19 @@ export interface KPIData {
   reviews: number;
 }
 
+export interface BusinessPanelData {
+  businessName: string;
+  serviceType: string;
+  serviceArea: string;
+  starterOffer: string;
+  priceFloor: string;
+  phone: string;
+  bookingMethod: string;
+  paymentMethod: string;
+  currentPhase: string;
+  completedTasks: number;
+}
+
 export interface ChatMessage {
   role: "user" | "assistant";
   text: string;

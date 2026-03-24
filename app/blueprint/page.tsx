@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
+import { BusinessPanel } from "@/components/BusinessPanel";
 import { BlueprintUpgradePrompt } from "@/components/BlueprintUpgradePrompt";
 import { ExecutionStageCard } from "@/components/ExecutionStageCard";
 import { LockedFeatureCard } from "@/components/LockedFeatureCard";
@@ -21,7 +22,7 @@ import {
   getNextActionSuggestion,
   milestoneTemplate
 } from "@/utils/benchmarks";
-import { useAccessProfile, useActiveBlueprint, useBlueprintProgress } from "@/utils/storage";
+import { useAccessProfile, useActiveBlueprint, useBlueprintProgress, useBusinessPanel } from "@/utils/storage";
 
 const tabs = [
   { id: "plan", label: "Launch Blueprint", minTier: "core" },
@@ -38,6 +39,7 @@ export default function BlueprintPage() {
   const { activeBlueprintId, setActiveBlueprintId } = useActiveBlueprint();
   const business = getFallbackBusiness(profile.selectedBusinessId);
   const { progress, taskProgress, setWeekComplete, setTaskComplete } = useBlueprintProgress(business.id, business.executionPlan);
+  const { panel: businessPanel, setField: setBusinessPanelField } = useBusinessPanel(business, progress, taskProgress);
   const [activeTab, setActiveTab] = useState<(typeof tabs)[number]["id"]>("plan");
   const [focusRequest, setFocusRequest] = useState<{ stageIndex: number; taskIndex: number; token: number } | null>(null);
 
@@ -249,9 +251,15 @@ export default function BlueprintPage() {
             executionPlan={business.executionPlan}
             onToggleWeek={setWeekComplete}
           />
+
+          <BusinessPanel panel={businessPanel} onFieldChange={setBusinessPanelField} />
         </div>
 
         <section className="panel-surface w-full min-w-0 max-w-full overflow-hidden p-6 sm:p-8">
+          <div className="mb-6 lg:hidden">
+            <BusinessPanel panel={businessPanel} onFieldChange={setBusinessPanelField} collapsible />
+          </div>
+
           <div className="flex w-full max-w-full flex-wrap gap-2">
             {tabs.map((tab) => (
               hasTierAccess(profile.tier, tab.minTier) ? (

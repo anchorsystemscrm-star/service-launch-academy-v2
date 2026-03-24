@@ -21,6 +21,7 @@ import {
   createSavedCoachOutput,
   getRecentCoachMessages,
   useAccessProfile,
+  useBusinessPanel,
   useBlueprintProgress,
   useCoachConversation,
   useCoachSummary,
@@ -34,6 +35,7 @@ export default function AICoachPage() {
   const { profile } = useAccessProfile();
   const business = getFallbackBusiness(profile.selectedBusinessId);
   const { progress, taskProgress } = useBlueprintProgress(business.id, business.executionPlan);
+  const { panel: businessPanel } = useBusinessPanel(business, progress, taskProgress);
   const currentPhase = business.blueprintPhases[getPhaseIndexByProgress(progress)];
   const initialMessage = createCoachMessage({
     role: "assistant",
@@ -174,9 +176,15 @@ export default function AICoachPage() {
           requestedMode,
           context: {
             businessId: business.id,
-            businessType: business.name,
+            businessName: businessPanel.businessName || undefined,
+            businessType: businessPanel.serviceType || business.name,
             phase: currentPhase.title,
             entryOffer: business.recommended_first_offer,
+            serviceArea: businessPanel.serviceArea || undefined,
+            priceFloor: businessPanel.priceFloor || undefined,
+            phone: businessPanel.phone || undefined,
+            bookingMethod: businessPanel.bookingMethod || undefined,
+            paymentMethod: businessPanel.paymentMethod || undefined,
             budgetRange: business.startup_cost_range,
             accessTier: profile.tier,
             completedTasks,
@@ -288,9 +296,15 @@ export default function AICoachPage() {
       businessId: business.id,
       businessContext: {
         businessId: business.id,
-        businessType: business.name,
+        businessName: businessPanel.businessName || undefined,
+        businessType: businessPanel.serviceType || business.name,
         phase: currentPhase.title,
         entryOffer: business.recommended_first_offer,
+        serviceArea: businessPanel.serviceArea || undefined,
+        priceFloor: businessPanel.priceFloor || undefined,
+        phone: businessPanel.phone || undefined,
+        bookingMethod: businessPanel.bookingMethod || undefined,
+        paymentMethod: businessPanel.paymentMethod || undefined,
         budgetRange: business.startup_cost_range,
         accessTier: profile.tier,
         completedTasks

@@ -11,9 +11,15 @@ export function buildCoachContextBlock(context?: CoachContext, summary?: string)
   }
 
   const lines = [
+    context?.businessName ? `Business name: ${context.businessName}` : null,
     context?.businessType ? `Business type: ${context.businessType}` : null,
     context?.phase ? `Current phase: ${context.phase}` : null,
     context?.entryOffer ? `Entry offer: ${context.entryOffer}` : null,
+    context?.serviceArea ? `Service area: ${context.serviceArea}` : null,
+    context?.priceFloor ? `Price floor: ${context.priceFloor}` : null,
+    context?.phone ? `Phone: ${context.phone}` : null,
+    context?.bookingMethod ? `Booking method: ${context.bookingMethod}` : null,
+    context?.paymentMethod ? `Payment method: ${context.paymentMethod}` : null,
     context?.budgetRange ? `Budget range: ${context.budgetRange}` : null,
     formatLocation(context ?? {}) ? `Market: ${formatLocation(context ?? {})}` : null,
     context?.accessTier ? `Access tier: ${context.accessTier}` : null,

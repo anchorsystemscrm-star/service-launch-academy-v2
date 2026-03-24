@@ -10,8 +10,17 @@ import {
   CoachMode,
   SavedCoachOutput
 } from "@/lib/ai/coachTypes";
-import { SubscriptionTier, ChatMessage, KPIData, ExecutionStage, BlueprintMilestoneKey } from "@/types/business";
+import {
+  SubscriptionTier,
+  ChatMessage,
+  KPIData,
+  ExecutionStage,
+  BlueprintMilestoneKey,
+  Business,
+  BusinessPanelData
+} from "@/types/business";
 import { AccessProfile, normalizeSubscriptionTier } from "@/utils/access";
+import { getPhaseIndexByProgress } from "@/utils/benchmarks";
 
 export const STORAGE_KEYS = {
   selectedBusiness: "sla_selected_business",
@@ -23,6 +32,7 @@ export const STORAGE_KEYS = {
   coachConversationMap: "sla_coach_conversation_map",
   coachSummaryMap: "sla_coach_summary_map",
   coachSavedOutputMap: "sla_coach_saved_output_map",
+  businessPanelMap: "sla_business_panel_map",
   onboardingComplete: "sla_onboarding_complete",
   subscriptionTier: "sla_subscription_tier"
 } as const;
@@ -253,6 +263,16 @@ type StoredBlueprintProgress = {
 };
 
 type StoredBlueprintMilestones = Partial<Record<BlueprintMilestoneKey, boolean>>;
+type BusinessPanelEditableField =
+  | "businessName"
+  | "serviceType"
+  | "serviceArea"
+  | "starterOffer"
+  | "priceFloor"
+  | "phone"
+  | "bookingMethod"
+  | "paymentMethod";
+type StoredBusinessPanel = Partial<Record<BusinessPanelEditableField, string>>;
 
 function normalizeWeeks(raw: unknown): boolean[] {
   return Array.isArray(raw) && raw.length === 13 ? raw.map(Boolean) : new Array(13).fill(false);
@@ -349,6 +369,83 @@ export function useBlueprintMilestones(businessId: string) {
   }
 
   return { hydrated, milestones, setMilestoneAchieved };
+}
+
+function hasCompletedTask(taskProgress: boolean[][], executionPlan: ExecutionStage[], title: string) {
+  return executionPlan.some((stage, stageIndex) =>
+    stage.checklist.some((item, taskIndex) => item.title === title && Boolean(taskProgress[stageIndex]?.[taskIndex]))
+  );
+}
+
+function extractSuggestedPriceFloor(guidance: string) {
+  const match = guidance.match(/\$[\d,]+(?:-\$?[\d,]+)?/);
+  return match?.[0] ?? guidance;
+}
+
+function getDerivedBusinessPanelData(
+  business: Business,
+  progress: boolean[],
+  taskProgress: boolean[][]
+): BusinessPanelData {
+  const starterOfferLocked = hasCompletedTask(taskProgress, business.executionPlan, "Lock the starter offer");
+  const railsReady = hasCompletedTask(taskProgress, business.executionPlan, "Set the commercial rails");
+  const completedTasks = taskProgress.reduce((sum, stage) => sum + stage.filter(Boolean).length, 0);
+  const currentPhase = business.blueprintPhases[Math.min(getPhaseIndexByProgress(progress), business.blueprintPhases.length - 1)];
+
+  return {
+    businessName: "",
+    serviceType: business.name,
+    serviceArea: "",
+    starterOffer: starterOfferLocked ? business.offerPricing.starterOffer : "",
+    priceFloor: starterOfferLocked ? extractSuggestedPriceFloor(business.offerPricing.minimumPriceGuidance) : "",
+    phone: railsReady ? "Business phone live" : "",
+    bookingMethod: railsReady ? "Phone + text intake" : "",
+    paymentMethod: railsReady ? "Invoice link or card on completion" : "",
+    currentPhase: currentPhase?.title ?? business.blueprintPhases[0]?.title ?? "Phase 1",
+    completedTasks
+  };
+}
+
+function mergeBusinessPanelData(
+  derived: BusinessPanelData,
+  overrides: StoredBusinessPanel
+): BusinessPanelData {
+  const merged = { ...derived };
+
+  (Object.keys(overrides) as BusinessPanelEditableField[]).forEach((field) => {
+    if (Object.prototype.hasOwnProperty.call(overrides, field)) {
+      merged[field] = overrides[field] ?? "";
+    }
+  });
+
+  return merged;
+}
+
+export function useBusinessPanel(business: Business, progress: boolean[], taskProgress: boolean[][]) {
+  const { hydrated, value, setValue } = usePersistentState<Record<string, StoredBusinessPanel>>(
+    STORAGE_KEYS.businessPanelMap,
+    {}
+  );
+
+  const overrides = value[business.id] ?? {};
+  const derived = getDerivedBusinessPanelData(business, progress, taskProgress);
+  const panel = mergeBusinessPanelData(derived, overrides);
+
+  function setField(field: BusinessPanelEditableField, nextValue: string) {
+    setValue((previous) => ({
+      ...previous,
+      [business.id]: {
+        ...(previous[business.id] ?? {}),
+        [field]: nextValue
+      }
+    }));
+  }
+
+  return {
+    hydrated,
+    panel,
+    setField
+  };
 }
 
 export function useKpiState(businessId: string, fallback: KPIData) {
