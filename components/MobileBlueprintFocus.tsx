@@ -50,7 +50,6 @@ interface MobileBlueprintFocusProps {
   hasProAccess: boolean;
   canAccessAnchor?: boolean;
   onOpenAnchor?: () => void;
-  focusRequest?: { stageIndex: number; taskIndex: number; token: number } | null;
 }
 
 const stepRewardCopy = [
@@ -105,8 +104,7 @@ export function MobileBlueprintFocus({
   onTaskOutputGenerated,
   hasProAccess,
   canAccessAnchor = false,
-  onOpenAnchor,
-  focusRequest
+  onOpenAnchor
 }: MobileBlueprintFocusProps) {
   const [view, setView] = useState<MobileView>("focus");
   const [activeTask, setActiveTask] = useState<TaskPosition>(() => getFirstIncompletePosition(executionPlan, taskProgress));
@@ -171,14 +169,6 @@ export function MobileBlueprintFocus({
         : []
     )
   );
-
-  useEffect(() => {
-    if (!focusRequest) {
-      return;
-    }
-
-    setFocusedTask({ stageIndex: focusRequest.stageIndex, taskIndex: focusRequest.taskIndex });
-  }, [focusRequest]);
 
   useEffect(() => {
     if (isAnimatingComplete || celebration) {
@@ -778,7 +768,7 @@ export function MobileBlueprintFocus({
                   onClick: () => dismissCelebration("full")
                 },
                 {
-                  label: "Continue to Benchmarks",
+                  label: "View Benchmarks",
                   href: "/benchmarks"
                 },
                 ...(hasProAccess
@@ -792,7 +782,7 @@ export function MobileBlueprintFocus({
               ]
             : [
                 {
-                  label: "Continue to Next Stage",
+                  label: "Next stage",
                   primary: true,
                   onClick: () => dismissCelebration("focus")
                 },

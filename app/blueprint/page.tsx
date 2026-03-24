@@ -8,7 +8,6 @@ import { BlueprintUpgradePrompt } from "@/components/BlueprintUpgradePrompt";
 import { ExecutionStageCard } from "@/components/ExecutionStageCard";
 import { LockedFeatureCard } from "@/components/LockedFeatureCard";
 import { MobileBlueprintFocus } from "@/components/MobileBlueprintFocus";
-import { NextActionCard } from "@/components/NextActionCard";
 import { PhaseCard } from "@/components/PhaseCard";
 import { ProgressTracker } from "@/components/ProgressTracker";
 import { ScriptCard } from "@/components/ScriptCard";
@@ -16,11 +15,11 @@ import { getCheckoutHref, getPricingHref, getUpgradeMessage, hasTierAccess, isEx
 import {
   buildBlueprint,
   buildScripts,
+  formatWeekLabel,
   getBlueprintAnchorStage,
   getChecklistCompletion,
   getExecutionStageStatus,
   getFallbackBusiness,
-  getNextActionSuggestion,
   milestoneTemplate
 } from "@/utils/benchmarks";
 import { useAccessProfile, useActiveBlueprint, useBlueprintProgress, useBlueprintTaskOutputState, useBusinessPanel } from "@/utils/storage";
@@ -43,7 +42,6 @@ export default function BlueprintPage() {
   const { outputMap: taskOutputMap, setTaskHasOutput } = useBlueprintTaskOutputState(business.id);
   const { panel: businessPanel, setField: setBusinessPanelField } = useBusinessPanel(business, progress, taskProgress);
   const [activeTab, setActiveTab] = useState<(typeof tabs)[number]["id"]>("plan");
-  const [focusRequest, setFocusRequest] = useState<{ stageIndex: number; taskIndex: number; token: number } | null>(null);
 
   const phases = buildBlueprint(business);
   const scripts = buildScripts(business);
@@ -53,7 +51,6 @@ export default function BlueprintPage() {
   const canAccessAnchor = hasTierAccess(profile.tier, "elite");
   const coreCheckoutHref = getCheckoutHref("core");
   const checklistStats = getChecklistCompletion(taskProgress);
-  const nextAction = getNextActionSuggestion(business.executionPlan, taskProgress);
   const anchorStage = getBlueprintAnchorStage(taskProgress, taskOutputMap);
   const visibleTabs = tabs.filter((tab) => tab.id !== "anchor" || anchorStage >= 4);
   const stageStatuses = business.executionPlan.map((stage, stageIndex) => ({
@@ -66,6 +63,7 @@ export default function BlueprintPage() {
   const currentStageTasks = currentStage ? taskProgress[currentStage.stageIndex] ?? [] : [];
   const currentStageCompletedTasks = currentStageTasks.filter(Boolean).length;
   const currentStageRemainingTasks = Math.max(currentStage.stage.checklist.length - currentStageCompletedTasks, 0);
+  const currentWeekLabel = currentStage ? formatWeekLabel(currentStage.stageIndex) : "Week 1";
   const currentStageMomentum =
     currentStage.status === "completed"
       ? currentStage.stage.momentumMessages.complete
@@ -295,50 +293,29 @@ export default function BlueprintPage() {
 
           {activeTab === "plan" && (
             <div className="mt-6 grid gap-4">
-              {nextAction ? (
-                <div className="grid w-full max-w-full gap-4">
-                  <div className="grid w-full max-w-full gap-4 lg:grid-cols-[minmax(0,1.15fr)_minmax(260px,0.85fr)]">
-                    <NextActionCard
-                      weekLabel={nextAction.weekLabel}
-                      stageTitle={nextAction.stageTitle}
-                      title={nextAction.title}
-                      description={nextAction.description}
-                      effortLabel={nextAction.effortLabel}
-                      completed={nextAction.completed}
-                      buttonLabel={nextAction.completed ? "Review Blueprint" : "Open task"}
-                      onStart={() => {
-                        setActiveTab("plan");
-                        setFocusRequest({
-                          stageIndex: nextAction.stageIndex,
-                          taskIndex: nextAction.taskIndex,
-                          token: Date.now()
-                        });
-                      }}
-                    />
-                    <div className="w-full max-w-full overflow-hidden rounded-[26px] border border-white/10 bg-white/5 p-5 shadow-card">
-                      <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-accentSecondary">Progress snapshot</p>
-                      <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
-                        <div className="rounded-[20px] border border-white/10 bg-black/20 p-4">
-                          <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-muted">Overall progress</p>
-                          <p className="mt-2 text-2xl font-semibold text-white">{checklistStats.percentage}%</p>
-                        </div>
-                        <div className="rounded-[20px] border border-white/10 bg-black/20 p-4">
-                          <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-muted">Current week</p>
-                          <p className="mt-2 text-2xl font-semibold text-white">{nextAction.weekLabel}</p>
-                        </div>
-                      </div>
-                      <div className="mt-4 h-2 overflow-hidden rounded-full bg-slate-950">
-                        <div
-                          className="h-full rounded-full bg-gradient-to-r from-accent to-accentSecondary transition-all duration-700"
-                          style={{ width: `${checklistStats.percentage}%` }}
-                        />
-                      </div>
+              <div className="grid w-full max-w-full gap-4">
+                <div className="w-full max-w-full overflow-hidden rounded-[26px] border border-white/10 bg-white/5 p-5 shadow-card">
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-accentSecondary">Progress snapshot</p>
+                  <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
+                    <div className="rounded-[20px] border border-white/10 bg-black/20 p-4">
+                      <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-muted">Overall progress</p>
+                      <p className="mt-2 text-2xl font-semibold text-white">{checklistStats.percentage}%</p>
+                    </div>
+                    <div className="rounded-[20px] border border-white/10 bg-black/20 p-4">
+                      <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-muted">Current week</p>
+                      <p className="mt-2 text-2xl font-semibold text-white">{currentWeekLabel}</p>
                     </div>
                   </div>
-
-                  <BlueprintUpgradePrompt tier={profile.tier} progressPercentage={checklistStats.percentage} />
+                  <div className="mt-4 h-2 overflow-hidden rounded-full bg-slate-950">
+                    <div
+                      className="h-full rounded-full bg-gradient-to-r from-accent to-accentSecondary transition-all duration-700"
+                      style={{ width: `${checklistStats.percentage}%` }}
+                    />
+                  </div>
                 </div>
-              ) : null}
+
+                <BlueprintUpgradePrompt tier={profile.tier} progressPercentage={checklistStats.percentage} />
+              </div>
 
               <MobileBlueprintFocus
                 businessId={business.id}
@@ -353,7 +330,6 @@ export default function BlueprintPage() {
                 hasProAccess={hasProAccess}
                 canAccessAnchor={canAccessAnchor}
                 onOpenAnchor={() => setActiveTab("anchor")}
-                focusRequest={focusRequest}
               />
 
               <section className="hidden w-full max-w-full overflow-hidden rounded-[24px] border border-white/10 bg-panel-gradient p-5 lg:block">

@@ -130,7 +130,7 @@ export function ExecutionStageCard({
                   <div className="flex flex-wrap items-center justify-between gap-3">
                     <p className="break-words text-sm font-semibold text-white">{item.title}</p>
                     <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-muted">
-                      {checked ? "Checked off" : "Open task"}
+                      {checked ? "Checked off" : "Pending"}
                     </span>
                   </div>
 
