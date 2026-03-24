@@ -126,18 +126,7 @@ export function ExecutionStageCard({
                     </span>
                   </div>
 
-                  <div className="mt-3 rounded-[18px] border border-white/10 bg-black/20 p-3">
-                    <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-accentSecondary">Instruction</p>
-                    <p className="mt-2 break-words text-sm leading-6 text-slate-100">{item.instruction}</p>
-                  </div>
-
-                  {item.instructions.length > 1 ? (
-                    <ul className="mt-3 grid gap-2 pl-5 text-sm leading-6 text-slate-200">
-                      {item.instructions.slice(1).map((instruction) => (
-                      <li key={instruction} className="break-words whitespace-normal">{instruction}</li>
-                      ))}
-                    </ul>
-                  ) : null}
+                  <p className="mt-3 break-words text-sm leading-6 text-slate-100">{item.instruction}</p>
 
                   <div className="mt-4">
                     <BlueprintTaskSupportPanel
@@ -146,25 +135,6 @@ export function ExecutionStageCard({
                       hasAiAccess={hasAiAccess}
                       aiUpgradeHref={getCheckoutHref("pro")}
                     />
-                  </div>
-
-                  <div className="mt-4 grid w-full max-w-full gap-3 lg:grid-cols-2">
-                    <div className="w-full max-w-full rounded-2xl border border-white/10 bg-white/5 p-3">
-                      <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-muted">Done when</p>
-                      <p className="mt-2 break-words text-sm leading-6 text-slate-100">{item.doneDefinition}</p>
-                    </div>
-                    {item.documentation ? (
-                      <div className="w-full max-w-full rounded-2xl border border-white/10 bg-white/5 p-3">
-                        <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-muted">What to document</p>
-                        <p className="mt-2 break-words text-sm leading-6 text-slate-100">{item.documentation}</p>
-                      </div>
-                    ) : null}
-                    {item.avoid ? (
-                      <div className="w-full max-w-full rounded-2xl border border-amber-400/20 bg-amber-500/5 p-3">
-                        <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-amber-100">What to avoid</p>
-                        <p className="mt-2 break-words text-sm leading-6 text-slate-100">{item.avoid}</p>
-                      </div>
-                    ) : null}
                   </div>
                 </div>
               </div>

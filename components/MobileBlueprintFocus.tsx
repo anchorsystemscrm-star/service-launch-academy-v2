@@ -488,31 +488,7 @@ export function MobileBlueprintFocus({
                 </div>
               </div>
 
-              {activeTaskItem.instructions.length > 1 ? (
-                <ul className="mt-4 grid gap-2 pl-5 text-sm leading-6 text-slate-300">
-                  {activeTaskItem.instructions.slice(1, 3).map((instruction) => (
-                    <li key={instruction} className="break-words">{instruction}</li>
-                  ))}
-                </ul>
-              ) : null}
-
-              <div className="mt-4 grid gap-3">
-                <div className="rounded-[22px] border border-white/10 bg-black/20 p-4">
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-accentSecondary">Instruction</p>
-                  <p className="mt-2 break-words text-sm leading-6 text-slate-100">{activeTaskItem.instruction}</p>
-                </div>
-                <div className="rounded-[22px] border border-white/10 bg-black/20 p-4">
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-muted">Why it matters</p>
-                  <p className="mt-2 break-words text-sm leading-6 text-slate-100">{activeTaskItem.doneDefinition}</p>
-                </div>
-
-                {activeTaskItem.documentation ? (
-                  <div className="rounded-[22px] border border-white/10 bg-black/20 p-4">
-                    <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-muted">Document this</p>
-                    <p className="mt-2 break-words text-sm leading-6 text-slate-100">{activeTaskItem.documentation}</p>
-                  </div>
-                ) : null}
-              </div>
+              <p className="mt-4 break-words text-sm leading-6 text-slate-100">{activeTaskItem.instruction}</p>
 
               <div className="mt-4">
                 <BlueprintTaskSupportPanel
