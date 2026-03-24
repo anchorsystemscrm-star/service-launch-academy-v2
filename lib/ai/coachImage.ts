@@ -343,7 +343,21 @@ export async function generateCoachImage(
     }
   });
 
-  const parsed = JSON.parse(promptBuilder.output_text) as CoachImagePromptPackage;
+  let parsed: CoachImagePromptPackage;
+
+  try {
+    parsed = JSON.parse(promptBuilder.output_text) as CoachImagePromptPackage;
+  } catch {
+    parsed = {
+      title: template.title,
+      assetType,
+      prompt: message,
+      supportingText: "Creative direction is ready. Refine it or rerun the request if you want a different angle.",
+      suggestions: getRefinementOptions(assetType).slice(0, 4),
+      transparentBackground: template.transparentBackground
+    };
+  }
+
   const finalPrompt = [
     parsed.prompt,
     `Quality direction: ${GLOBAL_IMAGE_QUALITY_BLOCK.join("; ")}.`,
@@ -362,7 +376,7 @@ export async function generateCoachImage(
       quality: "high",
       n: COACH_IMAGE_VARIATION_COUNT
     });
-    const generatedImages = imageResponse.data ?? [];
+    const generatedImages = (imageResponse.data ?? []).slice(0, 1);
 
     return {
       title: parsed.title,

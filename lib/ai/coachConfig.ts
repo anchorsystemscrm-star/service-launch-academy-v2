@@ -8,7 +8,7 @@ export const COACH_FAST_MODEL =
 export const COACH_IMAGE_MODEL = process.env.OPENAI_IMAGE_MODEL || "gpt-image-1.5";
 export const COACH_RECENT_MESSAGE_LIMIT = 6;
 export const COACH_SUMMARY_MAX_LINES = 6;
-export const COACH_IMAGE_VARIATION_COUNT = 2;
+export const COACH_IMAGE_VARIATION_COUNT = 1;
 
 export function getCoachTextModel(mode: CoachMode, tier: SubscriptionTier) {
   if (mode === "image" || mode === "marketing" || mode === "sop") {

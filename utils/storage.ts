@@ -54,8 +54,12 @@ function writeStorage<T>(key: string, value: T) {
     return;
   }
 
-  window.localStorage.setItem(key, JSON.stringify(value));
-  window.dispatchEvent(new CustomEvent(STORAGE_EVENT, { detail: { key } }));
+  try {
+    window.localStorage.setItem(key, JSON.stringify(value));
+    window.dispatchEvent(new CustomEvent(STORAGE_EVENT, { detail: { key } }));
+  } catch (error) {
+    console.warn(`Failed to persist storage key "${key}"`, error);
+  }
 }
 
 function setCookie(name: string, value: string, maxAgeSeconds = 60 * 60 * 24 * 365) {
@@ -419,6 +423,34 @@ function mapLegacyChatMessage(message: ChatMessage, businessId: string, index: n
   };
 }
 
+function sanitizeCoachImageForStorage(image?: CoachConversationMessage["image"]) {
+  if (!image) {
+    return undefined;
+  }
+
+  return {
+    ...image,
+    b64_json: undefined,
+    urls: image.urls?.slice(0, 2)
+  };
+}
+
+function sanitizeCoachMessageForStorage(
+  message: CoachConversationMessage
+): CoachConversationMessage {
+  return {
+    ...message,
+    image: sanitizeCoachImageForStorage(message.image)
+  };
+}
+
+function sanitizeSavedOutputForStorage(output: SavedCoachOutput): SavedCoachOutput {
+  return {
+    ...output,
+    image: sanitizeCoachImageForStorage(output.image)
+  };
+}
+
 export function useCoachConversation(
   businessId: string,
   initialMessage: CoachConversationMessage
@@ -453,9 +485,10 @@ export function useCoachConversation(
   const messages = value[businessId] ?? [initialMessage];
 
   function replaceMessages(nextMessages: CoachConversationMessage[]) {
+    const sanitizedMessages = nextMessages.map(sanitizeCoachMessageForStorage);
     setValue((previous) => ({
       ...previous,
-      [businessId]: nextMessages
+      [businessId]: sanitizedMessages
     }));
   }
 
@@ -487,9 +520,10 @@ export function useSavedCoachOutputs(businessId: string) {
   const savedOutputs = value[businessId] ?? [];
 
   function saveOutput(output: SavedCoachOutput) {
+    const sanitizedOutput = sanitizeSavedOutputForStorage(output);
     setValue((previous) => ({
       ...previous,
-      [businessId]: [output, ...(previous[businessId] ?? [])]
+      [businessId]: [sanitizedOutput, ...(previous[businessId] ?? [])]
     }));
   }
 

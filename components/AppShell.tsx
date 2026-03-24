@@ -109,8 +109,8 @@ export function AppShell({ children }: PropsWithChildren) {
   return (
     <>
       {!isLoginPage && <Navbar profile={profile} />}
-      <main className={isLoginPage ? "relative z-0 min-h-screen" : "relative z-0 min-h-screen lg:pl-[20rem]"}>
-        <div className={isLoginPage ? "relative z-10" : "relative z-10 px-4 pb-12 pt-44 sm:px-6 lg:px-8 lg:pt-32"}>
+      <main className={isLoginPage ? "relative z-0 min-h-screen max-w-full overflow-x-hidden" : "relative z-0 min-h-screen max-w-full overflow-x-hidden lg:pl-[20rem]"}>
+        <div className={isLoginPage ? "relative z-10 w-full max-w-full overflow-x-hidden" : "relative z-10 w-full max-w-full overflow-x-hidden px-4 pb-12 pt-44 sm:px-6 lg:px-8 lg:pt-32"}>
           {children}
         </div>
       </main>

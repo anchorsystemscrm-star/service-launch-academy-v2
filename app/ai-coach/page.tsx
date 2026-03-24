@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useRef, useState } from "react";
 
 import { CoachComposer } from "@/components/ai-coach/CoachComposer";
 import { CoachResponseRenderer } from "@/components/ai-coach/CoachResponseRenderer";
@@ -25,6 +25,7 @@ import {
   useCoachSummary,
   useSavedCoachOutputs
 } from "@/utils/storage";
+import { CoachResponse } from "@/lib/ai/coachTypes";
 
 export default function AICoachPage() {
   const isDev = process.env.NODE_ENV !== "production";
@@ -43,9 +44,12 @@ export default function AICoachPage() {
   const { summary, setSummary } = useCoachSummary(business.id);
   const { savedOutputs, saveOutput, deleteOutput } = useSavedCoachOutputs(business.id);
   const [isLoading, setIsLoading] = useState(false);
+  const [loadingMode, setLoadingMode] = useState<CoachMode | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [selectedSavedOutputId, setSelectedSavedOutputId] = useState<string | null>(null);
   const [saveNotice, setSaveNotice] = useState<string | null>(null);
+  const [liveResponse, setLiveResponse] = useState<CoachResponse | null>(null);
+  const requestInFlightRef = useRef(false);
 
   const hasProAccess = hasTierAccess(profile.tier, "pro");
   const hasEliteAccess = hasTierAccess(profile.tier, "elite");
@@ -101,23 +105,46 @@ export default function AICoachPage() {
     .reverse()
     .find((message) => message.role === "assistant");
   const selectedSavedOutput = savedOutputs.find((item) => item.id === selectedSavedOutputId) ?? null;
-  const activeResponse = selectedSavedOutput ?? latestAssistantMessage ?? null;
+  const persistedLatestResponse = useMemo(() => {
+    if (!latestAssistantMessage?.mode) {
+      return null;
+    }
+
+    return {
+      mode: latestAssistantMessage.mode,
+      buildStage: latestAssistantMessage.buildStage,
+      title: latestAssistantMessage.title,
+      text: latestAssistantMessage.content,
+      structured: latestAssistantMessage.structured,
+      image: latestAssistantMessage.image,
+      suggestions: latestAssistantMessage.suggestions,
+      primaryAction: latestAssistantMessage.primaryAction,
+      actions: latestAssistantMessage.actions,
+      nextStep: latestAssistantMessage.nextStep,
+      secondaryNextSteps: latestAssistantMessage.secondaryNextSteps,
+      anchorBridge: latestAssistantMessage.anchorBridge
+    } satisfies CoachResponse;
+  }, [latestAssistantMessage]);
+  const activeResponse = selectedSavedOutput ?? liveResponse ?? persistedLatestResponse ?? null;
   const recentConversation = messages.slice(-6);
+  const isImageLoading = isLoading && loadingMode === "image";
 
   async function handleSendMessage(
     message: string,
     requestedMode?: CoachMode,
     action?: CoachAction
-  ) {
+  ): Promise<boolean> {
     const trimmed = message.trim();
 
-    if (!trimmed || isLoading) {
-      return;
+    if (!trimmed || isLoading || requestInFlightRef.current) {
+      return false;
     }
 
+    requestInFlightRef.current = true;
     setError(null);
     setSaveNotice(null);
     setSelectedSavedOutputId(null);
+    setLoadingMode(requestedMode ?? null);
 
     const optimisticMessages = [
       ...messages,
@@ -187,11 +214,28 @@ export default function AICoachPage() {
           anchorBridge: data.anchorBridge
         })
       ]);
+
+      setLiveResponse({
+        mode: data.mode,
+        buildStage: data.buildStage,
+        title: data.title,
+        text: data.text || "The coach returned an empty response.",
+        structured: data.structured,
+        image: data.image,
+        suggestions: data.suggestions,
+        primaryAction: data.primaryAction,
+        actions: data.actions,
+        nextStep: data.nextStep,
+        secondaryNextSteps: data.secondaryNextSteps,
+        anchorBridge: data.anchorBridge
+      });
+      return true;
     } catch (requestError) {
       const errorMessage =
         requestError instanceof Error ? requestError.message : "The AI coach ran into an error.";
 
       setError(errorMessage);
+      setLiveResponse(null);
       replaceMessages([
         ...optimisticMessages,
         createCoachMessage({
@@ -199,8 +243,11 @@ export default function AICoachPage() {
           content: `I hit an error while generating this output: ${errorMessage}`
         })
       ]);
+      return false;
     } finally {
       setIsLoading(false);
+      setLoadingMode(null);
+      requestInFlightRef.current = false;
     }
   }
 
@@ -208,6 +255,13 @@ export default function AICoachPage() {
     if (!activeResponse || !("mode" in activeResponse) || !activeResponse.mode) {
       return;
     }
+
+    const activeResponseText =
+      typeof activeResponse === "object" && activeResponse !== null && "content" in activeResponse
+        ? typeof activeResponse.content === "string"
+          ? activeResponse.content
+          : undefined
+        : activeResponse.text;
 
     if (!canSaveCoachOutput(profile.tier, activeResponse.mode)) {
       setSaveNotice(
@@ -247,7 +301,7 @@ export default function AICoachPage() {
           : messages[messages.length - 1]?.role === "user"
             ? messages[messages.length - 1].content
             : "Saved from AI Coach",
-      text: "content" in activeResponse ? activeResponse.content : activeResponse.text,
+      text: activeResponseText,
       structured: activeResponse.structured,
       image: activeResponse.image,
       primaryAction: activeResponse.primaryAction,
@@ -263,7 +317,7 @@ export default function AICoachPage() {
   }
 
   function handleActionClick(action: CoachAction) {
-    handleSendMessage(action.prompt, action.mode, action);
+    void handleSendMessage(action.prompt, action.mode, action);
   }
 
   if (!hasProAccess) {
@@ -285,21 +339,22 @@ export default function AICoachPage() {
   }
 
   return (
-    <div className="mx-auto max-w-7xl animate-fade-up">
-      <section className="panel-surface p-6 sm:p-8">
+    <div className="mx-auto w-full max-w-7xl overflow-x-hidden animate-fade-up">
+      <section className="panel-surface w-full max-w-full overflow-hidden p-6 sm:p-8">
         <p className="text-sm font-semibold uppercase tracking-[0.18em] text-accent">AI Coach</p>
         <h1 className="mt-3 text-3xl font-semibold text-white sm:text-4xl">
           Premium in-app business assistant
         </h1>
-        <p className="mt-4 max-w-4xl text-base leading-7 text-muted">
+        <p className="mt-4 max-w-4xl break-words text-base leading-7 text-muted">
           Generate operator-grade outputs for the business you selected. The coach uses your current blueprint phase, offer, and progress so the guidance stays specific instead of generic.
         </p>
       </section>
 
-      <div className="mt-6 grid gap-6 xl:grid-cols-[minmax(0,1fr)_320px]">
-        <div className="grid gap-5 sm:gap-6">
+      <div className="mt-6 grid w-full max-w-full grid-cols-1 gap-6 overflow-x-hidden xl:grid-cols-[minmax(0,1fr)_320px]">
+        <div className="grid w-full min-w-0 max-w-full gap-5 sm:gap-6">
           <CoachComposer
             loading={isLoading}
+            loadingMode={loadingMode}
             onSendMessage={handleSendMessage}
             quickActions={quickActions}
           />
@@ -310,13 +365,19 @@ export default function AICoachPage() {
             </div>
           ) : null}
 
+          {isImageLoading ? (
+            <div className="rounded-[24px] border border-accent/20 bg-accent/5 px-5 py-4 text-sm text-white">
+              Generating logo concept. Stay on this page while the image request completes.
+            </div>
+          ) : null}
+
           {activeResponse ? (
             <section className="grid gap-4">
-              <div className="flex flex-wrap items-center gap-3 text-sm">
+              <div className="flex w-full max-w-full flex-wrap items-center gap-3 text-sm">
                 <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1.5 font-medium text-slate-200">
                   {selectedSavedOutput ? "Saved output" : "Latest output"}
                 </span>
-                <span className="text-muted">
+                <span className="break-words text-muted">
                   {selectedSavedOutput
                     ? `Saved ${new Date(selectedSavedOutput.createdAt).toLocaleDateString()}`
                     : "Generated from your current business context"}
@@ -347,12 +408,12 @@ export default function AICoachPage() {
           ) : null}
         </div>
 
-        <aside className="grid gap-6">
-          <details className="panel-surface overflow-hidden p-5 sm:p-6" open={false}>
-            <summary className="flex cursor-pointer list-none items-center justify-between gap-3">
-              <div>
+        <aside className="grid w-full min-w-0 max-w-full gap-6">
+          <details className="panel-surface w-full max-w-full overflow-hidden p-5 sm:p-6" open={false}>
+            <summary className="flex w-full max-w-full cursor-pointer list-none flex-wrap items-center justify-between gap-3">
+              <div className="min-w-0">
                 <p className="text-sm font-semibold uppercase tracking-[0.16em] text-accent">Saved outputs</p>
-                <p className="mt-2 text-sm text-muted">
+                <p className="mt-2 break-words text-sm text-muted">
                   Reopen strong work without keeping it in the main flow.
                 </p>
               </div>
@@ -362,11 +423,11 @@ export default function AICoachPage() {
             </summary>
 
             {savedOutputs.length ? (
-              <div className="mt-5 grid gap-3">
+              <div className="mt-5 grid w-full max-w-full gap-3">
                 {savedOutputs.map((item) => (
                   <article
                     key={item.id}
-                    className={`rounded-[22px] border p-4 ${
+                    className={`w-full max-w-full overflow-hidden rounded-[22px] border p-4 ${
                       selectedSavedOutputId === item.id
                         ? "border-accent/40 bg-accent/10"
                         : "border-white/10 bg-white/5"
@@ -387,7 +448,7 @@ export default function AICoachPage() {
                         Delete
                       </button>
                     </div>
-                    <p className="mt-3 max-h-[4.5rem] overflow-hidden text-sm leading-6 text-slate-200">{item.prompt}</p>
+                    <p className="mt-3 max-h-[4.5rem] overflow-hidden break-words text-sm leading-6 text-slate-200">{item.prompt}</p>
                     <button
                       type="button"
                       onClick={() => setSelectedSavedOutputId(item.id)}
@@ -405,11 +466,11 @@ export default function AICoachPage() {
             )}
           </details>
 
-          <details className="panel-surface overflow-hidden p-5 sm:p-6" open={false}>
-            <summary className="flex cursor-pointer list-none items-center justify-between gap-3">
-              <div>
+          <details className="panel-surface w-full max-w-full overflow-hidden p-5 sm:p-6" open={false}>
+            <summary className="flex w-full max-w-full cursor-pointer list-none flex-wrap items-center justify-between gap-3">
+              <div className="min-w-0">
                 <p className="text-sm font-semibold uppercase tracking-[0.16em] text-accent">Coach details</p>
-                <p className="mt-2 text-sm text-muted">
+                <p className="mt-2 break-words text-sm text-muted">
                   Context, memory, and recent messages stay here when you need them.
                 </p>
               </div>
@@ -418,53 +479,53 @@ export default function AICoachPage() {
               </span>
             </summary>
 
-            <div className="mt-5 grid gap-4">
-              <div className="grid gap-3 sm:grid-cols-2">
-                <div className="rounded-[20px] border border-white/10 bg-white/5 p-4">
+            <div className="mt-5 grid w-full max-w-full gap-4">
+              <div className="grid w-full max-w-full grid-cols-1 gap-3 sm:grid-cols-2">
+                <div className="w-full max-w-full rounded-[20px] border border-white/10 bg-white/5 p-4">
                   <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted">Selected business</p>
-                  <p className="mt-2 text-sm text-white">{business.name}</p>
+                  <p className="mt-2 break-words text-sm text-white">{business.name}</p>
                 </div>
-                <div className="rounded-[20px] border border-white/10 bg-white/5 p-4">
+                <div className="w-full max-w-full rounded-[20px] border border-white/10 bg-white/5 p-4">
                   <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted">Current phase</p>
-                  <p className="mt-2 text-sm text-white">{currentPhase.title}</p>
+                  <p className="mt-2 break-words text-sm text-white">{currentPhase.title}</p>
                 </div>
-                <div className="rounded-[20px] border border-white/10 bg-white/5 p-4">
+                <div className="w-full max-w-full rounded-[20px] border border-white/10 bg-white/5 p-4">
                   <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted">Entry offer</p>
-                  <p className="mt-2 text-sm text-white">{business.recommended_first_offer}</p>
+                  <p className="mt-2 break-words text-sm text-white">{business.recommended_first_offer}</p>
                 </div>
-                <div className="rounded-[20px] border border-white/10 bg-white/5 p-4">
+                <div className="w-full max-w-full rounded-[20px] border border-white/10 bg-white/5 p-4">
                   <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted">Access tier</p>
-                  <p className="mt-2 text-sm text-white">{tierLabels[profile.tier]}</p>
+                  <p className="mt-2 break-words text-sm text-white">{tierLabels[profile.tier]}</p>
                 </div>
-                <div className="rounded-[20px] border border-white/10 bg-white/5 p-4">
+                <div className="w-full max-w-full rounded-[20px] border border-white/10 bg-white/5 p-4">
                   <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted">Completed tasks tracked</p>
                   <p className="mt-2 text-sm text-white">{completedTasks.length}</p>
                 </div>
-                <div className="rounded-[20px] border border-white/10 bg-white/5 p-4">
+                <div className="w-full max-w-full rounded-[20px] border border-white/10 bg-white/5 p-4">
                   <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted">Build stage</p>
-                  <p className="mt-2 text-sm capitalize text-white">{activeResponse?.buildStage || "pricing"}</p>
+                  <p className="mt-2 break-words text-sm capitalize text-white">{activeResponse?.buildStage || "pricing"}</p>
                 </div>
               </div>
 
-              <div className="rounded-[22px] border border-white/10 bg-black/20 p-4">
+              <div className="w-full max-w-full overflow-hidden rounded-[22px] border border-white/10 bg-black/20 p-4">
                 <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted">Working memory</p>
-                <p className="mt-3 whitespace-pre-wrap text-sm leading-6 text-slate-100">
+                <p className="mt-3 whitespace-pre-wrap break-words text-sm leading-6 text-slate-100">
                   {summary || "The coach will start building lightweight memory after your first request."}
                 </p>
               </div>
 
-              <div className="rounded-[22px] border border-white/10 bg-black/20 p-4">
-                <div className="flex items-center justify-between gap-3">
+              <div className="w-full max-w-full overflow-hidden rounded-[22px] border border-white/10 bg-black/20 p-4">
+                <div className="flex w-full max-w-full flex-wrap items-center justify-between gap-3">
                   <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted">Recent conversation</p>
                   <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-200">
                     {recentConversation.length}
                   </span>
                 </div>
-                <div className="mt-4 grid gap-3">
+                <div className="mt-4 grid w-full max-w-full gap-3">
                   {recentConversation.map((message) => (
                     <article
                       key={message.id}
-                      className={`rounded-[18px] border px-4 py-3 text-sm leading-6 ${
+                      className={`w-full max-w-full overflow-hidden rounded-[18px] border px-4 py-3 text-sm leading-6 ${
                         message.role === "user"
                           ? "border-accent/30 bg-accent/10 text-white"
                           : "border-white/10 bg-white/5 text-slate-100"
@@ -473,7 +534,7 @@ export default function AICoachPage() {
                       <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted">
                         {message.role === "user" ? "You" : message.title || "Coach"}
                       </p>
-                      <p className="mt-2 whitespace-pre-wrap">{message.content}</p>
+                      <p className="mt-2 whitespace-pre-wrap break-words">{message.content}</p>
                     </article>
                   ))}
                 </div>
