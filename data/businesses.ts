@@ -6125,6 +6125,1763 @@ const serviceSeeds: ServiceSeed[] = [
       "Annual tune-up reminder campaign",
       "Property-manager priority service pipeline"
     ]
+  },
+  {
+    id: "event-dj",
+    name: "Event DJ",
+    tags: ["low2k", "low5k", "solo", "indoor", "outdoor", "mobile", "high", "seasonal"],
+    summary:
+      "A deposit-friendly, calendar-driven event business built around trust, proof, and polished execution. It works best when the operator sells confidence, manages timelines cleanly, and turns every successful event into referrals, reviews, and stronger package positioning.",
+    teaser:
+      "Lock deposits early, run events cleanly, and turn weekend bookings into a premium referral engine.",
+    goodFor: [
+      "Founders comfortable performing live and managing event energy in real time",
+      "Operators who can protect calendars, answer leads quickly, and stay organized around event logistics",
+      "People who want a service model with deposits, package upgrades, and strong referral upside"
+    ],
+    operatorModel:
+      "Strong solo launch if the operator can handle performance, planning, equipment transport, and customer communication without letting details slip.",
+    teamModel:
+      "Often expands into assistant support, second systems, or multi-event coverage once weekends start filling and lighting or ceremony add-ons increase complexity.",
+    serviceMode: "Indoor / outdoor / mobile event service",
+    difficulty: "Moderate because performance quality, timeline control, and trust matter on every booking",
+    startup_cost_range: "$1,500-$6,500",
+    revenue_90_range: "$4,000-$20,000",
+    revenue_1yr_range: "$45,000-$140,000",
+    margin_range: "40%-65%",
+    demandLevel: "High in most local event markets where weddings, private parties, schools, and corporate gatherings are active",
+    seasonality:
+      "Strongest in spring through fall wedding season, with holiday parties and school events creating additional peaks.",
+    recurringRevenuePotential:
+      "Moderate through venue referrals, corporate repeat events, school functions, and planner relationships, even though many bookings are one-off dates.",
+    recommended_first_offer: "4-hour private event DJ package with microphone support",
+    whyAttractive:
+      "The model supports deposits, clear package upgrades, and strong word-of-mouth growth when events run smoothly and the operator looks reliable from the first inquiry.",
+    whyPeopleStartIt:
+      "It can be launched leaner than many event businesses, customers understand the value, and a few great events can create real local reputation quickly.",
+    pros: [
+      "Deposit-friendly cash flow",
+      "Clear upsells into lighting, MC, and ceremony coverage",
+      "Strong review and referral loops when events go well",
+      "High perceived value for polished operators"
+    ],
+    cons: [
+      "Weekend-heavy schedule can compress life and operations",
+      "A bad event experience hurts reputation quickly",
+      "Timeline, communication, and backup planning must stay tight",
+      "Gear reliability matters because live events offer little room for mistakes"
+    ],
+    bestFitOperatorType:
+      "A confident, organized performer who likes event energy, handles pressure well, and can pair showmanship with serious logistics discipline.",
+    phaseBenchmarks: [
+      { leads: [6, 12], quotes: [4, 8], jobs: [1, 3], revenue: [700, 2800] },
+      { leads: [12, 20], quotes: [7, 12], jobs: [3, 5], revenue: [2600, 8200] },
+      { leads: [16, 26], quotes: [9, 15], jobs: [4, 7], revenue: [4600, 12800] },
+      { leads: [20, 32], quotes: [11, 18], jobs: [5, 8], revenue: [6400, 17000] }
+    ],
+    costs: {
+      equipment: "$1,000-$4,500",
+      insurance: "$240-$850",
+      marketing: "$180-$700",
+      software: "$60-$260",
+      misc: "$140-$480"
+    },
+    tools: [
+      "DJ controller or mixer setup",
+      "Laptop with licensed DJ software",
+      "Primary speaker pair and backup audio option",
+      "Wireless and wired microphone kit",
+      "Speaker stands, cables, and labeled power management",
+      "Music-library backup drive and offline backup playlists",
+      "Basic uplighting or dance-lighting kit",
+      "Event timeline and planning templates"
+    ],
+    equipment: [
+      "Controller or mixer",
+      "Speakers and stands",
+      "Microphone kit",
+      "Lighting kit",
+      "Road cases and cable management",
+      "Backup storage and playback setup"
+    ],
+    vehicleNeeds: [
+      "SUV, van, or hatchback setup that moves speakers, stands, controller, and lighting without chaos",
+      "Labeled cases and a fast-load system so setup and teardown stay smooth on tight venue timelines",
+      "Reliable transport because late arrival is reputation damage, not a minor inconvenience"
+    ],
+    requiredItems: [
+      "Reliable DJ controller or mixer",
+      "Primary audio system with backup path",
+      "Business phone and CRM",
+      "Simple contract, deposit, and event-planning workflow",
+      "General liability coverage"
+    ],
+    optionalItems: [
+      "Uplighting package",
+      "Ceremony sound kit",
+      "Facade or premium booth setup",
+      "Assistant or helper support",
+      "Second complete backup rig"
+    ],
+    softwareNotes: {
+      CRM: "Track event type, date, venue, deposit status, planner contact, timeline notes, and upsells for every booking.",
+      Scheduling: "Booking calendar, lead response speed, and date-hold rules matter more than fancy automation early on.",
+      Invoicing: "Use clear deposit and balance-due workflows so weekend cash flow does not depend on memory.",
+      "Graphic design / content": "Use Canva or similar for proof reels, event recap graphics, and package visuals that look premium instead of nightclub-cheap."
+    },
+    commonLicenseCategories: [
+      "General business license",
+      "Local entertainment or event-vendor registration where required",
+      "Venue insurance certificate requirements",
+      "Sales-tax questions for service-plus-rental style packages in some states"
+    ],
+    localAgencyPrompts: [
+      "Do mobile DJs need any local event-vendor registration or entertainment permits in this city or county?",
+      "Are there venue, park, or outdoor amplified-sound restrictions I should know before marketing event services here?",
+      "Do I need any local tax registration for DJ packages that include add-on equipment or lighting services?"
+    ],
+    commercialAutoNote:
+      "Worth asking about once the business vehicle regularly transports speakers, lighting, and event gear to paid jobs.",
+    equipmentCoverageNote:
+      "Important if a lost or damaged controller, speakers, microphones, or lights would cancel a booked event or cause major replacement cost.",
+    questionsToAskAgent: [
+      "How should event audio gear and lighting inventory be covered while in transit and on site?",
+      "Does liability cover venue or guest property damage tied to setup, cables, or speaker stands?",
+      "If I hire assistants or subcontract another DJ, what coverage changes should I expect?"
+    ],
+    starterOffer: "4-hour private event DJ package with one microphone and basic dance-floor support.",
+    standardOffer: "Reception or private-event package with MC support, planning call, and basic lighting.",
+    premiumOffer: "Full event package with ceremony audio, cocktail-to-reception coverage, MC service, and upgraded lighting.",
+    addOns: [
+      "Ceremony coverage",
+      "Cocktail-hour audio",
+      "Uplighting package",
+      "Extra hour",
+      "Photo booth or partner referral coordination"
+    ],
+    recurringOption:
+      "Preferred-vendor relationships with venues, planners, schools, and corporate clients for repeat event bookings.",
+    minimumPriceGuidance:
+      "Protect a real booking minimum because prep, music curation, planning calls, load-in, setup, travel, live performance, and teardown make low-price gigs look better on paper than they are.",
+    sampleUpsells: [
+      "Add ceremony or cocktail-hour coverage",
+      "Upgrade the lighting package",
+      "Add an extra hour or timeline-coordination support"
+    ],
+    pricingNotes: [
+      "Price around date value, event type, planning complexity, travel, setup time, and upgrade scope, not just performance hours.",
+      "Use deposits and clear date-hold rules so you are not reserving prime weekends for weak inquiries.",
+      "Spell out setup window, overtime terms, and what MC or ceremony service actually includes."
+    ],
+    bestFirstLeadSources: [
+      "Google Business Profile",
+      "Venue and planner referrals",
+      "Instagram and TikTok proof content",
+      "Wedding and event Facebook groups"
+    ],
+    onlineSources: [
+      "Google Business Profile",
+      "Instagram reels showing clean setups and packed dance floors",
+      "Wedding directories or niche event platforms if cost is disciplined",
+      "Planner and venue tags on event recap content"
+    ],
+    offlineSources: [
+      "Venue outreach",
+      "Planner introductions",
+      "Bridal shows or local event expos",
+      "Referral cards for photographers, coordinators, and bartending vendors"
+    ],
+    localOutreachIdeas: [
+      "Target venues and planners with a polished proof reel and concise package sheet",
+      "Promote a simple private-party package first, then upsell lighting or ceremony coverage after the consult",
+      "Use real event recap content and review screenshots instead of generic entertainment claims"
+    ],
+    referralIdeas: [
+      "Wedding planners",
+      "Photographers",
+      "Venues",
+      "Caterers",
+      "Event coordinators"
+    ],
+    neighborhoodMarketingIdeas: [
+      "Promote graduation, holiday, and school-event packages in local family communities",
+      "Run seasonal wedding-booking pushes tied to date availability",
+      "Show polished setup photos and review snippets rather than broad price promotions"
+    ],
+    socialProofIdeas: [
+      "Packed dance-floor clips",
+      "Review snippets about professionalism and timeline control",
+      "Short MC and lighting setup reels"
+    ],
+    beforeAfterContentIdeas: [
+      "Venue room before guests vs live event energy",
+      "Lighting transformation clips",
+      "Timeline recap posts",
+      "Ceremony-to-reception setup transitions"
+    ],
+    googleBusinessProfileGuidance: [
+      "Use keywords around wedding DJ, event DJ, reception DJ, MC service, and ceremony audio in the profile.",
+      "Ask reviewers to mention professionalism, crowd reading, communication, and how smoothly the event ran.",
+      "Upload clean booth, lighting, and event-floor proof so prospects see polished execution rather than generic party photos."
+    ],
+    leadResponseProcess: [
+      "Ask event date, venue, guest count, event type, and whether the lead needs DJ-only, MC, or ceremony coverage before quoting.",
+      "If the date is attractive, move quickly to a consult or planning call because event leads often compare vendors fast.",
+      "Tag venue, referral source, and event type immediately so follow-up and package language stay relevant."
+    ],
+    quotingProcess: [
+      "Quote with package tiers and clear add-ons so the customer sees an easy upgrade path instead of one vague custom number.",
+      "Send pricing with date-hold rules, deposit terms, overtime policy, and the next step to secure the booking.",
+      "Use a consult call for weddings or higher-ticket events before final scope so timeline, ceremony, and MC expectations are aligned."
+    ],
+    schedulingProcess: [
+      "Hold dates only according to a written deposit policy so the calendar does not get clogged with soft maybes.",
+      "Confirm load-in time, venue rules, power access, timeline, and contact person before the event week begins.",
+      "Use a final confirmation sequence the week of the event so changes do not arrive as surprises during setup."
+    ],
+    jobPrep: [
+      "Review playlist notes, timeline, special requests, names, and venue details before packing the vehicle.",
+      "Load gear in setup order and verify backup music, mics, and cables before departure.",
+      "Arrive with enough buffer to solve room or power issues without making the client feel the stress."
+    ],
+    completionChecklist: [
+      "Confirm final payment status, teardown condition, and all gear accounted for before leaving the venue.",
+      "Save event notes on what sold, what the crowd responded to, and which partners or guests asked for info.",
+      "Mark the client for review, referral, and anniversary or repeat-event follow-up where appropriate."
+    ],
+    invoicing: [
+      "Use deposit plus balance-due workflow with clear due dates before the event date whenever possible.",
+      "If last-minute add-ons or overtime were approved, itemize them clearly on the final invoice.",
+      "Track which event types and venues produce the highest margin so weekend calendar decisions get smarter."
+    ],
+    reviewRequestProcess: [
+      "Ask for the review within 24 hours of the event while the emotional win is still strong.",
+      "Prompt them to mention energy, professionalism, communication, and how smoothly the event felt.",
+      "If planners or venues were involved, ask for both a review and a referral introduction when the event clearly went well."
+    ],
+    followUpProcess: [
+      "Revisit warm leads whose dates were not lost and check whether they still need entertainment support.",
+      "Send anniversary, holiday, or repeat-event follow-up to private clients and corporate contacts.",
+      "Keep planners, venues, and photographers on a structured referral follow-up cadence with recent proof content."
+    ],
+    executionFocus: [
+      "Lock the starter package, deposit policy, and booking process before taking broad event inquiries.",
+      "Publish polished proof, reach out to planners and venues, and push fast consult booking on open dates.",
+      "Refine consults, contracts, and package pricing around event type, timeline complexity, and add-ons.",
+      "Install final-confirmation, review-request, and partner follow-up workflows after the first events.",
+      "Build venue and planner relationships while tightening lighting, ceremony, and premium-package upsells.",
+      "Document event prep, show flow, and post-event follow-up SOPs so the business scales without chaos."
+    ],
+    advancedSystems: [
+      "Deposit and date-hold automation",
+      "Event questionnaire and reminder sequence",
+      "Review plus vendor-referral follow-up workflow"
+    ]
+  },
+  {
+    id: "party-rentals",
+    name: "Party Rentals",
+    tags: ["low10k", "crew", "outdoor", "mobile", "high", "seasonal"],
+    summary:
+      "A package-driven event service built around inventory utilization, delivery logistics, deposits, and weekend route density. It performs well when the operator sells complete event setups instead of one isolated item at a time and protects margin with damage waivers, weather terms, and disciplined scheduling.",
+    teaser:
+      "Build profitable event packages, protect weekends with deposits, and turn inventory into repeat seasonal bookings.",
+    goodFor: [
+      "Founders comfortable with inventory ownership, logistics, and event scheduling",
+      "Operators who can manage delivery, setup, pickup, and weekend compression without losing control",
+      "People who want deposit-driven event revenue with upsells and repeat organization clients"
+    ],
+    operatorModel:
+      "Can start lean with a narrow inventory set and helper support, but most profitable versions quickly benefit from at least one setup or delivery assistant.",
+    teamModel:
+      "Scales into delivery crews, setup teams, and route-based event weekends once inventory and booking volume grow.",
+    serviceMode: "Outdoor / mobile event logistics and rental service",
+    difficulty: "Moderate because inventory management, weather policy, and delivery timing all matter",
+    startup_cost_range: "$5,000-$25,000",
+    revenue_90_range: "$6,000-$32,000",
+    revenue_1yr_range: "$80,000-$240,000",
+    margin_range: "30%-55%",
+    demandLevel: "High in family, school, church, wedding, and community-event markets",
+    seasonality:
+      "Strongest in spring through fall, with birthdays, graduations, school events, and weddings driving heavy seasonal demand.",
+    recurringRevenuePotential:
+      "Moderate through schools, churches, planners, corporate events, and repeat family or community bookings.",
+    recommended_first_offer: "Bounce house + table and chair party package",
+    whyAttractive:
+      "Deposits, visible package value, and strong event-season demand make the model compelling when inventory is selected well and the operator sells convenience instead of single-item rentals.",
+    whyPeopleStartIt:
+      "A few strong packages can create meaningful weekend revenue, and each delivery creates neighborhood visibility plus referral potential.",
+    pros: [
+      "Deposit-friendly booking model",
+      "Clear package upsells and add-ons",
+      "Strong family, school, and community demand",
+      "Visible event setups help marketing and referrals"
+    ],
+    cons: [
+      "Inventory capital and maintenance matter",
+      "Weather and cancellations can hurt if policies are weak",
+      "Weekend logistics get tight quickly",
+      "Damage, late pickup, and route mistakes can erase margin fast"
+    ],
+    bestFitOperatorType:
+      "A logistics-minded operator who likes packaging, delivery systems, and selling convenience with clear event coordination.",
+    phaseBenchmarks: [
+      { leads: [8, 14], quotes: [5, 9], jobs: [2, 4], revenue: [900, 3200] },
+      { leads: [14, 24], quotes: [9, 14], jobs: [5, 8], revenue: [3200, 9800] },
+      { leads: [18, 30], quotes: [11, 18], jobs: [7, 11], revenue: [5600, 15500] },
+      { leads: [22, 36], quotes: [13, 21], jobs: [8, 13], revenue: [7600, 20500] }
+    ],
+    costs: {
+      equipment: "$3,500-$18,000",
+      insurance: "$450-$1,350",
+      marketing: "$220-$900",
+      software: "$80-$320",
+      misc: "$300-$1,000"
+    },
+    tools: [
+      "Initial event inventory such as bounce houses, tables, chairs, or tents",
+      "Inflation blowers, tarps, stakes, and anchoring equipment",
+      "Hand truck, dollies, and loading straps",
+      "Cleaning and sanitation supplies",
+      "Inventory tags and tracking sheets",
+      "Waiver and delivery confirmation forms",
+      "Basic repair kit for minor fabric or hardware issues",
+      "Weather and route-planning workflow"
+    ],
+    equipment: [
+      "Bounce house or core inventory package",
+      "Tables and chairs inventory",
+      "Tent or canopy package if included in launch scope",
+      "Blowers, anchors, and straps",
+      "Dollies and loading tools",
+      "Storage racks or organized inventory space"
+    ],
+    vehicleNeeds: [
+      "Truck, trailer, or van setup large enough for delivery, setup, and pickup on event weekends",
+      "Secure loading system so inventory is protected and route order is easy to unload",
+      "Clean storage or warehouse plan because dirty or disorganized inventory hurts both brand and operations"
+    ],
+    requiredItems: [
+      "Core rentable inventory",
+      "Delivery vehicle or trailer setup",
+      "General liability coverage",
+      "Rental agreement, deposit, and damage-waiver workflow",
+      "Scheduling and inventory calendar"
+    ],
+    optionalItems: [
+      "Generators",
+      "Attendant add-on staffing",
+      "Linens and decor upgrades",
+      "Concession machines",
+      "Dance floor or lighting packages"
+    ],
+    softwareNotes: {
+      CRM: "Track event date, package, deposit, balance due, delivery window, and add-ons for every booking.",
+      Scheduling: "Use event calendar plus delivery and pickup route planning so weekend slots do not overlap badly.",
+      Invoicing: "Deposits, balance reminders, damage waivers, and weather terms should all be visible in the workflow.",
+      "Estimates / proposals": "Packages should clearly separate delivery, setup, pickup, attendant time, weather rules, and overtime."
+    },
+    commonLicenseCategories: [
+      "General business license",
+      "Local event-vendor registration or park use rules",
+      "Tent or temporary-structure rules depending on inventory and jurisdiction",
+      "Sales-tax questions for rental transactions"
+    ],
+    localAgencyPrompts: [
+      "Are there local rules for bounce house, tent, or temporary event-rental businesses in this city or county?",
+      "Do tent sizes or outdoor event setups trigger any permit, fire-safety, or inspection requirements here?",
+      "Are there local tax or rental-specific registrations I should complete before booking events?"
+    ],
+    commercialAutoNote:
+      "Recommended because the business relies on transport of inventory, weekend deliveries, and equipment hauling.",
+    equipmentCoverageNote:
+      "Important because damaged, stolen, or weather-ruined inventory directly affects future bookings and weekend revenue.",
+    questionsToAskAgent: [
+      "How should rental inventory be covered during transport, setup, use, and storage?",
+      "Does liability cover guest injury allegations tied to inflatable or rental equipment use?",
+      "If I add attendants or helpers, what workers' compensation or liability changes should I plan for?"
+    ],
+    starterOffer: "Bounce house plus table-and-chair package with delivery, setup, and pickup.",
+    standardOffer: "Birthday or school-event package with inflatable, seating, and optional concession add-ons.",
+    premiumOffer: "Full event-rental package with tents, tables, chairs, linens, lighting, and staffed setup support.",
+    addOns: [
+      "Generator rental",
+      "Extra rental hours",
+      "Attendant support",
+      "Linens or decor upgrades",
+      "Concession machine package"
+    ],
+    recurringOption:
+      "Preferred-vendor relationships with schools, churches, HOAs, planners, and local venues for repeat event bookings.",
+    minimumPriceGuidance:
+      "Protect a delivery minimum because loading, route time, setup, teardown, cleaning, and maintenance can make cheap single-item drops look profitable only until the calendar gets real.",
+    sampleUpsells: [
+      "Add tables and chairs to inflatable-only inquiries",
+      "Upgrade to tent or lighting package",
+      "Add extra hours, generators, or attendant time"
+    ],
+    pricingNotes: [
+      "Price around delivery zone, setup labor, event duration, weather risk, and inventory wear, not just item category.",
+      "Use deposits, balance-due dates, damage waivers, and weather language on every booking.",
+      "Weekend route density matters. A cheap far-out rental can block a better multi-package day."
+    ],
+    bestFirstLeadSources: [
+      "Google Business Profile",
+      "School and church outreach",
+      "Facebook parent groups",
+      "Planner and venue referrals"
+    ],
+    onlineSources: [
+      "Google Business Profile",
+      "Facebook and Instagram proof posts",
+      "Local event and parent groups",
+      "Simple package landing pages with clear visuals"
+    ],
+    offlineSources: [
+      "School and church introductions",
+      "Community event sponsors",
+      "Planner outreach",
+      "Yard signs or branded trailers during setups where allowed"
+    ],
+    localOutreachIdeas: [
+      "Lead with complete event packages instead of one-off item menus",
+      "Target schools, churches, HOAs, and family-heavy neighborhoods before peak seasonal weekends fill up",
+      "Use delivery and setup proof to sell reliability and convenience, not just cheap inventory"
+    ],
+    referralIdeas: [
+      "Event planners",
+      "Venues",
+      "Photographers",
+      "Caterers",
+      "Church and school administrators"
+    ],
+    neighborhoodMarketingIdeas: [
+      "Push graduation and birthday packages in family neighborhoods",
+      "Use same-weekend route availability to fill open slots efficiently",
+      "Promote bundle pricing for tables, chairs, inflatables, and concessions together"
+    ],
+    socialProofIdeas: [
+      "Event setup transformation reels",
+      "Review snippets about on-time delivery and clean equipment",
+      "Package visuals showing complete party setups"
+    ],
+    beforeAfterContentIdeas: [
+      "Empty yard to full party setup",
+      "School field-day package clips",
+      "Tent and seating transformation posts",
+      "Inflatable and concession combo package content"
+    ],
+    googleBusinessProfileGuidance: [
+      "Use keywords around party rentals, bounce house rentals, table and chair rentals, and tent rentals.",
+      "Ask reviews to mention on-time delivery, clean inventory, communication, and how easy the setup felt.",
+      "Upload package images that show finished event scenes instead of isolated inventory only."
+    ],
+    leadResponseProcess: [
+      "Ask event date, address, surface type, guest count, power access, and package needs before quoting.",
+      "Confirm whether the customer wants delivery-only, setup, teardown, or staffed support so the quote reflects real labor.",
+      "If the event is weather-sensitive or outside your delivery zone, clarify the policy immediately instead of hiding it until contract time."
+    ],
+    quotingProcess: [
+      "Quote in packages first, then add line-item upsells so the customer sees the easier bundled path.",
+      "Show deposit, balance due, damage waiver, setup scope, pickup time, and weather policy in writing.",
+      "Use a clean delivery window and surface assumptions to avoid day-of setup arguments."
+    ],
+    schedulingProcess: [
+      "Protect weekends with deposits and firm delivery windows instead of soft verbal holds.",
+      "Group routes by geography and setup complexity so one difficult stop does not wreck the whole day.",
+      "Confirm site access, gate width, stairs, power, and weather backup plan before the event week."
+    ],
+    jobPrep: [
+      "Inspect, clean, and tag inventory before loading so you are not discovering problems at the customer site.",
+      "Load the vehicle in route order and keep straps, blowers, anchors, and waivers easy to access.",
+      "Review setup notes, pickup plan, and customer contacts before departure."
+    ],
+    completionChecklist: [
+      "Document setup photos, customer sign-off, and pickup timing before leaving the site.",
+      "On pickup, inspect for damage, missing parts, and cleaning needs before the item returns to storage.",
+      "Log which packages sold well, which add-ons were requested, and which customers should be reactivated next season."
+    ],
+    invoicing: [
+      "Collect deposits at booking and keep balance-due timing visible before delivery day.",
+      "Use separate charges for overtime, attendants, generator fuel, or damage issues when applicable.",
+      "Track package margin by event type so inventory expansion follows what actually performs."
+    ],
+    reviewRequestProcess: [
+      "Ask after pickup when the event went well and the customer feels the convenience value clearly.",
+      "Prompt them to mention on-time delivery, clean equipment, easy communication, and stress-free setup.",
+      "For schools, churches, or planners, combine the review ask with a repeat-booking follow-up."
+    ],
+    followUpProcess: [
+      "Reactivate seasonal event clients before graduation, school-year kickoff, and holiday booking windows.",
+      "Follow up with planners, schools, and churches on an annual calendar rather than waiting for random inquiries.",
+      "Use past package history to suggest the next logical upgrade instead of blasting the same offer to everyone."
+    ],
+    executionFocus: [
+      "Choose the first rentable inventory package, delivery rules, deposit terms, and weather policy before broad promotion.",
+      "Launch package visuals, reach out to schools and churches, and push booked-with-deposit weekends.",
+      "Refine quoting, waiver, and route assumptions after the first deliveries and pickups.",
+      "Install review, damage, and reactivation workflows after the first completed events.",
+      "Grow packages, route density, and add-ons while protecting weather and weekend margin.",
+      "Document cleaning, loading, setup, pickup, and damage SOPs so growth does not create chaos."
+    ],
+    advancedSystems: [
+      "Deposit and balance reminder automation",
+      "Weekend route and pickup scheduling workflow",
+      "Seasonal reactivation by event type and customer segment"
+    ]
+  },
+  {
+    id: "security-camera-installation",
+    name: "Security Camera Installation",
+    tags: ["low5k", "low10k", "solo", "crew", "indoor", "outdoor", "mobile", "high"],
+    summary:
+      "A trust-heavy technical service for residential and small-business customers who want clear install scope, clean setup, and confidence using the system after the job is done. The model works best when the operator controls walkthroughs, expectations, and app onboarding instead of selling vague 'camera packages.'",
+    teaser:
+      "Walk the property, quote clearly, install cleanly, and turn security concerns into premium local service revenue.",
+    goodFor: [
+      "Technically inclined operators who communicate clearly with homeowners and small-business owners",
+      "Founders comfortable with ladders, routing, mounting, and network-aware troubleshooting",
+      "People who want higher-ticket local installs with service-call and referral upside"
+    ],
+    operatorModel:
+      "Can launch solo with a controlled scope, especially for smaller residential and small-business installs, if wiring and complexity boundaries stay clear.",
+    teamModel:
+      "Expands naturally into helper or second-tech support once multi-camera jobs, ladders, or larger small-business installs become common.",
+    serviceMode: "Indoor / outdoor / mobile technical install service",
+    difficulty: "Moderate because scope clarity, network expectations, and installation quality all matter",
+    startup_cost_range: "$2,500-$9,500",
+    revenue_90_range: "$6,000-$30,000",
+    revenue_1yr_range: "$80,000-$220,000",
+    margin_range: "35%-55%",
+    demandLevel: "High because homeowners and small businesses continue investing in visible deterrence and remote monitoring convenience",
+    seasonality:
+      "Fairly stable year-round, with occasional spikes after local security concerns, moves, business openings, and holiday travel periods.",
+    recurringRevenuePotential:
+      "Moderate through service calls, expansion installs, maintenance checkups, and monitoring-partner referrals where appropriate.",
+    recommended_first_offer: "Residential 2-camera install with app setup",
+    whyAttractive:
+      "Customers value safety and convenience, ticket sizes can be strong, and clean installs create trust-driven referrals when the scope is handled professionally.",
+    whyPeopleStartIt:
+      "It sits in a premium home and small-business category, supports labor plus hardware margin, and can begin with a narrow residential install scope.",
+    pros: [
+      "Higher-ticket installs than many basic local services",
+      "Trust-driven referrals when systems work cleanly",
+      "Clear upsell path into more cameras, doorbells, and service calls",
+      "Strong demand across both homes and small businesses"
+    ],
+    cons: [
+      "Scope mistakes hurt margin and customer trust quickly",
+      "Network and power issues can expand the job unexpectedly",
+      "Licensing rules vary by state and need real verification",
+      "Customers often underestimate wiring, app, and placement complexity"
+    ],
+    bestFitOperatorType:
+      "A detail-oriented installer who likes walkthroughs, clear technical communication, and leaving the customer feeling safer and fully oriented.",
+    phaseBenchmarks: [
+      { leads: [6, 12], quotes: [4, 8], jobs: [1, 3], revenue: [1200, 4200] },
+      { leads: [12, 20], quotes: [7, 12], jobs: [3, 5], revenue: [4200, 12600] },
+      { leads: [16, 26], quotes: [9, 15], jobs: [4, 7], revenue: [7200, 18500] },
+      { leads: [20, 32], quotes: [11, 18], jobs: [5, 8], revenue: [9800, 24000] }
+    ],
+    costs: {
+      equipment: "$1,600-$5,500",
+      insurance: "$360-$1,150",
+      marketing: "$220-$850",
+      software: "$70-$280",
+      misc: "$220-$650"
+    },
+    tools: [
+      "Drill and driver kit",
+      "Ladders and safe mounting equipment",
+      "Fish tape and cable-routing tools",
+      "Ethernet crimping and testing tools",
+      "Stud finder, bits, anchors, and mounting hardware",
+      "Voltage or continuity tester",
+      "Tablet or phone for app onboarding and testing",
+      "Wire-labeling and documentation supplies"
+    ],
+    equipment: [
+      "Drill and mounting kit",
+      "Ladder setup",
+      "Network and testing tools",
+      "Cable-routing tools",
+      "Mounting hardware bins",
+      "Protective gear and drop cloths"
+    ],
+    vehicleNeeds: [
+      "Van, SUV, or truck setup that keeps ladders, drills, cable kits, and hardware organized and ready for walkthrough or install dispatch",
+      "Enough space to move small inventory and tools without mixing finished devices, boxes, and jobsite trash together",
+      "Secure storage because tools and hardware loss can stop installs immediately"
+    ],
+    requiredItems: [
+      "Core install tool kit",
+      "Ladder and safe mounting gear",
+      "General liability coverage",
+      "Quote template with clear scope and exclusions",
+      "Business phone and CRM"
+    ],
+    optionalItems: [
+      "Device demo kit for consults",
+      "Second installer or helper support",
+      "Structured low-voltage inventory bins",
+      "Premium label printer",
+      "Service-call subscription or care-plan workflow"
+    ],
+    softwareNotes: {
+      CRM: "Track property type, camera count, wired or wireless expectations, network notes, and quote exclusions on every lead.",
+      Scheduling: "Leave enough time for app onboarding, walkthroughs, and troubleshooting instead of booking installs back to back like simple handyman jobs.",
+      "Estimates / proposals": "Separate labor, hardware, extra routing, app setup, and network assumptions clearly so customers understand the scope."
+    },
+    commonLicenseCategories: [
+      "General business license",
+      "Low-voltage or alarm-related licensing questions depending on state",
+      "Electrical scope limitations for device power and wiring",
+      "Contractor registration in some jurisdictions"
+    ],
+    localAgencyPrompts: [
+      "Do residential or small-business camera installs require low-voltage, alarm, or contractor licensing here?",
+      "What wiring or power work is allowed without an electrical license in this state or city?",
+      "If I sell and install video doorbells, cameras, and network video devices together, does that change licensing requirements?"
+    ],
+    commercialAutoNote:
+      "Recommended because ladders, tools, and hardware travel daily and the vehicle functions as the install platform.",
+    equipmentCoverageNote:
+      "Important if ladders, testing tools, devices, and install gear would be costly or disruptive to replace quickly.",
+    questionsToAskAgent: [
+      "Does my policy cover property damage from mounting, drilling, routing, or ladder work?",
+      "How should install tools, ladders, and hardware inventory be covered in the vehicle?",
+      "If I add monitoring-partner referrals or service plans, are there any insurance details I should clarify?"
+    ],
+    starterOffer: "Two-camera residential install with mounting, app setup, and customer walkthrough.",
+    standardOffer: "Four-camera home or small-business install with app onboarding and clear placement planning.",
+    premiumOffer: "Full security package with multi-camera layout, recorder setup, app training, and follow-up support.",
+    addOns: [
+      "Video doorbell install",
+      "Extra camera",
+      "Recorder or storage upgrade",
+      "Network extension or tidy-up",
+      "Post-install service visit"
+    ],
+    recurringOption:
+      "Service-call, expansion, and annual checkup relationship for homes and small businesses that may add cameras or need support later.",
+    minimumPriceGuidance:
+      "Protect a site-visit and install minimum because planning, mounting, app onboarding, labeling, and customer training make these jobs much more than hanging devices on walls.",
+    sampleUpsells: [
+      "Add a video doorbell or extra exterior camera",
+      "Upgrade storage or recorder setup",
+      "Add a service visit or annual system check"
+    ],
+    pricingNotes: [
+      "Quote around camera count, mounting conditions, routing difficulty, wireless versus wired expectations, and customer network readiness.",
+      "Spell out what is not included, especially major electrical work, drywall patching, unsupported network troubleshooting, or commercial access systems.",
+      "Customers will often underestimate install complexity, so scope clarity is part of the sale."
+    ],
+    bestFirstLeadSources: [
+      "Google Business Profile",
+      "Realtor and new-homeowner referrals",
+      "Small-business owner outreach",
+      "Electrician and low-voltage partner referrals"
+    ],
+    onlineSources: [
+      "Google Business Profile",
+      "Neighborhood groups",
+      "Local search ads if tracked tightly",
+      "Short proof clips showing tidy installs and app walkthroughs"
+    ],
+    offlineSources: [
+      "Realtor outreach",
+      "Small-business visits",
+      "Electrician and handyman partnerships",
+      "Neighborhood referral cards"
+    ],
+    localOutreachIdeas: [
+      "Lead with clear install scope and customer education rather than fear-heavy security language",
+      "Target new homeowners and small-business openings where install timing is clean and buying intent is high",
+      "Use proof of neat mounting, labeling, and app setup instead of generic surveillance messaging"
+    ],
+    referralIdeas: [
+      "Realtors",
+      "Electricians",
+      "IT providers",
+      "Property managers",
+      "Handymen"
+    ],
+    neighborhoodMarketingIdeas: [
+      "Promote simple starter packages for homeowners who want front-door and driveway coverage first",
+      "Run new-homeowner install campaigns",
+      "Use local proof and review screenshots focused on professionalism and clarity"
+    ],
+    socialProofIdeas: [
+      "Clean before-and-after install photos",
+      "App onboarding clips",
+      "Review snippets around professionalism, neatness, and explanation quality"
+    ],
+    beforeAfterContentIdeas: [
+      "Entryway camera install comparisons",
+      "Small-business front-desk coverage setups",
+      "Recorder and cable-management closeups",
+      "Customer training and app handoff visuals"
+    ],
+    googleBusinessProfileGuidance: [
+      "Use keywords around security camera installation, home camera installation, business camera installation, and video doorbell setup.",
+      "Ask reviews to mention professionalism, clean work, communication, and how confident the customer felt after training.",
+      "Post tidy install photos and clear package language so prospects understand the service quickly."
+    ],
+    leadResponseProcess: [
+      "Ask property type, camera count, indoor or outdoor coverage, wired or wireless preference, and whether a recorder is already on site.",
+      "If the customer is vague, guide them through a short site-intake process instead of throwing out a rough guess too early.",
+      "Flag difficult installs early, such as high ladders, long routing, weak Wi-Fi, or unsupported network conditions."
+    ],
+    quotingProcess: [
+      "Use walkthroughs or photo reviews to define camera count, placements, routing path, power assumptions, and app onboarding scope.",
+      "Separate labor, hardware, additional routing, and optional upgrades in the quote so the customer sees a clean decision path.",
+      "State exclusions clearly and make unsupported power, electrical, or network work explicit before the job is approved."
+    ],
+    schedulingProcess: [
+      "Leave install windows large enough for mounting, testing, and customer training instead of treating jobs like simple one-hour calls.",
+      "Confirm access, ladder conditions, Wi-Fi name and password availability, and any business-hours constraints before arrival.",
+      "Keep site notes and device list attached to the appointment so setup is not rebuilt from memory."
+    ],
+    jobPrep: [
+      "Review placements, devices, routing plan, and app-account details before loading the vehicle.",
+      "Stage ladders, mounts, anchors, labeling supplies, and testing tools in install order.",
+      "Verify device compatibility and customer expectations before the first hole is drilled."
+    ],
+    completionChecklist: [
+      "Confirm all devices are mounted, tested, visible in the app, and labeled clearly where appropriate.",
+      "Walk the customer through the app, alerts, recordings, and any limitations before leaving.",
+      "Save final device list, passwords or account handoff notes if appropriate, and future service opportunities in the CRM."
+    ],
+    invoicing: [
+      "Use deposits on larger hardware-heavy jobs and collect final payment immediately after the walkthrough whenever possible.",
+      "Itemize hardware, labor, extra routing, and service-call add-ons so the customer sees what was delivered.",
+      "Track which install types create the best margin so future offers stay tight."
+    ],
+    reviewRequestProcess: [
+      "Ask after the customer sees the finished install and understands how to use the app confidently.",
+      "Prompt them to mention clean work, clear explanations, and professionalism.",
+      "If a realtor, electrician, or business owner referred the job, combine the review ask with a referral thank-you follow-up."
+    ],
+    followUpProcess: [
+      "Check in after installation to confirm the customer is using the system and to surface small issues before they become complaints.",
+      "Re-open leads for doorbells, recorder upgrades, or extra camera coverage after the first install proves itself.",
+      "Offer annual or seasonal system checkups to customers who want ongoing support."
+    ],
+    executionFocus: [
+      "Define exactly which residential and small-business install scope you will take and what you will exclude at launch.",
+      "Launch proof-driven local marketing and partner outreach to realtors, electricians, and small-business owners.",
+      "Refine walkthrough, quote, and scope-exclusion language after the first install leads.",
+      "Install app-onboarding, review-request, and follow-up support workflows.",
+      "Grow average ticket with extra cameras, doorbells, and service-call upsells.",
+      "Document walkthrough, install, and customer-training SOPs so the work stays neat and scalable."
+    ],
+    advancedSystems: [
+      "Walkthrough and scope-confirmation workflow",
+      "Quote follow-up plus hardware approval sequence",
+      "Post-install check-in and expansion reminder campaign"
+    ]
+  },
+  {
+    id: "smart-home-installation",
+    name: "Smart Home Installation",
+    tags: ["low5k", "solo", "indoor", "mobile", "high", "beginner"],
+    summary:
+      "A premium convenience service for homeowners who want devices installed, configured, connected, and explained without the frustration of DIY troubleshooting. The business works when the operator sells calm setup, app onboarding, and practical household improvements rather than gadget hype.",
+    teaser:
+      "Install practical smart-home upgrades, train the customer cleanly, and turn convenience into a premium local service.",
+    goodFor: [
+      "Technically comfortable operators who enjoy patient homeowner communication",
+      "Founders who want a low-overhead service with strong upsells and household convenience positioning",
+      "People who like install-plus-education work more than heavy construction or repair"
+    ],
+    operatorModel:
+      "Excellent solo launch if device scope stays practical and the operator protects boundaries around electrical and network complexity.",
+    teamModel:
+      "Can remain solo for a long time, then expand into helper support or second-tech capacity for denser days and multi-device installs.",
+    serviceMode: "Indoor / mobile homeowner install and setup service",
+    difficulty: "Beginner-friendly to moderate if the launch scope stays focused on practical devices and app configuration instead of broad electrical work",
+    startup_cost_range: "$1,500-$4,500",
+    revenue_90_range: "$4,000-$18,000",
+    revenue_1yr_range: "$45,000-$125,000",
+    margin_range: "40%-65%",
+    demandLevel: "High because many homeowners want smart-home convenience but do not want to troubleshoot setup and compatibility issues themselves",
+    seasonality:
+      "Fairly stable year-round, with spikes around move-ins, gift seasons, renovations, and home-improvement periods.",
+    recurringRevenuePotential:
+      "Moderate through add-on installs, device expansion, seasonal upgrades, and homeowner reactivation after the first successful visit.",
+    recommended_first_offer: "Video doorbell + smart lock starter install",
+    whyAttractive:
+      "It sells convenience, calm, and confidence rather than emergency repair, and a good first install often leads to more devices in the same home.",
+    whyPeopleStartIt:
+      "The startup can stay relatively lean, the service is easy to package, and there are clear upsells across doorbells, locks, thermostats, cameras, sensors, and hubs.",
+    pros: [
+      "Lean startup compared with many installation businesses",
+      "Clear upsell path inside the same household",
+      "Homeowners value setup plus training, not just physical install",
+      "Good fit for referral growth in local homeowner markets"
+    ],
+    cons: [
+      "Wi-Fi and compatibility issues can expand the job",
+      "Electrical and code boundaries must stay clear",
+      "Customers often expect the installer to solve every home-tech issue",
+      "Underpricing setup and training hurts margin"
+    ],
+    bestFitOperatorType:
+      "A calm, detail-oriented installer who likes simplifying technology for homeowners and leaving them fully set up instead of half-configured.",
+    phaseBenchmarks: [
+      { leads: [8, 14], quotes: [5, 9], jobs: [2, 4], revenue: [800, 2600] },
+      { leads: [14, 24], quotes: [9, 14], jobs: [4, 7], revenue: [2600, 8200] },
+      { leads: [18, 30], quotes: [11, 18], jobs: [6, 10], revenue: [4500, 12600] },
+      { leads: [22, 36], quotes: [13, 21], jobs: [7, 12], revenue: [6200, 16500] }
+    ],
+    costs: {
+      equipment: "$700-$2,200",
+      insurance: "$240-$850",
+      marketing: "$180-$650",
+      software: "$60-$240",
+      misc: "$120-$380"
+    },
+    tools: [
+      "Drill and driver set",
+      "Basic hand tools and mounting hardware",
+      "Device setup tablet or phone",
+      "Stud finder and level",
+      "Labeling supplies for hubs or sensors if useful",
+      "Extension cords and chargers",
+      "Wi-Fi and app troubleshooting checklist",
+      "Small parts and fastener kit"
+    ],
+    equipment: [
+      "Basic install tool kit",
+      "Mounting hardware bins",
+      "Setup device or tablet",
+      "Testing and labeling supplies",
+      "Protective shoe covers and drop cloths"
+    ],
+    vehicleNeeds: [
+      "A car, SUV, or small work vehicle is enough if tools, mounts, and devices stay organized and presentable",
+      "Storage should separate customer devices, install tools, and trash so home visits feel polished",
+      "Fast access to mounts, screws, and chargers matters more than vehicle size"
+    ],
+    requiredItems: [
+      "Core install tool kit",
+      "Business phone and CRM",
+      "Quote and onboarding templates",
+      "General liability coverage",
+      "Scope boundaries around device types and excluded electrical work"
+    ],
+    optionalItems: [
+      "Demo devices for consults",
+      "Premium hub or lighting install packages",
+      "Second setup tablet or backup phone",
+      "Wi-Fi partner referral relationships",
+      "Home-tech maintenance membership"
+    ],
+    softwareNotes: {
+      CRM: "Track device types, homeowner app readiness, Wi-Fi notes, and add-on opportunities inside each household.",
+      Scheduling: "Leave enough time for configuration and homeowner training, not just mounting and physical install.",
+      "Estimates / proposals": "Quote should separate install, setup, app onboarding, and training so convenience work is not hidden inside one vague labor number."
+    },
+    commonLicenseCategories: [
+      "General business license",
+      "Electrical scope questions depending on thermostat, power, or low-voltage involvement",
+      "Contractor or handyman registration in some markets",
+      "Alarm or low-voltage questions if cameras and sensors expand beyond simple homeowner setups"
+    ],
+    localAgencyPrompts: [
+      "What smart-home device installations are allowed without an electrical or low-voltage license in this state or city?",
+      "Do thermostats, video doorbells, or integrated sensors change licensing requirements here?",
+      "If I focus on device install plus app setup and training, are there any local registration rules I should verify?"
+    ],
+    commercialAutoNote:
+      "Often not critical on day one, but worth asking about once the vehicle is used daily to transport tools and devices to paid installs.",
+    equipmentCoverageNote:
+      "Helpful if the tool kit, setup devices, and stocked hardware become important enough that replacement would disrupt operations.",
+    questionsToAskAgent: [
+      "Does the liability policy cover accidental wall damage or device-related property damage during installation?",
+      "How should stocked devices or customer-supplied device handling be described to the carrier?",
+      "If I expand into more complex electrical or low-voltage work later, what coverage questions should I revisit?"
+    ],
+    starterOffer: "Video doorbell and smart lock starter install with app setup and homeowner walkthrough.",
+    standardOffer: "Home convenience package with thermostat, doorbell, lock, lighting, and hub setup.",
+    premiumOffer: "Whole-home smart setup with device install, configuration, routines, and homeowner training session.",
+    addOns: [
+      "Additional camera or door sensor",
+      "Smart lighting rooms",
+      "Hub configuration",
+      "Routine or scene setup",
+      "Follow-up support visit"
+    ],
+    recurringOption:
+      "Add-on install and seasonal reactivation relationship for homeowners expanding their smart-home setup over time.",
+    minimumPriceGuidance:
+      "Protect a visit minimum because install, configuration, account setup, Wi-Fi troubleshooting, and homeowner training create more labor than the device box alone suggests.",
+    sampleUpsells: [
+      "Add thermostat or lighting package to a lock or doorbell install",
+      "Upgrade to full routine and scene configuration",
+      "Book a follow-up visit for the next batch of devices"
+    ],
+    pricingNotes: [
+      "Price around device count, setup complexity, app onboarding, and expected troubleshooting rather than physical install alone.",
+      "State clearly what is not included, especially advanced network work, unsupported devices, or broader electrical troubleshooting.",
+      "Customers buy convenience and confidence here, so training and setup should be priced on purpose."
+    ],
+    bestFirstLeadSources: [
+      "Google Business Profile",
+      "New-homeowner referrals",
+      "Realtor and handyman partners",
+      "Neighborhood homeowner groups"
+    ],
+    onlineSources: [
+      "Google Business Profile",
+      "Facebook neighborhood groups",
+      "Instagram before-and-after convenience posts",
+      "Local home-improvement and move-in communities"
+    ],
+    offlineSources: [
+      "Realtor relationships",
+      "Handyman and electrician referrals",
+      "Neighborhood mailers or cards",
+      "Organizer and interior-designer introductions"
+    ],
+    localOutreachIdeas: [
+      "Target new homeowners and busy households who want the devices to just work without tech frustration",
+      "Lead with convenience, clean setup, and homeowner education rather than gadget buzzwords",
+      "Promote a starter package first, then upsell additional rooms or devices once trust is built"
+    ],
+    referralIdeas: [
+      "Realtors",
+      "Handymen",
+      "Electricians",
+      "Interior designers",
+      "Professional organizers"
+    ],
+    neighborhoodMarketingIdeas: [
+      "New-home setup campaigns",
+      "Holiday gift-install promotions for locks, bells, and thermostats",
+      "Home convenience package offers by neighborhood"
+    ],
+    socialProofIdeas: [
+      "Before-and-after entryway convenience clips",
+      "Review snippets about patience and clarity",
+      "Routine or lighting scene demo posts"
+    ],
+    beforeAfterContentIdeas: [
+      "Doorbell and lock install transformation",
+      "Thermostat upgrade post",
+      "Smart-light room setup content",
+      "Homeowner app onboarding visuals"
+    ],
+    googleBusinessProfileGuidance: [
+      "Use keywords around smart home installation, video doorbell installation, smart lock setup, thermostat installation, and home automation setup.",
+      "Ask reviews to mention ease, clarity, patience, and how well the system worked after training.",
+      "Post practical device setups and homeowner-ready outcomes rather than abstract tech branding."
+    ],
+    leadResponseProcess: [
+      "Ask what devices the homeowner already has, which ones they want installed, and whether they expect install-only or full setup and training.",
+      "Clarify Wi-Fi reliability, app account access, and whether the devices are already purchased before quoting.",
+      "If the request drifts into unsupported electrical or network work, narrow the scope or recommend a partner early."
+    ],
+    quotingProcess: [
+      "Quote by device group and setup complexity instead of trying to cover every possible issue in one flat number.",
+      "Separate install, app configuration, and training so the customer understands what makes the service premium.",
+      "State exclusions around unsupported Wi-Fi, account issues, wiring, and electrical scope before the visit is booked."
+    ],
+    schedulingProcess: [
+      "Leave enough time for homeowner questions and training, especially on first-time smart-home installs.",
+      "Confirm devices are on site, accounts are accessible, and someone can approve app setup during the appointment.",
+      "Use notes for Wi-Fi names, homeowner goals, and device compatibility concerns before arrival."
+    ],
+    jobPrep: [
+      "Review device list, homeowner goals, and likely mount or setup needs before leaving for the job.",
+      "Stage tools, mounts, chargers, and setup device in installation order.",
+      "Know the scope boundaries before arrival so the visit does not turn into unpaid all-day tech support."
+    ],
+    completionChecklist: [
+      "Confirm devices are installed, connected, named clearly, and functioning in the app before leaving.",
+      "Show the homeowner the basics: alerts, locks, video history, thermostat changes, or lighting routines as relevant.",
+      "Record which additional devices or rooms the customer may want next so follow-up feels relevant."
+    ],
+    invoicing: [
+      "Collect same day whenever possible because the customer sees the convenience value immediately after setup.",
+      "Separate added devices, extended troubleshooting, and follow-up service if the scope expanded.",
+      "Track which starter packages produce the cleanest upsells so future offers stay simple and profitable."
+    ],
+    reviewRequestProcess: [
+      "Ask after the homeowner has successfully used the system and feels the convenience value clearly.",
+      "Prompt them to mention clarity, professionalism, patience, and how much easier the home feels afterward.",
+      "If the job came from a realtor or partner, combine the review ask with a quick referral thank-you."
+    ],
+    followUpProcess: [
+      "Check back after the first install to surface questions and offer the next logical device package.",
+      "Re-open households for thermostat, lighting, camera, or sensor add-ons when seasons or life changes make the need obvious.",
+      "Build a segmented list of new-homeowner and convenience-focused customers for future package offers."
+    ],
+    executionFocus: [
+      "Define the starter package, device scope boundaries, and pricing model before broad promotion.",
+      "Launch convenience-first marketing and partner outreach to realtors, handymen, and homeowner communities.",
+      "Refine quote language around setup, training, and Wi-Fi expectations after early installs.",
+      "Install homeowner follow-up, review-request, and add-on workflows.",
+      "Grow average ticket with bundles, follow-up visits, and next-room device expansions.",
+      "Document install, app setup, and homeowner-training SOPs so the experience stays polished."
+    ],
+    advancedSystems: [
+      "New-homeowner reactivation campaign",
+      "Device-bundle quote workflow",
+      "Post-install add-on reminder sequence"
+    ]
+  },
+  {
+    id: "carpet-cleaning",
+    name: "Carpet Cleaning",
+    tags: ["low5k", "low10k", "solo", "indoor", "mobile", "high", "beginner", "recurring"],
+    summary:
+      "A visible-results local service with strong before-and-after proof, repeat reminders, and partner referral upside from property managers, realtors, and household service providers. It works best when the operator prices by rooms, stairs, and condition while selling optional treatments and fast, professional response.",
+    teaser:
+      "Sell visible results, protect room-based pricing, and turn clean outcomes into reviews, reminders, and repeat work.",
+    goodFor: [
+      "Operators who want strong before-and-after proof and straightforward homeowner value",
+      "Founders comfortable with route-based home service and equipment discipline",
+      "People who want repeat and referral potential without relying only on one-time emergency jobs"
+    ],
+    operatorModel:
+      "Strong solo launch business when the first offer is simple, travel stays controlled, and the operator keeps setup and drying workflow efficient.",
+    teamModel:
+      "Can expand into helper or technician support once route density, move-out work, and property-manager volume increase.",
+    serviceMode: "Indoor / mobile home and light commercial cleaning service",
+    difficulty: "Beginner-friendly to moderate if pricing, stain expectations, and equipment handling stay disciplined",
+    startup_cost_range: "$2,500-$8,500",
+    revenue_90_range: "$5,000-$24,000",
+    revenue_1yr_range: "$60,000-$170,000",
+    margin_range: "35%-55%",
+    demandLevel: "High because visible floor care, move-out needs, pet issues, and household freshness are easy for customers to value",
+    seasonality:
+      "Fairly stable year-round, with stronger demand around move-outs, spring cleaning, holidays, and listing-prep periods.",
+    recurringRevenuePotential:
+      "Moderate through annual reminders, property-manager turns, repeat households, and referral-driven maintenance cleans.",
+    recommended_first_offer: "3-room carpet cleaning starter package",
+    whyAttractive:
+      "The results are easy to show, customers understand the value quickly, and add-ons like stain treatment, deodorizer, and protectant make tickets healthier without overcomplicating the sale.",
+    whyPeopleStartIt:
+      "It offers visible proof, local search demand, and strong partner upside with realtors and property managers while remaining relatively understandable for first-time operators.",
+    pros: [
+      "Very strong before-and-after proof",
+      "Straightforward package pricing by room, hallway, and stairs",
+      "Natural upsells like stain treatment and deodorizer",
+      "Good repeat and referral potential"
+    ],
+    cons: [
+      "Equipment quality and maintenance matter",
+      "Poor expectation setting on stains leads to unhappy customers",
+      "Travel and setup can kill small jobs if minimums are weak",
+      "Dry time and access issues need clear communication"
+    ],
+    bestFitOperatorType:
+      "A practical field operator who likes visible results, clean process, and selling premium add-ons without making the offer feel complicated.",
+    phaseBenchmarks: [
+      { leads: [8, 14], quotes: [5, 9], jobs: [3, 5], revenue: [900, 3000] },
+      { leads: [14, 24], quotes: [9, 14], jobs: [5, 8], revenue: [3000, 9200] },
+      { leads: [18, 30], quotes: [11, 18], jobs: [7, 11], revenue: [5200, 14000] },
+      { leads: [22, 36], quotes: [13, 21], jobs: [8, 13], revenue: [7000, 18500] }
+    ],
+    costs: {
+      equipment: "$1,800-$6,000",
+      insurance: "$280-$950",
+      marketing: "$180-$750",
+      software: "$60-$250",
+      misc: "$180-$520"
+    },
+    tools: [
+      "Carpet extractor or portable machine",
+      "Hoses and wand setup",
+      "Spotting kit and stain-treatment chemicals",
+      "Deodorizer and protectant products",
+      "Air movers for faster drying",
+      "Hand tools for edges and stairs",
+      "PPE and shoe covers",
+      "Before-and-after photo workflow"
+    ],
+    equipment: [
+      "Extractor or portable cleaning machine",
+      "Hose and wand kit",
+      "Spotting supplies",
+      "Air movers",
+      "Chemical storage bins",
+      "Vehicle organization system"
+    ],
+    vehicleNeeds: [
+      "Van, truck, or SUV setup that can move the machine, hoses, fans, and supplies safely",
+      "Enough organization to separate clean supplies, chemicals, and dirty hoses or tools",
+      "Reliable transport because route delays cascade once multiple jobs are booked"
+    ],
+    requiredItems: [
+      "Carpet cleaning machine",
+      "Core spotting and treatment kit",
+      "General liability coverage",
+      "Business phone and CRM",
+      "Room-based quote and minimum-pricing system"
+    ],
+    optionalItems: [
+      "Upholstery tool package",
+      "Tile or hard-floor add-on tools",
+      "Truckmount upgrade later",
+      "Premium protector package",
+      "Property-manager turnover workflow"
+    ],
+    softwareNotes: {
+      CRM: "Track room count, stairs, pets, stain notes, move-out status, and realtor or property-manager source on every lead.",
+      Scheduling: "Leave buffer for setup, drying communication, and route drive time instead of stacking too many homes per day.",
+      "Review management": "Before-and-after proof and strong smell or stain results make review requests especially effective here."
+    },
+    commonLicenseCategories: [
+      "General business license",
+      "Wastewater or disposal questions in some municipalities",
+      "Contractor or janitorial registration questions if commercial scope expands"
+    ],
+    localAgencyPrompts: [
+      "Are there any wastewater, disposal, or chemical handling rules I should verify for carpet cleaning here?",
+      "Do I need a general business license or local janitorial registration for residential and move-out carpet cleaning in this city?",
+      "If I expand into commercial carpet work, does that change any registration requirements locally?"
+    ],
+    commercialAutoNote:
+      "Recommended once the vehicle routinely transports the machine, hoses, and fans for paid route work.",
+    equipmentCoverageNote:
+      "Important if the machine, hoses, fans, and specialty tools would be disruptive or expensive to replace.",
+    questionsToAskAgent: [
+      "Does liability cover water-related property damage or accidental overspray during cleaning?",
+      "How should the extractor, hoses, and fans be covered while in the vehicle and on site?",
+      "If I add helpers later, what workers' compensation or related questions should I revisit?"
+    ],
+    starterOffer: "Three-room carpet cleaning package with fast quote and optional stain treatment.",
+    standardOffer: "Whole-home carpet clean with hallway, stairs, and optional deodorizer or protectant.",
+    premiumOffer: "Move-out or premium restoration-style clean with stain treatment, deodorizer, protectant, and drying support.",
+    addOns: [
+      "Hallway and stairs",
+      "Pet deodorizer",
+      "Protectant application",
+      "Targeted stain treatment",
+      "Upholstery cleaning"
+    ],
+    recurringOption:
+      "Annual or semiannual household reminders plus repeat move-out and property-manager turnover relationships.",
+    minimumPriceGuidance:
+      "Protect a job minimum because travel, hose setup, machine prep, cleanup, and drying explanation make tiny jobs weaker than they first appear.",
+    sampleUpsells: [
+      "Add deodorizer or protectant",
+      "Upgrade from room-only to whole-home package",
+      "Bundle upholstery or move-out support"
+    ],
+    pricingNotes: [
+      "Price around room count, stairs, stain load, pet issues, access, and move-out condition rather than square footage alone.",
+      "Be very clear about stain improvement versus stain removal so results stay aligned with reality.",
+      "Move-out, pet-heavy, and high-soil jobs should not be priced like simple maintenance cleans."
+    ],
+    bestFirstLeadSources: [
+      "Google Business Profile",
+      "Realtor and property-manager referrals",
+      "Neighborhood groups",
+      "Before-and-after social proof"
+    ],
+    onlineSources: [
+      "Google Business Profile",
+      "Facebook and Nextdoor",
+      "Move-out and local home-service groups",
+      "Before-and-after reels and review screenshots"
+    ],
+    offlineSources: [
+      "Realtor outreach",
+      "Property manager introductions",
+      "Referral cards for cleaners and movers",
+      "Neighborhood leave-behinds after visible results"
+    ],
+    localOutreachIdeas: [
+      "Lead with room packages and visible results rather than technical cleaning jargon",
+      "Target realtors, move-outs, and pet-heavy households with specific problem-solution messaging",
+      "Use stain and freshness proof to sell the service, not generic cleaning claims"
+    ],
+    referralIdeas: [
+      "Realtors",
+      "Property managers",
+      "House cleaners",
+      "Movers",
+      "Flooring professionals"
+    ],
+    neighborhoodMarketingIdeas: [
+      "Move-out and listing-prep campaigns",
+      "Pet-odor and kid-heavy household messaging",
+      "Route-day promos within dense neighborhoods"
+    ],
+    socialProofIdeas: [
+      "Before-and-after stain clips",
+      "Review snippets about freshness and professionalism",
+      "Drying and setup professionalism visuals"
+    ],
+    beforeAfterContentIdeas: [
+      "Room stain transformation",
+      "Move-out refresh posts",
+      "Hallway and stairs results",
+      "Pet-odor treatment proof content"
+    ],
+    googleBusinessProfileGuidance: [
+      "Use keywords around carpet cleaning, stain removal, move-out carpet cleaning, and pet odor treatment.",
+      "Ask reviews to mention responsiveness, visible results, smell improvement, and professionalism.",
+      "Upload clear before-and-after room photos and avoid generic stock-like cleaning imagery."
+    ],
+    leadResponseProcess: [
+      "Ask room count, stairs, stain severity, pets, move-out status, and whether photos are available before quoting.",
+      "Clarify whether the customer wants maintenance cleaning, odor help, stain improvement, or move-out support so the quote matches the actual need.",
+      "Flag unrealistic expectations early, especially around old stains, heavy pet damage, or major access issues."
+    ],
+    quotingProcess: [
+      "Use room packages first, then add stairs, stain treatment, deodorizer, or protectant clearly as options.",
+      "State drying expectations, furniture assumptions, and stain limitations in writing before the customer books.",
+      "If photos or condition are unclear, slow down and request better scope details instead of forcing a weak quote."
+    ],
+    schedulingProcess: [
+      "Group jobs by area and leave enough time for setup, cleaning, and customer walkthrough instead of running impossibly tight windows.",
+      "Send prep notes about light furniture movement, pets, and drying expectations before arrival.",
+      "Keep move-out and real-estate-turn jobs in separate blocks if they typically run longer and more detailed."
+    ],
+    jobPrep: [
+      "Review room count, stain notes, add-ons, and access details before leaving for the job.",
+      "Stage hoses, spotting kit, fans, and shoe covers in the order you will use them.",
+      "Take before photos and confirm problem areas before you begin so the result has context later."
+    ],
+    completionChecklist: [
+      "Walk the result with the customer or send photo proof immediately if they are not on site.",
+      "Explain drying time, stain limits, and any product add-ons that were applied before leaving.",
+      "Log room count, stain notes, and whether the household should get a reminder later."
+    ],
+    invoicing: [
+      "Collect same day whenever possible because the visible result is strongest at completion.",
+      "Itemize treatment add-ons and extra scope so the customer sees exactly what created the final number.",
+      "Track which job types produce the best margin so future offer design stays disciplined."
+    ],
+    reviewRequestProcess: [
+      "Ask while the customer is reacting to the visible change and freshness, not days later.",
+      "Prompt them to mention stain improvement, odor improvement, professionalism, and how easy the service was.",
+      "If the lead came from a realtor or property manager, follow the review ask with a referral thank-you."
+    ],
+    followUpProcess: [
+      "Set annual or semiannual reminders for households that were good repeat customers.",
+      "Reactivate move-out and listing-prep contacts before busy local moving seasons.",
+      "Follow up with property managers and realtors on a repeat cadence using recent proof content."
+    ],
+    executionFocus: [
+      "Lock the room-based starter offer, minimum job price, and stain-expectation language before broad marketing.",
+      "Launch Google Business Profile, before-and-after proof, and realtor or property-manager outreach.",
+      "Refine quoting and treatment upsells after early jobs and real room-condition data.",
+      "Install review, reminder, and partner follow-up workflows quickly so visible results compound into growth.",
+      "Grow tickets with deodorizer, protectant, stairs, and move-out packages while protecting route density.",
+      "Document quote, setup, stain, and closeout SOPs so quality stays consistent as volume grows."
+    ],
+    advancedSystems: [
+      "Before-and-after review automation",
+      "Annual household reactivation reminders",
+      "Realtor and property-manager turnover pipeline"
+    ]
+  },
+  {
+    id: "photographer",
+    name: "Photographer",
+    tags: ["low2k", "low5k", "solo", "mobile", "high", "seasonal"],
+    summary:
+      "A calendar-driven creative service that works especially well around weddings and real-estate photography, with deposits, referrals, and strong portfolio leverage. The model succeeds when the operator protects booking workflow, manages expectations clearly, and delivers polished galleries on time.",
+    teaser:
+      "Book the calendar cleanly, deliver proof that sells, and turn weddings and listings into referral-driven premium work.",
+    goodFor: [
+      "Creatives who can pair quality visual work with serious client process",
+      "Founders comfortable with consultations, retainers, editing workflow, and deadline management",
+      "People who want an asset-driven service where proof and reputation compound over time"
+    ],
+    operatorModel:
+      "Excellent solo model at launch if the photographer keeps editing workflow, turnaround promises, and booking calendar under control.",
+    teamModel:
+      "Can expand into second shooters, editors, assistants, and multi-booking coverage as wedding or agent volume grows.",
+    serviceMode: "Mobile on-location creative service",
+    difficulty: "Moderate because brand, proof quality, editing workflow, and client communication all matter",
+    startup_cost_range: "$2,000-$8,000",
+    revenue_90_range: "$4,000-$24,000",
+    revenue_1yr_range: "$45,000-$180,000",
+    margin_range: "45%-70%",
+    demandLevel: "High where weddings, real-estate listings, and portrait or family demand are active",
+    seasonality:
+      "Weddings drive strong spring through fall seasonality, while real-estate listing work can produce steadier activity through the year.",
+    recurringRevenuePotential:
+      "Moderate through realtor relationships, repeat family or portrait clients, and annual or life-event rebooking.",
+    recommended_first_offer: "Real estate listing photo package",
+    whyAttractive:
+      "A strong portfolio sells the next job, retainers improve cash flow, and one well-served wedding or realtor relationship can create multiple future bookings.",
+    whyPeopleStartIt:
+      "The service can begin with a relatively lean setup, and visual proof creates compounding marketing assets faster than many local businesses.",
+    pros: [
+      "Portfolio-driven marketing gets stronger with each good job",
+      "Retainers and deposits improve booking quality",
+      "Multiple niches available with weddings and real estate leading well",
+      "High referral value when communication and delivery are clean"
+    ],
+    cons: [
+      "Editing time can quietly crush schedule and margin",
+      "Client expectation management is essential",
+      "Weekend calendar pressure is real for weddings",
+      "Gear redundancy matters because failures can be disastrous"
+    ],
+    bestFitOperatorType:
+      "A creative operator who can manage calendars, client emotion, and editing throughput as well as camera work.",
+    phaseBenchmarks: [
+      { leads: [6, 12], quotes: [4, 8], jobs: [2, 4], revenue: [900, 3200] },
+      { leads: [12, 20], quotes: [7, 12], jobs: [4, 6], revenue: [3200, 9800] },
+      { leads: [16, 26], quotes: [9, 15], jobs: [5, 8], revenue: [5600, 15000] },
+      { leads: [20, 32], quotes: [11, 18], jobs: [6, 9], revenue: [7600, 21000] }
+    ],
+    costs: {
+      equipment: "$1,500-$6,000",
+      insurance: "$220-$780",
+      marketing: "$180-$800",
+      software: "$80-$320",
+      misc: "$140-$450"
+    },
+    tools: [
+      "Primary camera body and backup body",
+      "Core lens kit for events and interiors",
+      "Memory cards, batteries, and chargers",
+      "Lighting or flash setup as needed",
+      "Tripod and basic stabilization gear",
+      "Editing workstation and storage backups",
+      "Gallery delivery platform",
+      "Consultation and shot-list templates"
+    ],
+    equipment: [
+      "Camera bodies",
+      "Lens kit",
+      "Lighting or flash kit",
+      "Tripod",
+      "Backup storage",
+      "Protective cases and card system"
+    ],
+    vehicleNeeds: [
+      "Reliable vehicle for weddings, listing appointments, and location shoots with safe gear transport",
+      "Organized storage for camera bodies, lenses, lighting, and backup batteries",
+      "Fast gear access matters because appointment windows and event timelines are tight"
+    ],
+    requiredItems: [
+      "Primary and backup camera setup",
+      "Editing workflow and backup storage",
+      "Business phone and CRM",
+      "Contract and retainer system",
+      "General liability coverage"
+    ],
+    optionalItems: [
+      "Second shooter network",
+      "Drone workflow if legally and locally allowed",
+      "Premium flash or off-camera lighting upgrades",
+      "Outsourced editing support",
+      "Album or print package vendor relationships"
+    ],
+    softwareNotes: {
+      CRM: "Track inquiry source, session type, date, retainer status, shot list, and delivery deadline for every booking.",
+      Scheduling: "Calendar management, buffer time, and turnaround promises matter more than many photographers expect.",
+      "Notes / docs": "Keep session guides, wedding timeline templates, listing shot checklists, and edit SOPs in one place.",
+      "Graphic design / content": "Use proof galleries, recap carousels, and portfolio snippets to feed marketing consistently."
+    },
+    commonLicenseCategories: [
+      "General business license",
+      "Drone or aerial photo rules if that service is added",
+      "Commercial venue or park permit questions for some locations"
+    ],
+    localAgencyPrompts: [
+      "Do photographers need any local business registration or permit to shoot at parks, venues, or public event spaces here?",
+      "If I add drone photography for real estate, what local or federal rules should I verify before offering it?",
+      "Are there any local permit rules for commercial photography on public property in this city or county?"
+    ],
+    commercialAutoNote:
+      "Usually not the first priority, but worth asking about once the vehicle is used routinely for paid gear transport and client work.",
+    equipmentCoverageNote:
+      "Important because cameras, lenses, flashes, and storage systems can represent a large portion of the business value.",
+    questionsToAskAgent: [
+      "How should camera bodies, lenses, flashes, and storage drives be covered while traveling and on site?",
+      "Does liability cover venue or guest property damage during shoots?",
+      "If I use second shooters or assistants, what coverage changes should I ask about?"
+    ],
+    starterOffer: "Real estate listing photo package with next-day turnaround.",
+    standardOffer: "Wedding essentials or premium listing package with stronger coverage and polished delivery.",
+    premiumOffer: "Full wedding storytelling package with engagement session, second-shooter option, and premium gallery delivery.",
+    addOns: [
+      "Engagement session",
+      "Twilight real-estate add-on",
+      "Second shooter",
+      "Rush turnaround",
+      "Album or print package"
+    ],
+    recurringOption:
+      "Realtor listing relationships, annual portrait clients, and repeat life-event bookings.",
+    minimumPriceGuidance:
+      "Protect a real booking minimum because consults, travel, culling, editing, gallery prep, delivery, and client communication are part of the job whether the shoot is short or not.",
+    sampleUpsells: [
+      "Add engagement or portrait session",
+      "Upgrade to rush turnaround",
+      "Add twilight listing images, album, or second-shooter coverage"
+    ],
+    pricingNotes: [
+      "Price around session type, editing time, travel, turnaround speed, rights or usage needs, and booking-date value.",
+      "Use retainers for weddings and booked dates so the calendar is protected and the client is committed.",
+      "State delivery timelines, image counts, and revision limits clearly before the booking is secured."
+    ],
+    bestFirstLeadSources: [
+      "Google Business Profile",
+      "Instagram portfolio proof",
+      "Wedding planners and venues",
+      "Realtor relationships"
+    ],
+    onlineSources: [
+      "Google Business Profile",
+      "Instagram and Facebook portfolio content",
+      "Wedding directories or listing-photography landing pages",
+      "Realtor and venue tags"
+    ],
+    offlineSources: [
+      "Planner and venue outreach",
+      "Open-house networking",
+      "Realtor office introductions",
+      "Referral relationships with DJs, florists, and coordinators"
+    ],
+    localOutreachIdeas: [
+      "Lead weddings with trust, calm communication, and storytelling proof rather than only pretty images",
+      "Lead real-estate photography with speed, consistency, and agent-friendly turnaround language",
+      "Use portfolio proof and delivery discipline as the differentiator, not broad claims of creativity"
+    ],
+    referralIdeas: [
+      "Wedding planners",
+      "Venues",
+      "Realtors",
+      "DJs",
+      "Florists"
+    ],
+    neighborhoodMarketingIdeas: [
+      "Local engagement and wedding season pushes",
+      "New listing and open-house outreach",
+      "Family portrait or mini-session seasonal drops where they fit the brand"
+    ],
+    socialProofIdeas: [
+      "Wedding reaction clips and review snippets",
+      "Listing-photo before-and-after visuals",
+      "Gallery previews and delivery screenshots"
+    ],
+    beforeAfterContentIdeas: [
+      "Raw room versus final listing image",
+      "Engagement session highlights",
+      "Wedding day storytelling carousel",
+      "Twilight listing add-on comparisons"
+    ],
+    googleBusinessProfileGuidance: [
+      "Use keywords around wedding photographer, real estate photographer, engagement photographer, and listing photography.",
+      "Ask reviews to mention communication, professionalism, turnaround, and how the final images felt or performed.",
+      "Post both wedding proof and listing proof so prospects see range without confusion."
+    ],
+    leadResponseProcess: [
+      "Ask session type, date, location, timeline, and image-use goals before quoting.",
+      "If it is a wedding inquiry, move fast to a consult because date-driven bookings can disappear quickly.",
+      "If it is a listing inquiry, clarify square footage, property type, occupancy, and turnaround expectations before quoting."
+    ],
+    quotingProcess: [
+      "Quote with packages and add-ons rather than vague custom ranges whenever possible.",
+      "Use retainers or booking fees to secure dates and make calendar rules clear.",
+      "Spell out delivery timeline, image count expectations, usage rights if relevant, and reschedule policy in writing."
+    ],
+    schedulingProcess: [
+      "Protect calendar blocks for travel, prep, culling, editing, and delivery instead of booking only shoot time.",
+      "Use questionnaires, shot lists, and timeline calls before weddings or higher-complexity sessions.",
+      "For real-estate work, confirm staging status, access, and delivery deadline before appointment day."
+    ],
+    jobPrep: [
+      "Review shot list, location, lighting needs, timeline, and backup gear before departure.",
+      "Charge batteries, clear cards, and confirm storage backup before every booking.",
+      "Arrive with enough time to scout and solve location issues without making the client feel rushed."
+    ],
+    completionChecklist: [
+      "Back up files immediately and log the delivery deadline before the day ends.",
+      "Send a quick thank-you or preview touchpoint so the client feels momentum after the shoot.",
+      "Tag the client for review, referral, and future rebooking follow-up based on session type."
+    ],
+    invoicing: [
+      "Use booking retainers for dates and final balance reminders before delivery or before the event as appropriate.",
+      "Invoice add-ons such as rush editing, albums, or second shooter clearly instead of hiding them in one total.",
+      "Track margins by session type so calendar choices reflect both creative fit and actual profitability."
+    ],
+    reviewRequestProcess: [
+      "Ask for the review after the gallery or preview lands and the emotional response is high.",
+      "Prompt them to mention communication, professionalism, turnaround, and the quality of the final images.",
+      "If the booking came from a planner, venue, or agent, follow the review ask with a referral thank-you."
+    ],
+    followUpProcess: [
+      "Reconnect with wedding clients for anniversary, family, or referral opportunities when appropriate.",
+      "Stay in front of realtors with portfolio refreshes and turnaround proof so the relationship becomes repeatable.",
+      "Reactivate past portrait and family clients on a seasonal cadence that fits your brand."
+    ],
+    executionFocus: [
+      "Define the launch offer, retainer policy, calendar rules, and delivery promises before broad outreach.",
+      "Publish strong portfolio proof and reach out to planners, venues, and realtors with clear service positioning.",
+      "Refine consult, quote, and turnaround language after early wedding and listing leads.",
+      "Install review, referral, and gallery-delivery workflows that make clients feel taken care of.",
+      "Build repeat realtor relationships and premium wedding upsells while protecting editing capacity.",
+      "Document booking, shot planning, editing, and delivery SOPs so quality stays high as volume grows."
+    ],
+    advancedSystems: [
+      "Retainer and booking automation",
+      "Gallery-delivery and review request workflow",
+      "Realtor rebooking and wedding referral pipeline"
+    ]
+  },
+  {
+    id: "locksmith",
+    name: "Locksmith",
+    tags: ["low5k", "low10k", "solo", "mobile", "high"],
+    summary:
+      "An urgent-response local service built around trust, fast dispatch, paid diagnostics, and strong local search intent. The model performs well when the operator answers quickly, verifies identity carefully, and separates lockouts, rekeys, and replacement work with clear pricing.",
+    teaser:
+      "Win urgent calls fast, dispatch cleanly, and turn response speed plus trust into premium local service revenue.",
+    goodFor: [
+      "Operators comfortable with urgent-response service and trust-sensitive customer interactions",
+      "Founders who can manage local search, dispatch zones, and premium after-hours pricing",
+      "People who want a mobile service model with strong local intent and repeat property-manager upside"
+    ],
+    operatorModel:
+      "Strong solo launch if the operator protects scope, dispatch radius, and licensing compliance while running clean intake and verification.",
+    teamModel:
+      "Can expand into additional vans or after-hours coverage once call volume and service area support it.",
+    serviceMode: "Mobile urgent-response residential and light commercial service",
+    difficulty: "Moderate because licensing, trust, urgency, and scope control all matter",
+    startup_cost_range: "$3,000-$12,000",
+    revenue_90_range: "$6,000-$34,000",
+    revenue_1yr_range: "$90,000-$260,000",
+    margin_range: "35%-60%",
+    demandLevel: "High because lockouts, rekeys, and lock changes are urgent and local search intent is strong",
+    seasonality:
+      "Fairly stable year-round because emergency lock and access issues are not highly seasonal.",
+    recurringRevenuePotential:
+      "Moderate through landlord, property-manager, and small-commercial rekey or change relationships.",
+    recommended_first_offer: "Residential lockout service call",
+    whyAttractive:
+      "Urgent response supports premium pricing, calls can close fast, and local search plus trust positioning can build a strong service lane quickly.",
+    whyPeopleStartIt:
+      "It solves immediate customer pain, supports mobile dispatch economics, and creates repeat value through rekeys and property relationships.",
+    pros: [
+      "Strong local urgent-intent demand",
+      "Premium after-hours and emergency pricing potential",
+      "Clear upsells into rekeys and lock changes",
+      "Property-manager and landlord repeat-work opportunities"
+    ],
+    cons: [
+      "Licensing and compliance vary significantly by market",
+      "Trust and verification standards must stay very high",
+      "Missed calls can mean lost revenue fast",
+      "After-hours demand can strain schedule and quality of life"
+    ],
+    bestFitOperatorType:
+      "A fast, trustworthy operator who handles urgent customer stress calmly and runs disciplined dispatch and verification processes.",
+    phaseBenchmarks: [
+      { leads: [10, 18], quotes: [6, 11], jobs: [3, 5], revenue: [1200, 4200] },
+      { leads: [18, 28], quotes: [11, 17], jobs: [6, 9], revenue: [4200, 11800] },
+      { leads: [24, 38], quotes: [14, 22], jobs: [8, 12], revenue: [7200, 17800] },
+      { leads: [28, 44], quotes: [16, 26], jobs: [9, 14], revenue: [9800, 23000] }
+    ],
+    costs: {
+      equipment: "$1,500-$6,500",
+      insurance: "$340-$1,100",
+      marketing: "$260-$1,000",
+      software: "$70-$280",
+      misc: "$220-$680"
+    },
+    tools: [
+      "Licensed locksmith tool set appropriate to allowed service scope",
+      "Rekey kit and pinning supplies",
+      "Key machine or code-cutting access where appropriate",
+      "Lock hardware inventory for common residential needs",
+      "Basic vehicle organization for fast dispatch",
+      "Documentation and identity-verification workflow",
+      "After-hours lighting and safety supplies",
+      "Invoice and estimate templates"
+    ],
+    equipment: [
+      "Locksmith tool kit",
+      "Rekey supplies",
+      "Common lock inventory",
+      "Key machine or cutting access",
+      "Vehicle storage system",
+      "Dispatch and documentation setup"
+    ],
+    vehicleNeeds: [
+      "Reliable mobile dispatch vehicle with organized tools, hardware, and safety gear ready for urgent calls",
+      "Fast-access layout matters because after-hours and emergency work punish disorganization immediately",
+      "Clear branding can help trust, but response speed and professionalism matter even more"
+    ],
+    requiredItems: [
+      "Licensed or compliant locksmith tool set",
+      "Common residential hardware and rekey supplies",
+      "Business phone with missed-call text-back",
+      "General liability and relevant vehicle coverage",
+      "Identity-verification and invoice workflow"
+    ],
+    optionalItems: [
+      "Additional automotive tooling if legally and operationally appropriate",
+      "Commercial hardware inventory",
+      "Dispatch routing tools",
+      "After-hours premium service workflow",
+      "Property-manager account program"
+    ],
+    softwareNotes: {
+      CRM: "Track call type, urgency, address, after-hours status, verification notes, and lock hardware used on every dispatch.",
+      Scheduling: "Build emergency and standard-response slots differently so urgent calls do not destroy the whole day.",
+      Invoicing: "Use clear service-call, after-hours, labor, and hardware line items so premium pricing still feels structured and trustworthy."
+    },
+    commonLicenseCategories: [
+      "General business license",
+      "Locksmith or security-professional licensing depending on state",
+      "Background check or registration requirements in some jurisdictions",
+      "Commercial or automotive access rules depending on service scope"
+    ],
+    localAgencyPrompts: [
+      "Does locksmith work require a specific state or local locksmith license, registration, or background check here?",
+      "Are residential, commercial, and automotive locksmith services regulated differently in this market?",
+      "If I offer emergency lockout, rekey, and lock-change service together, what compliance steps do I need before advertising?"
+    ],
+    commercialAutoNote:
+      "Recommended because the vehicle is the dispatch platform and carries the tools and hardware required to earn revenue.",
+    equipmentCoverageNote:
+      "Important if tools, key equipment, and stocked lock hardware would be expensive or disruptive to replace quickly.",
+    questionsToAskAgent: [
+      "Does the policy cover property damage or alleged lock damage during service?",
+      "How should locksmith tools and stocked hardware be covered in the vehicle and on site?",
+      "If I add after-hours helpers or another van later, what coverage questions should I revisit?"
+    ],
+    starterOffer: "Residential lockout response with identity verification and structured dispatch pricing.",
+    standardOffer: "Residential rekey or lock change package with service call, labor, and hardware options.",
+    premiumOffer: "Priority urgent-response package with after-hours dispatch, rekey, lock changes, and small-property support.",
+    addOns: [
+      "After-hours response",
+      "Additional lock rekey",
+      "Lock hardware upgrade",
+      "Mailbox or gate lock service",
+      "Property-manager account setup"
+    ],
+    recurringOption:
+      "Landlord, property-manager, and small-commercial rekey and lock-change relationship.",
+    minimumPriceGuidance:
+      "Always protect a service-call minimum because dispatch time, verification, travel, and stocked hardware readiness are the product before labor even starts.",
+    sampleUpsells: [
+      "Upgrade lock hardware during rekey visits",
+      "Bundle additional doors or units",
+      "Offer property-manager or landlord repeat-service relationship"
+    ],
+    pricingNotes: [
+      "Separate service-call, after-hours premium, labor, and hardware clearly so urgency pricing still feels structured and defensible.",
+      "Do not quote vague 'cheap lockout' pricing that ignores distance, time of day, or complexity.",
+      "Verification and safety procedures are part of the value and should not be treated like administrative fluff."
+    ],
+    bestFirstLeadSources: [
+      "Google Business Profile",
+      "Local search ads if tightly managed",
+      "Property-manager referrals",
+      "Landlord and realtor relationships"
+    ],
+    onlineSources: [
+      "Google Business Profile",
+      "Local search ads",
+      "Neighborhood groups",
+      "Property manager directories or local business groups"
+    ],
+    offlineSources: [
+      "Property manager visits",
+      "Landlord and realtor outreach",
+      "Referral cards with towing, door, and handyman providers",
+      "Vehicle branding where appropriate"
+    ],
+    localOutreachIdeas: [
+      "Lead with trust, response speed, and structured pricing rather than bargain-first language",
+      "Build landlord and property-manager accounts that need reliable rekeys and unit turnovers",
+      "Use clear urgent-service positioning without sounding sketchy or aggressive"
+    ],
+    referralIdeas: [
+      "Property managers",
+      "Realtors",
+      "Handymen",
+      "Garage door companies",
+      "Towing providers"
+    ],
+    neighborhoodMarketingIdeas: [
+      "Trust-focused local service messaging",
+      "Landlord turnover rekey campaigns",
+      "After-hours response positioning in local directories"
+    ],
+    socialProofIdeas: [
+      "Review snippets about speed, professionalism, and trust",
+      "Organized van and hardware visuals",
+      "Service-call result graphics with response-time framing"
+    ],
+    beforeAfterContentIdeas: [
+      "Old lock to upgraded hardware content",
+      "Rekey and turnover service visuals",
+      "Organized emergency-response setup",
+      "Professional arrival and documentation workflow posts"
+    ],
+    googleBusinessProfileGuidance: [
+      "Use keywords around locksmith, emergency locksmith, lockout service, rekey service, and lock change.",
+      "Ask reviews to mention response speed, professionalism, honesty, and trustworthiness.",
+      "Use profile imagery that feels legitimate and professional rather than gimmicky or fear-based."
+    ],
+    leadResponseProcess: [
+      "Ask service type, address, urgency, property type, and time sensitivity before giving a range or dispatch window.",
+      "Explain the verification requirement early so the customer understands that identity and access confirmation are part of the process.",
+      "If the request is outside your launch scope, unsafe, or noncompliant, decline cleanly instead of forcing the job."
+    ],
+    quotingProcess: [
+      "Use structured service-call pricing plus expected labor and hardware range instead of vague emergency quotes.",
+      "Clarify after-hours premiums, verification requirements, and hardware assumptions before dispatch.",
+      "For rekeys or lock changes, give options rather than one take-it-or-leave-it number so trust stays higher."
+    ],
+    schedulingProcess: [
+      "Separate urgent calls from standard scheduled work so lockouts do not destroy every planned service block.",
+      "Use missed-call text-back and fast intake because slow response loses urgent leads quickly.",
+      "Keep dispatch zones tight and quote realistic arrival windows instead of overpromising speed."
+    ],
+    jobPrep: [
+      "Review service type, address, verification notes, and likely hardware needs before dispatch.",
+      "Stage the most likely tools and common hardware for the specific call type.",
+      "Know your verification and safety process before arrival so urgency does not override good judgment."
+    ],
+    completionChecklist: [
+      "Verify the job result, collect payment, and document the service performed before leaving.",
+      "If hardware was changed or rekeyed, confirm the customer understands what was done and what keys or access changed.",
+      "Log property-manager, landlord, or repeat-service opportunities immediately after the call."
+    ],
+    invoicing: [
+      "Invoice the service call, labor, after-hours premium, and hardware clearly so the customer sees a structured professional charge.",
+      "Collect same day whenever possible because urgency customers mentally move on fast once access is restored.",
+      "Track call type and time-of-day margin so dispatch decisions stay smart."
+    ],
+    reviewRequestProcess: [
+      "Ask once the urgent stress is resolved and the customer can clearly feel the value of fast, trustworthy help.",
+      "Prompt them to mention speed, professionalism, honesty, and peace of mind.",
+      "For landlords or property managers, follow the review ask with a repeat-service introduction."
+    ],
+    followUpProcess: [
+      "Revisit landlords and property managers with turnover and rekey reminders on a repeat cadence.",
+      "Re-open customers for hardware upgrades or additional lock work when relevant.",
+      "Track high-value addresses and repeat contacts so dispatch and outreach become more intelligent over time."
+    ],
+    executionFocus: [
+      "Verify licensing, define exact launch scope, and lock service-call plus after-hours pricing before promoting widely.",
+      "Launch trust-first local search positioning and missed-call recovery so urgent leads are not lost.",
+      "Refine dispatch intake, verification wording, and hardware assumptions after early calls.",
+      "Install review, property-manager follow-up, and after-hours workflow standards quickly.",
+      "Grow rekey, lock-change, and property-account revenue while protecting response times and trust.",
+      "Document dispatch, verification, invoicing, and closeout SOPs so urgency does not create sloppy operations."
+    ],
+    advancedSystems: [
+      "Missed-call text-back and dispatch intake workflow",
+      "After-hours pricing and dispatch-zone automation",
+      "Property-manager account and turnover follow-up pipeline"
+    ]
   }
 ];
 
