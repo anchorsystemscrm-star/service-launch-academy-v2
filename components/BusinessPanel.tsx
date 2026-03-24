@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useState } from "react";
 
 import { BusinessPanelData } from "@/types/business";
@@ -20,7 +21,6 @@ type BusinessPanelField = keyof Pick<
 interface BusinessPanelProps {
   panel: BusinessPanelData;
   onFieldChange: (field: BusinessPanelField, value: string) => void;
-  onCompleteSetup?: () => void;
   collapsible?: boolean;
   defaultOpen?: boolean;
 }
@@ -85,10 +85,30 @@ function PipelineStat({ label, value }: { label: string; value: number }) {
   );
 }
 
+function ReadOnlyField({
+  label,
+  value,
+  placeholder
+}: {
+  label: string;
+  value: string;
+  placeholder: string;
+}) {
+  const hasValue = value.trim().length > 0;
+
+  return (
+    <div className="grid gap-2">
+      <span className="text-[11px] font-semibold uppercase tracking-[0.16em] text-muted">{label}</span>
+      <div className="w-full max-w-full cursor-not-allowed rounded-[16px] border border-white/10 bg-slate-950/70 px-4 py-3 text-sm text-white/90 opacity-80">
+        {hasValue ? value : <span className="text-slate-500">{placeholder}</span>}
+      </div>
+    </div>
+  );
+}
+
 function BusinessPanelContent({
   panel,
-  onFieldChange,
-  onCompleteSetup
+  onFieldChange
 }: Omit<BusinessPanelProps, "collapsible" | "defaultOpen">) {
   const missing = [
     !panel.phone ? "Phone" : null,
@@ -141,6 +161,7 @@ function BusinessPanelContent({
           <PipelineStat label="Booked" value={panel.booked} />
           <PipelineStat label="Completed" value={panel.completed} />
         </div>
+        <p className="text-xs leading-5 text-muted">These counts pull from your benchmarks.</p>
       </div>
 
       <div className="grid gap-3 border-t border-white/10 pt-4">
@@ -150,21 +171,24 @@ function BusinessPanelContent({
           <StatusPill label="Booking" active={Boolean(panel.bookingMethod)} />
           <StatusPill label="Payments" active={Boolean(panel.paymentMethod)} />
         </div>
+        <p className="text-xs leading-5 text-muted">These update from your Blueprint setup steps, not from this panel.</p>
         <div className="grid gap-3 sm:grid-cols-3">
-          <Field label="Phone" value={panel.phone} placeholder="Business phone" onChange={(value) => onFieldChange("phone", value)} />
-          <Field label="Booking Method" value={panel.bookingMethod} placeholder="Call, text, form, calendar" onChange={(value) => onFieldChange("bookingMethod", value)} />
-          <Field label="Payment Method" value={panel.paymentMethod} placeholder="Invoice, card, ACH" onChange={(value) => onFieldChange("paymentMethod", value)} />
+          <ReadOnlyField label="Phone" value={panel.phone} placeholder="Set this in your Blueprint setup steps" />
+          <ReadOnlyField label="Booking Method" value={panel.bookingMethod} placeholder="Set this in your Blueprint setup steps" />
+          <ReadOnlyField label="Payment Method" value={panel.paymentMethod} placeholder="Set this in your Blueprint setup steps" />
         </div>
       </div>
 
       <div className="border-t border-white/10 pt-4">
-        <button
-          type="button"
-          onClick={onCompleteSetup}
+        <p className="mb-3 text-xs leading-5 text-muted">
+          This pulls from your benchmarks and setup progress. Update them to keep everything accurate.
+        </p>
+        <Link
+          href="/benchmarks"
           className="inline-flex w-full max-w-full items-center justify-center rounded-[18px] border border-accent/40 bg-accent/10 px-4 py-3 text-sm font-semibold text-white transition hover:border-accent/70 hover:bg-accent/15"
         >
           Complete your setup
-        </button>
+        </Link>
       </div>
     </div>
   );
@@ -173,7 +197,6 @@ function BusinessPanelContent({
 export function BusinessPanel({
   panel,
   onFieldChange,
-  onCompleteSetup,
   collapsible = false,
   defaultOpen = false
 }: BusinessPanelProps) {
@@ -203,7 +226,7 @@ export function BusinessPanel({
       </button>
       {open ? (
         <div className="mt-4">
-          <BusinessPanelContent panel={panel} onFieldChange={onFieldChange} onCompleteSetup={onCompleteSetup} />
+          <BusinessPanelContent panel={panel} onFieldChange={onFieldChange} />
         </div>
       ) : null}
     </section>

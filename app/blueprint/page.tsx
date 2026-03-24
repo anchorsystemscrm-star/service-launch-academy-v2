@@ -256,12 +256,12 @@ export default function BlueprintPage() {
             onToggleWeek={setWeekComplete}
           />
 
-          <BusinessPanel panel={businessPanel} onFieldChange={setBusinessPanelField} onCompleteSetup={() => setActiveTab("plan")} />
+          <BusinessPanel panel={businessPanel} onFieldChange={setBusinessPanelField} />
         </div>
 
         <section className="panel-surface w-full min-w-0 max-w-full overflow-hidden p-6 sm:p-8">
           <div className="mb-6 lg:hidden">
-            <BusinessPanel panel={businessPanel} onFieldChange={setBusinessPanelField} onCompleteSetup={() => setActiveTab("plan")} collapsible />
+            <BusinessPanel panel={businessPanel} onFieldChange={setBusinessPanelField} collapsible />
           </div>
 
           <div className="flex w-full max-w-full flex-wrap gap-2">
