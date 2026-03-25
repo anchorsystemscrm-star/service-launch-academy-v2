@@ -101,10 +101,11 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        <div className="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+        <div className="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-5">
           {[
             { label: "Service Exploration", unlocked: hasTierAccess(profile.tier, "preview"), detail: "Compare opportunities, fit, and economics" },
             { label: "Blueprint", unlocked: hasTierAccess(profile.tier, "core"), detail: "Full launch roadmap, setup, pricing, and operations" },
+            { label: "Business", unlocked: hasTierAccess(profile.tier, "core"), detail: "Central workspace for offers, notes, setup, and operating context" },
             { label: "Benchmarks", unlocked: hasTierAccess(profile.tier, "core"), detail: "Weekly KPI tracking and scorecards" },
             { label: "AI Coach", unlocked: hasTierAccess(profile.tier, "pro"), detail: "Phase-aware coaching and guidance" }
           ].map((item) => (

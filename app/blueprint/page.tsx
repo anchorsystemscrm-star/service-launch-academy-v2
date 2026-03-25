@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
-import { BusinessPanel } from "@/components/BusinessPanel";
 import { BlueprintUpgradePrompt } from "@/components/BlueprintUpgradePrompt";
 import { ExecutionStageCard } from "@/components/ExecutionStageCard";
 import { LockedFeatureCard } from "@/components/LockedFeatureCard";
@@ -15,7 +14,6 @@ import { getCheckoutHref, getPricingHref, getUpgradeMessage, hasTierAccess, isEx
 import {
   buildBlueprint,
   buildScripts,
-  defaultKpiData,
   formatWeekLabel,
   getBlueprintAnchorStage,
   getChecklistCompletion,
@@ -23,7 +21,7 @@ import {
   getFallbackBusiness,
   milestoneTemplate
 } from "@/utils/benchmarks";
-import { useAccessProfile, useActiveBlueprint, useBlueprintProgress, useBlueprintTaskOutputState, useBusinessPanel, useKpiState } from "@/utils/storage";
+import { useAccessProfile, useActiveBlueprint, useBlueprintProgress, useBlueprintTaskOutputState } from "@/utils/storage";
 
 const tabs = [
   { id: "plan", label: "Launch Blueprint", minTier: "core" },
@@ -41,8 +39,6 @@ export default function BlueprintPage() {
   const business = getFallbackBusiness(profile.selectedBusinessId);
   const { progress, taskProgress, setWeekComplete, setTaskComplete } = useBlueprintProgress(business.id, business.executionPlan);
   const { outputMap: taskOutputMap, setTaskHasOutput } = useBlueprintTaskOutputState(business.id);
-  const { kpis } = useKpiState(business.id, defaultKpiData);
-  const { panel: businessPanel, setField: setBusinessPanelField } = useBusinessPanel(business, progress, taskProgress, kpis);
   const [activeTab, setActiveTab] = useState<(typeof tabs)[number]["id"]>("plan");
 
   const phases = buildBlueprint(business);
@@ -211,8 +207,16 @@ export default function BlueprintPage() {
             </button>
           </label>
         </div>
-        <div className="mt-4 inline-flex rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm text-slate-200">
-          Current tier: {tierLabels[profile.tier]}
+        <div className="mt-4 flex flex-wrap items-center gap-3">
+          <div className="inline-flex rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm text-slate-200">
+            Current tier: {tierLabels[profile.tier]}
+          </div>
+          <Link
+            href="/business"
+            className="text-sm font-medium text-slate-300 transition hover:text-white"
+          >
+            Open business workspace
+          </Link>
         </div>
       </section>
 
@@ -255,15 +259,9 @@ export default function BlueprintPage() {
             executionPlan={business.executionPlan}
             onToggleWeek={setWeekComplete}
           />
-
-          <BusinessPanel panel={businessPanel} onFieldChange={setBusinessPanelField} />
         </div>
 
         <section className="panel-surface w-full min-w-0 max-w-full overflow-hidden p-6 sm:p-8">
-          <div className="mb-6 lg:hidden">
-            <BusinessPanel panel={businessPanel} onFieldChange={setBusinessPanelField} collapsible />
-          </div>
-
           <div className="flex w-full max-w-full flex-wrap gap-2">
             {visibleTabs.map((tab) => (
               hasTierAccess(profile.tier, tab.minTier) ? (

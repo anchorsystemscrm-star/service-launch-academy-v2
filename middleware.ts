@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 
 import { canAccessPath, getFirstAvailableAppPath, normalizeSubscriptionTier } from "@/utils/access";
 
-const protectedRoutes = ["/dashboard", "/blueprint", "/benchmarks", "/ai-coach", "/pricing"];
+const protectedRoutes = ["/dashboard", "/blueprint", "/business", "/benchmarks", "/ai-coach", "/pricing"];
 
 export function middleware(request: NextRequest) {
   const accessToken = request.cookies.get("sla-access-token")?.value;
@@ -44,6 +44,7 @@ export const config = {
     "/login",
     "/dashboard/:path*",
     "/blueprint/:path*",
+    "/business/:path*",
     "/benchmarks/:path*",
     "/ai-coach/:path*",
     "/pricing/:path*"

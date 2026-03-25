@@ -42,6 +42,12 @@ export const navItems: NavItem[] = [
     description: "Full operating guidance, pricing, tools, and execution plan."
   },
   {
+    href: "/business",
+    label: "Business",
+    minTier: "core",
+    description: "Your business workspace for offers, notes, market strategy, and setup."
+  },
+  {
     href: "/benchmarks",
     label: "Benchmarks",
     minTier: "core",
@@ -76,6 +82,10 @@ export function hasTierAccess(currentTier: SubscriptionTier, requiredTier: Subsc
 export function getRequiredTierForPath(pathname: string): SubscriptionTier {
   if (pathname.startsWith("/ai-coach")) {
     return "pro";
+  }
+
+  if (pathname.startsWith("/business")) {
+    return "core";
   }
 
   if (pathname.startsWith("/benchmarks")) {
