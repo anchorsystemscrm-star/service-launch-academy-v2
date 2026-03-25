@@ -11,7 +11,6 @@ import {
   getPricingHref,
   getLockedCopy,
   hasTierAccess,
-  isSetupComplete,
   navItems,
   tierDescriptions,
   tierLabels
@@ -30,12 +29,8 @@ export function Navbar({ profile }: NavbarProps) {
   const [loggingOut, setLoggingOut] = useState(false);
   const mobileNavRef = useRef<HTMLDivElement | null>(null);
   const normalizedPathname = pathname ?? "";
-
-  const setupComplete = isSetupComplete(profile);
   const coreCheckoutHref = getCheckoutHref("core");
-  const currentLabel = normalizedPathname.startsWith("/start")
-    ? "Get Started"
-    : navItems.find((item) => normalizedPathname.startsWith(item.href))?.label ?? "Workspace";
+  const currentLabel = navItems.find((item) => normalizedPathname.startsWith(item.href))?.label ?? "Workspace";
 
   async function handleLogout() {
     setLoggingOut(true);
@@ -76,7 +71,7 @@ export function Navbar({ profile }: NavbarProps) {
     compact = false
   ) {
     const active = normalizedPathname.startsWith(href);
-    const enabled = setupComplete && hasTierAccess(profile.tier, minTier);
+    const enabled = hasTierAccess(profile.tier, minTier);
     const baseClass = compact
       ? "whitespace-nowrap rounded-xl px-3.5 py-2 text-sm font-medium"
       : "rounded-2xl px-4 py-3 text-sm font-medium";
@@ -87,7 +82,7 @@ export function Navbar({ profile }: NavbarProps) {
           key={href}
           type="button"
           disabled
-          title={!setupComplete ? "Complete setup first" : getLockedCopy(minTier)}
+          title={getLockedCopy(minTier)}
           className={`${baseClass} cursor-not-allowed border border-white/10 bg-white/5 text-slate-500`}
         >
           {label}
@@ -116,7 +111,7 @@ export function Navbar({ profile }: NavbarProps) {
         <div className="flex h-full flex-col border-r border-white/10 bg-slate-950/88 px-4 pb-5 pt-4 backdrop-blur">
           <div>
             <BrandBlock
-              href={setupComplete ? "/dashboard" : "/start"}
+              href="/dashboard"
               size="shell"
               currentLabel={currentLabel}
               className="block rounded-[24px] border border-white/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.08),rgba(255,255,255,0.03))] px-4 py-3 shadow-card transition hover:border-accent/40 hover:bg-white/10"
@@ -132,16 +127,14 @@ export function Navbar({ profile }: NavbarProps) {
                 {tierLabels[profile.tier]}
               </span>
               <Link
-                href="/start"
+                href="/dashboard"
                 className="rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-xs font-semibold text-white transition hover:border-white/20 hover:bg-white/10"
               >
-                {setupComplete ? "Adjust setup" : "Finish setup"}
+                Dashboard
               </Link>
             </div>
             <p className="mt-3 text-sm leading-6 text-muted">
-              {setupComplete
-                ? tierDescriptions[profile.tier]
-                : "Complete setup to choose a business before entering the workspace."}
+              {tierDescriptions[profile.tier]}
             </p>
             <div className="mt-4 flex flex-col gap-2">
               <Link
@@ -163,16 +156,6 @@ export function Navbar({ profile }: NavbarProps) {
           </div>
 
           <nav className="mt-5 grid gap-2">
-            <Link
-              href="/start"
-              className={`rounded-2xl px-4 py-3 text-sm font-medium transition ${
-                normalizedPathname.startsWith("/start")
-                  ? "border border-accent/60 bg-accent/10 text-white shadow-[inset_0_0_0_1px_rgba(83,180,255,0.18)]"
-                  : "border border-transparent text-slate-300 hover:border-white/10 hover:bg-white/5 hover:text-white"
-              }`}
-            >
-              Get Started
-            </Link>
             {navItems.map((item) => renderNavItem(item.href, item.label, item.minTier))}
           </nav>
 
@@ -198,7 +181,7 @@ export function Navbar({ profile }: NavbarProps) {
           <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-3 sm:px-6 lg:px-8">
             <div className="flex min-w-0 items-center gap-3">
               <BrandBlock
-                href={setupComplete ? "/dashboard" : "/start"}
+                href="/dashboard"
                 size="compact"
                 currentLabel={currentLabel}
                 className="block lg:hidden"
@@ -220,12 +203,6 @@ export function Navbar({ profile }: NavbarProps) {
                 className="hidden rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm font-semibold text-white transition hover:border-white/20 hover:bg-white/10 sm:inline-flex"
               >
                 Pricing
-              </Link>
-              <Link
-                href="/start"
-                className="hidden rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm font-semibold text-white transition hover:border-white/20 hover:bg-white/10 sm:inline-flex"
-              >
-                Setup
               </Link>
               <button
                 type="button"
@@ -252,16 +229,6 @@ export function Navbar({ profile }: NavbarProps) {
               ref={mobileNavRef}
               className="flex flex-nowrap gap-2 overflow-x-auto scroll-smooth pb-1 pr-12 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
             >
-            <Link
-              href="/start"
-              className={`whitespace-nowrap rounded-xl px-3 py-2 text-sm font-medium transition ${
-                normalizedPathname.startsWith("/start")
-                  ? "border border-accent/60 bg-accent/10 text-white"
-                  : "border border-white/10 bg-white/5 text-slate-200 hover:border-white/20 hover:bg-white/10"
-              }`}
-            >
-              Get Started
-            </Link>
             {navItems.map((item) => renderNavItem(item.href, item.label, item.minTier, true))}
             </div>
             <div className="pointer-events-none absolute inset-y-0 right-0 flex w-14 items-center justify-end bg-gradient-to-l from-slate-950/95 via-slate-950/78 to-transparent">

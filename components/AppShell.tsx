@@ -99,7 +99,7 @@ export function AppShell({ children }: PropsWithChildren) {
           <p className="text-sm font-semibold uppercase tracking-[0.18em] text-accent">Service Launch Academy</p>
           <h1 className="mt-4 text-2xl font-semibold text-white">Loading your workspace</h1>
           <p className="mt-3 text-sm leading-6 text-muted">
-            Validating your session, onboarding state, and tier access before the app shell mounts.
+            Validating your session and tier access before the app shell mounts.
           </p>
         </div>
       </main>

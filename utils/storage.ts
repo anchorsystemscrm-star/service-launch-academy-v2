@@ -34,14 +34,12 @@ export const STORAGE_KEYS = {
   coachSavedOutputMap: "sla_coach_saved_output_map",
   businessPanelMap: "sla_business_panel_map",
   blueprintTaskOutputMap: "sla_blueprint_task_output_map",
-  onboardingComplete: "sla_onboarding_complete",
   subscriptionTier: "sla_subscription_tier"
 } as const;
 
 const COOKIE_KEYS = {
   accessToken: "sla-access-token",
   selectedBusiness: "sla-selected-business",
-  onboardingComplete: "sla-onboarding",
   subscriptionTier: "sla-tier"
 } as const;
 
@@ -111,10 +109,6 @@ export function setSelectedBusinessCookie(value: string | null) {
   clearCookie(COOKIE_KEYS.selectedBusiness);
 }
 
-export function setOnboardingCookie(value: boolean) {
-  setCookie(COOKIE_KEYS.onboardingComplete, value ? "1" : "0");
-}
-
 export function setTierCookie(value: SubscriptionTier) {
   setCookie(COOKIE_KEYS.subscriptionTier, value);
 }
@@ -134,7 +128,6 @@ export function syncTierFromSession(session: Session | null | undefined) {
 
 export function readClientAccessProfile(): AccessProfile {
   return {
-    onboardingComplete: readStorage<boolean>(STORAGE_KEYS.onboardingComplete, false),
     selectedBusinessId: readStorage<string | null>(STORAGE_KEYS.selectedBusiness, null),
     tier: normalizeSubscriptionTier(readStorage<SubscriptionTier>(STORAGE_KEYS.subscriptionTier, "preview"))
   };
@@ -200,22 +193,6 @@ export function useSelectedBusiness() {
   };
 }
 
-export function useOnboardingState() {
-  const state = usePersistentState<boolean>(STORAGE_KEYS.onboardingComplete, false);
-
-  useEffect(() => {
-    if (state.hydrated) {
-      setOnboardingCookie(state.value);
-    }
-  }, [state.hydrated, state.value]);
-
-  return {
-    hydrated: state.hydrated,
-    onboardingComplete: state.value,
-    setOnboardingComplete: state.setValue
-  };
-}
-
 export function useSubscriptionTier() {
   const state = usePersistentState<SubscriptionTier>(STORAGE_KEYS.subscriptionTier, "preview");
 
@@ -232,18 +209,15 @@ export function useSubscriptionTier() {
 }
 
 export function useAccessProfile() {
-  const onboardingState = useOnboardingState();
   const tierState = useSubscriptionTier();
   const businessState = useSelectedBusiness();
 
   return {
-    hydrated: onboardingState.hydrated && tierState.hydrated && businessState.hydrated,
+    hydrated: tierState.hydrated && businessState.hydrated,
     profile: {
-      onboardingComplete: onboardingState.onboardingComplete,
       selectedBusinessId: businessState.selectedBusinessId,
       tier: tierState.tier
     },
-    setOnboardingComplete: onboardingState.setOnboardingComplete,
     setSelectedBusinessId: businessState.setSelectedBusinessId
   };
 }

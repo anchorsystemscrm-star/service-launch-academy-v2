@@ -2,17 +2,15 @@ import { NextRequest, NextResponse } from "next/server";
 
 import { canAccessPath, getFirstAvailableAppPath, normalizeSubscriptionTier } from "@/utils/access";
 
-const protectedRoutes = ["/dashboard", "/blueprint", "/benchmarks", "/ai-coach", "/start", "/pricing"];
+const protectedRoutes = ["/dashboard", "/blueprint", "/benchmarks", "/ai-coach", "/pricing"];
 
 export function middleware(request: NextRequest) {
   const accessToken = request.cookies.get("sla-access-token")?.value;
   const { pathname } = request.nextUrl;
-  const onboardingComplete = request.cookies.get("sla-onboarding")?.value === "1";
   const selectedBusinessId = request.cookies.get("sla-selected-business")?.value ?? null;
   const tierCookie = request.cookies.get("sla-tier")?.value;
 
   const profile = {
-    onboardingComplete,
     selectedBusinessId,
     tier: normalizeSubscriptionTier(tierCookie)
   } as const;
@@ -44,7 +42,6 @@ export const config = {
   matcher: [
     "/",
     "/login",
-    "/start/:path*",
     "/dashboard/:path*",
     "/blueprint/:path*",
     "/benchmarks/:path*",

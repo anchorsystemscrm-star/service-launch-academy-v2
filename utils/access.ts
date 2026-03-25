@@ -2,7 +2,6 @@ import { SubscriptionTier } from "@/types/business";
 import { CoachMode } from "@/lib/ai/coachTypes";
 
 export interface AccessProfile {
-  onboardingComplete: boolean;
   selectedBusinessId: string | null;
   tier: SubscriptionTier;
 }
@@ -32,7 +31,7 @@ export function normalizeSubscriptionTier(value: unknown): SubscriptionTier {
 export const navItems: NavItem[] = [
   {
     href: "/dashboard",
-    label: "Explore Services",
+    label: "Dashboard",
     minTier: "preview",
     description: "Browse, compare, and shortlist service opportunities."
   },
@@ -74,10 +73,6 @@ export function hasTierAccess(currentTier: SubscriptionTier, requiredTier: Subsc
   return tierRank[currentTier] >= tierRank[requiredTier];
 }
 
-export function isSetupComplete(profile: AccessProfile) {
-  return profile.onboardingComplete && Boolean(profile.selectedBusinessId);
-}
-
 export function getRequiredTierForPath(pathname: string): SubscriptionTier {
   if (pathname.startsWith("/ai-coach")) {
     return "pro";
@@ -99,18 +94,10 @@ export function canAccessPath(pathname: string, profile: AccessProfile) {
     return true;
   }
 
-  if (pathname.startsWith("/start")) {
-    return true;
-  }
-
-  return isSetupComplete(profile);
+  return true;
 }
 
 export function getFirstAvailableAppPath(profile: AccessProfile) {
-  if (!isSetupComplete(profile)) {
-    return "/start";
-  }
-
   return "/dashboard";
 }
 
