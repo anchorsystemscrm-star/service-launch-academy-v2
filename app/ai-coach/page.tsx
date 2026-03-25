@@ -7,7 +7,7 @@ import { CoachComposer } from "@/components/ai-coach/CoachComposer";
 import { CoachResponseRenderer } from "@/components/ai-coach/CoachResponseRenderer";
 import { CoachAction, CoachMode } from "@/lib/ai/coachTypes";
 import { LockedFeatureCard } from "@/components/LockedFeatureCard";
-import { defaultKpiData, getFallbackBusiness, getPhaseIndexByProgress } from "@/utils/benchmarks";
+import { defaultKpiData, getBenchmarkSummary, getFallbackBusiness, getPhaseIndexByProgress } from "@/utils/benchmarks";
 import {
   canSaveCoachOutput,
   canUseCoachMode,
@@ -189,13 +189,24 @@ export default function AICoachPage() {
             serviceArea: businessPanel.serviceArea || undefined,
             targetCustomer: businessPanel.targetCustomer || undefined,
             priceFloor: businessPanel.priceFloor || undefined,
+            pricingNotes: businessPanel.pricingNotes || undefined,
+            packageIdeas: businessPanel.packageIdeas || undefined,
+            marketNotes: businessPanel.marketNotes || undefined,
             phone: businessPanel.phone || undefined,
             bookingMethod: businessPanel.bookingMethod || undefined,
             paymentMethod: businessPanel.paymentMethod || undefined,
             leadSourcePlan: businessPanel.leadSourcePlan || undefined,
             salesProcessNotes: businessPanel.salesProcessNotes || undefined,
+            objectionHandlingNotes: businessPanel.objectionHandlingNotes || undefined,
             automationNotes: businessPanel.automationNotes || undefined,
             focusThisWeek: businessPanel.focusThisWeek || undefined,
+            focusSupportNote: businessPanel.focusSupportNote || undefined,
+            toneMessagingNotes: businessPanel.toneMessagingNotes || undefined,
+            goal30Day: businessPanel.goal30Day || undefined,
+            goal90Day: businessPanel.goal90Day || undefined,
+            revenueGoal: businessPanel.revenueGoal || undefined,
+            milestoneNotes: businessPanel.milestoneNotes || undefined,
+            benchmarkSummary: getBenchmarkSummary(kpis),
             leadCount: businessPanel.leads,
             quotedCount: businessPanel.quoted,
             bookedCount: businessPanel.booked,

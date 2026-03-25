@@ -282,6 +282,7 @@ export type BusinessPanelEditableField =
   | "revenueGoal"
   | "milestoneNotes"
   | "focusThisWeek"
+  | "focusSupportNote"
   | "generalNotes";
 type StoredBusinessPanel = Partial<Record<BusinessPanelEditableField, string>> & {
   updatedAt?: string;
@@ -448,7 +449,6 @@ function getDerivedBusinessPanelData(
   taskProgress: boolean[][],
   kpis: KPIData
 ): BusinessPanelData {
-  const starterOfferLocked = hasCompletedTask(taskProgress, business.executionPlan, "Lock the starter offer");
   const railsReady = hasCompletedTask(taskProgress, business.executionPlan, "Set the commercial rails");
   const completedTasks = taskProgress.reduce((sum, stage) => sum + stage.filter(Boolean).length, 0);
   const currentPhase = business.blueprintPhases[Math.min(getPhaseIndexByProgress(progress), business.blueprintPhases.length - 1)];
@@ -462,7 +462,7 @@ function getDerivedBusinessPanelData(
     serviceArea: "",
     starterOffer: business.offerPricing.starterOffer,
     secondaryOffer: deriveSecondaryOffer(business),
-    priceFloor: starterOfferLocked ? extractSuggestedPriceFloor(business.offerPricing.minimumPriceGuidance) : extractSuggestedPriceFloor(business.offerPricing.minimumPriceGuidance),
+    priceFloor: extractSuggestedPriceFloor(business.offerPricing.minimumPriceGuidance),
     keyInclusions: deriveKeyInclusions(business.offerPricing.starterOffer),
     pricingNotes: business.offerPricing.pricingNotes.slice(0, 3).join("\n"),
     packageIdeas: [business.offerPricing.standardOffer, business.offerPricing.premiumOffer].filter(Boolean).join("\n"),
@@ -497,6 +497,7 @@ function getDerivedBusinessPanelData(
     revenueGoal: business.revenue_90_range,
     milestoneNotes: currentPhase?.successLooksLike ?? "",
     focusThisWeek: deriveCurrentExecutionFocus(business, taskProgress),
+    focusSupportNote: "",
     generalNotes: "",
     currentPhase: currentPhase?.title ?? business.blueprintPhases[0]?.title ?? "Phase 1",
     completedTasks,

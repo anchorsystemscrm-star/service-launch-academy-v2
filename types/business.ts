@@ -273,6 +273,7 @@ export interface BusinessPanelData {
   revenueGoal: string;
   milestoneNotes: string;
   focusThisWeek: string;
+  focusSupportNote: string;
   generalNotes: string;
   currentPhase: string;
   completedTasks: number;

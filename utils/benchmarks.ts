@@ -4,12 +4,14 @@ import {
   BlueprintMilestone,
   BlueprintMilestoneKey,
   Business,
+  BusinessPanelData,
   ChatMessage,
   ExecutionChecklistItem,
   ExecutionStage,
   KPIData,
   Phase,
   Script,
+  SubscriptionTier,
   WeekGroup
 } from "@/types/business";
 
@@ -24,6 +26,27 @@ export interface NextActionSuggestion {
   description: string;
   effortLabel: string;
   completed: boolean;
+}
+
+export interface BusinessSetupStrength {
+  percentage: number;
+  completed: number;
+  total: number;
+  missing: string[];
+  summary: string;
+}
+
+export interface WorkspaceActionCard {
+  title: string;
+  description: string;
+  href: string;
+  ctaLabel: string;
+}
+
+export interface WorkspaceRecommendation {
+  title: string;
+  body: string;
+  href?: string;
 }
 
 export type BlueprintGuidedAction = "generate_ai" | "mark_complete" | "next_step";
@@ -372,6 +395,217 @@ export function getTrackStatus(business: Business, progress: boolean[], kpis: KP
       ? `You are meeting ${score}/4 core benchmark minimums this week.`
       : `Only ${score}/4 core benchmark minimums are currently met. Focus on response time, quote quality, and lead volume.`
   };
+}
+
+function hasValue(value: string | number | null | undefined) {
+  if (typeof value === "number") {
+    return value > 0;
+  }
+
+  return Boolean(value && value.trim().length > 0);
+}
+
+export function getBenchmarkSummary(kpis: KPIData) {
+  return `Leads: ${kpis.leads}, Quotes: ${kpis.quotes}, Booked: ${kpis.jobs}, Completed: ${kpis.completed}, Revenue: $${Number(kpis.revenue || 0).toLocaleString()}, Reviews: ${kpis.reviews}`;
+}
+
+export function getBusinessSetupStrength(panel: BusinessPanelData): BusinessSetupStrength {
+  const checklist = [
+    { key: "serviceType", label: "Selected service", complete: hasValue(panel.serviceType) },
+    { key: "starterOffer", label: "Core offer", complete: hasValue(panel.starterOffer) },
+    { key: "priceFloor", label: "Starting price", complete: hasValue(panel.priceFloor) },
+    { key: "targetCustomer", label: "Target customer", complete: hasValue(panel.targetCustomer) },
+    { key: "focusThisWeek", label: "Current focus", complete: hasValue(panel.focusThisWeek) },
+    { key: "leadSourcePlan", label: "Lead source plan", complete: hasValue(panel.leadSourcePlan) },
+    { key: "serviceArea", label: "Service area", complete: hasValue(panel.serviceArea) },
+    {
+      key: "ops",
+      label: "Setup or operations notes",
+      complete: hasValue(panel.setupNotes) || hasValue(panel.operationsNotes)
+    }
+  ];
+
+  const completed = checklist.filter((item) => item.complete).length;
+  const total = checklist.length;
+  const percentage = Math.round((completed / total) * 100);
+  const missing = checklist.filter((item) => !item.complete).map((item) => item.label);
+
+  return {
+    percentage,
+    completed,
+    total,
+    missing,
+    summary:
+      missing.length === 0
+        ? "Your workspace is taking shape and the core operating pieces are in place."
+        : `${missing.length} key section${missing.length === 1 ? "" : "s"} still need attention.`
+  };
+}
+
+export function getDashboardNextBestAction(
+  panel: BusinessPanelData,
+  kpis: KPIData,
+  tier: SubscriptionTier
+): WorkspaceActionCard {
+  if (tier === "preview") {
+    return {
+      title: "Unlock your launch workspace",
+      description: "Move from exploration into execution with the Business workspace, Blueprint, and Benchmarks.",
+      href: "/pricing?plan=core",
+      ctaLabel: "Compare plans"
+    };
+  }
+
+  if (!hasValue(panel.focusThisWeek)) {
+    return {
+      title: "Set your current focus",
+      description: "Pick the one thing that matters most right now so the rest of the workspace stays aligned.",
+      href: "/business#current-focus",
+      ctaLabel: "Set focus"
+    };
+  }
+
+  if (!hasValue(panel.starterOffer)) {
+    return {
+      title: "Define your core offer",
+      description: "Your first offer should be easy to explain, easy to quote, and easy to sell.",
+      href: "/business#offer-pricing",
+      ctaLabel: "Edit offer"
+    };
+  }
+
+  if (!hasValue(panel.priceFloor)) {
+    return {
+      title: "Set your starting price",
+      description: "Lock the minimum price before more leads come in so you do not improvise under pressure.",
+      href: "/business#offer-pricing",
+      ctaLabel: "Set pricing"
+    };
+  }
+
+  if (!hasValue(panel.targetCustomer)) {
+    return {
+      title: "Tighten your target customer",
+      description: "Get specific about who this business is for before you write outreach or build ads.",
+      href: "/business#market-notes",
+      ctaLabel: "Define customer"
+    };
+  }
+
+  if (!hasValue(panel.leadSourcePlan)) {
+    return {
+      title: "Add your lead source plan",
+      description: "Choose the first channels that should actually produce leads instead of relying on vague marketing ideas.",
+      href: "/business#lead-flow",
+      ctaLabel: "Add lead plan"
+    };
+  }
+
+  if (kpis.leads === 0 && kpis.quotes === 0 && kpis.jobs === 0 && Number(kpis.revenue) === 0) {
+    return {
+      title: "Complete this week's benchmarks",
+      description: "Track live activity so you know whether the business is producing enough lead flow and bookings.",
+      href: "/benchmarks",
+      ctaLabel: "Open benchmarks"
+    };
+  }
+
+  if (!hasValue(panel.salesProcessNotes)) {
+    return {
+      title: "Write the sales process",
+      description: "Capture how a lead turns into a quote and a booked job so follow-up stays consistent.",
+      href: "/business#lead-flow",
+      ctaLabel: "Add sales notes"
+    };
+  }
+
+  return {
+    title: "Sharpen your follow-up system",
+    description: "Your core pieces are defined. Tighten the follow-up and booking flow so leads convert faster.",
+    href: "/business#lead-flow",
+    ctaLabel: "Refine lead flow"
+  };
+}
+
+export function getDashboardAIRecommendations(panel: BusinessPanelData, kpis: KPIData): WorkspaceRecommendation[] {
+  const recommendations: WorkspaceRecommendation[] = [];
+
+  if (!hasValue(panel.priceFloor)) {
+    recommendations.push({
+      title: "Pricing still needs a floor",
+      body: "Your entry price is not locked yet. Set the minimum before more quotes go out.",
+      href: "/business#offer-pricing"
+    });
+  }
+
+  if (!hasValue(panel.targetCustomer)) {
+    recommendations.push({
+      title: "Target customer is still broad",
+      body: "Define who the business is really for before you write outreach, ads, or Google copy.",
+      href: "/business#market-notes"
+    });
+  }
+
+  if (!hasValue(panel.leadSourcePlan)) {
+    recommendations.push({
+      title: "Lead plan is missing",
+      body: "You have a business idea, but not a real lead source sequence yet. Document that next.",
+      href: "/business#lead-flow"
+    });
+  }
+
+  if (kpis.leads > 0 && kpis.quotes === 0) {
+    recommendations.push({
+      title: "Leads are not turning into quotes",
+      body: "That usually means intake, offer clarity, or response speed needs work.",
+      href: "/ai-coach"
+    });
+  }
+
+  if (Number(kpis.revenue) === 0 && kpis.leads + kpis.quotes + kpis.jobs > 0) {
+    recommendations.push({
+      title: "Activity is up, revenue is not",
+      body: "Check quote speed, close rate, and whether the starting price is too soft.",
+      href: "/benchmarks"
+    });
+  }
+
+  if (!hasValue(panel.focusThisWeek)) {
+    recommendations.push({
+      title: "Current focus is empty",
+      body: "Choose one operating priority so the rest of the workspace has direction.",
+      href: "/business#current-focus"
+    });
+  }
+
+  if (!recommendations.length) {
+    recommendations.push(
+      {
+        title: "Your offer is taking shape",
+        body: "Use AI Coach to tighten the pricing structure or write the next sales script.",
+        href: "/ai-coach"
+      },
+      {
+        title: "Your workspace is ready for traction",
+        body: "Benchmarks will matter more now. Keep the weekly numbers updated so you can spot bottlenecks fast.",
+        href: "/benchmarks"
+      }
+    );
+  }
+
+  return recommendations.slice(0, 3);
+}
+
+export function shouldShowAnchorSystemsCard(panel: BusinessPanelData, kpis: KPIData) {
+  const definedCoreSystem =
+    hasValue(panel.starterOffer) &&
+    hasValue(panel.priceFloor) &&
+    hasValue(panel.leadSourcePlan) &&
+    (hasValue(panel.salesProcessNotes) || hasValue(panel.followUpNotes));
+
+  const liveActivity = kpis.leads + kpis.quotes + kpis.jobs + kpis.completed > 0 || Number(kpis.revenue) > 0;
+
+  return definedCoreSystem || liveActivity;
 }
 
 export function getCoachResponse(message: string, business: Business, progress: boolean[]): string {

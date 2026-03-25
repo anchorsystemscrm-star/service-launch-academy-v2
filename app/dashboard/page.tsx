@@ -5,11 +5,27 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 
 import { BusinessCard } from "@/components/BusinessCard";
+import { BusinessFlowPreviewCard } from "@/components/BusinessFlowPreviewCard";
 import { LockedFeatureCard } from "@/components/LockedFeatureCard";
 import { businessTagLabels, businesses } from "@/data/businesses";
 import { getCheckoutHref, getPricingHref, hasTierAccess, tierLabels } from "@/utils/access";
-import { filterBusinesses } from "@/utils/benchmarks";
-import { useAccessProfile, useActiveBlueprint } from "@/utils/storage";
+import {
+  defaultKpiData,
+  filterBusinesses,
+  getBenchmarkSummary,
+  getBusinessSetupStrength,
+  getDashboardAIRecommendations,
+  getDashboardNextBestAction,
+  getFallbackBusiness,
+  shouldShowAnchorSystemsCard
+} from "@/utils/benchmarks";
+import {
+  useAccessProfile,
+  useActiveBlueprint,
+  useBlueprintProgress,
+  useBusinessPanel,
+  useKpiState
+} from "@/utils/storage";
 
 const filterOptions = [
   { id: "low2k", label: "Low Startup (<$2k)" },
@@ -26,6 +42,24 @@ const filterOptions = [
   { id: "seasonal", label: "Seasonal" }
 ];
 
+function SnapshotRow({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="flex flex-wrap items-start justify-between gap-3 rounded-[18px] border border-white/10 bg-black/20 px-4 py-3">
+      <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted">{label}</p>
+      <p className="max-w-[70%] break-words text-right text-sm text-white">{value || "Not set yet"}</p>
+    </div>
+  );
+}
+
+function KpiStat({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="rounded-[18px] border border-white/10 bg-black/20 px-4 py-4">
+      <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-muted">{label}</p>
+      <p className="mt-2 text-2xl font-semibold text-white">{value}</p>
+    </div>
+  );
+}
+
 export default function DashboardPage() {
   const router = useRouter();
   const { profile, setSelectedBusinessId } = useAccessProfile();
@@ -33,7 +67,18 @@ export default function DashboardPage() {
   const [query, setQuery] = useState("");
   const [filters, setFilters] = useState<string[]>([]);
 
+  const business = getFallbackBusiness(profile.selectedBusinessId);
+  const { progress, taskProgress } = useBlueprintProgress(business.id, business.executionPlan);
+  const { kpis } = useKpiState(business.id, defaultKpiData);
+  const { panel } = useBusinessPanel(business, progress, taskProgress, kpis);
   const filteredBusinesses = filterBusinesses(businesses, query, filters);
+  const hasCoreAccess = hasTierAccess(profile.tier, "core");
+  const hasProAccess = hasTierAccess(profile.tier, "pro");
+  const businessStrength = getBusinessSetupStrength(panel);
+  const nextAction = getDashboardNextBestAction(panel, kpis, profile.tier);
+  const aiRecommendations = getDashboardAIRecommendations(panel, kpis);
+  const hasBenchmarkData =
+    kpis.leads > 0 || kpis.quotes > 0 || kpis.jobs > 0 || kpis.completed > 0 || Number(kpis.revenue) > 0 || kpis.reviews > 0;
 
   function toggleFilter(filterId: string) {
     setFilters((current) =>
@@ -51,14 +96,14 @@ export default function DashboardPage() {
       <section className="panel-surface overflow-hidden p-6 sm:p-8">
         <div className="grid gap-8 xl:grid-cols-[1.2fr_0.8fr] xl:items-end">
           <div>
-            <p className="text-sm font-semibold uppercase tracking-[0.18em] text-accent">Launch Dashboard</p>
-            <h1 className="mt-3 text-3xl font-semibold text-white sm:text-4xl">Choose your 90-day service launch.</h1>
+            <p className="text-sm font-semibold uppercase tracking-[0.18em] text-accent">Command Center</p>
+            <h1 className="mt-3 text-3xl font-semibold text-white sm:text-4xl">Run the launch like an operating system.</h1>
             <p className="mt-4 max-w-3xl text-base leading-7 text-muted">
-              Beginner-friendly step-by-step blueprints to launch a real service business, then run it on Anchor Systems with
-              clean follow-up, scheduling, and KPI visibility.
+              Dashboard is the command center. Blueprint tells you how to execute, Business captures what you are
+              building, Benchmarks shows whether the work is moving, and AI Coach helps tighten the next decision.
             </p>
             <p className="mt-3 text-sm text-slate-300">
-              Typical ranges; results vary. Revenue shown is conservative-to-likely gross revenue for new operators.
+              Selected business: {business.name}. Typical ranges vary by operator, market, and execution quality.
             </p>
           </div>
 
@@ -68,8 +113,8 @@ export default function DashboardPage() {
               <p className="mt-2 text-sm text-muted">Launch-ready business models</p>
             </div>
             <div>
-              <p className="text-3xl font-semibold text-white">13</p>
-              <p className="mt-2 text-sm text-muted">Weeks of guided execution</p>
+              <p className="text-3xl font-semibold text-white">{businessStrength.percentage}%</p>
+              <p className="mt-2 text-sm text-muted">Business setup completion</p>
             </div>
             <div>
               <p className="text-3xl font-semibold text-white">{tierLabels[profile.tier]}</p>
@@ -78,6 +123,139 @@ export default function DashboardPage() {
           </div>
         </div>
       </section>
+
+      <section className="mt-6 grid gap-4 xl:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)]">
+        <div className="panel-surface overflow-hidden p-6">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-accentSecondary">Next best action</p>
+          <h2 className="mt-2 text-2xl font-semibold text-white">{nextAction.title}</h2>
+          <p className="mt-3 max-w-2xl break-words text-sm leading-6 text-muted">{nextAction.description}</p>
+          <div className="mt-5 flex flex-wrap gap-3">
+            <Link
+              href={nextAction.href}
+              className="inline-flex items-center justify-center rounded-2xl border border-accent/40 bg-accent/10 px-4 py-3 text-sm font-semibold text-white transition hover:border-accent/80 hover:bg-accent/20"
+            >
+              {nextAction.ctaLabel}
+            </Link>
+            <Link
+              href="/blueprint"
+              className="inline-flex items-center justify-center rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm font-semibold text-white transition hover:border-white/20 hover:bg-white/10"
+            >
+              Open blueprint
+            </Link>
+          </div>
+        </div>
+
+        <div className="panel-surface overflow-hidden p-6">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-accentSecondary">AI recommendation</p>
+              <h2 className="mt-2 text-xl font-semibold text-white">What needs attention now</h2>
+            </div>
+            <Link
+              href={hasProAccess ? "/ai-coach" : getPricingHref("pro")}
+              className="text-sm font-semibold text-slate-200 transition hover:text-white"
+            >
+              {hasProAccess ? "Open AI Coach" : "Unlock AI Coach"}
+            </Link>
+          </div>
+          <div className="mt-4 grid gap-3">
+            {aiRecommendations.map((item) => (
+              <div key={item.title} className="rounded-[18px] border border-white/10 bg-black/20 px-4 py-4">
+                <p className="text-sm font-semibold text-white">{item.title}</p>
+                <p className="mt-2 break-words text-sm leading-6 text-muted">{item.body}</p>
+                {item.href ? (
+                  <Link
+                    href={!hasProAccess && item.href === "/ai-coach" ? getPricingHref("pro") : item.href}
+                    className="mt-3 inline-flex text-sm font-semibold text-accent transition hover:text-white"
+                  >
+                    Open next move
+                  </Link>
+                ) : null}
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section className="mt-6 grid gap-4 xl:grid-cols-[minmax(0,0.95fr)_minmax(0,1.05fr)]">
+        <div className="panel-surface overflow-hidden p-6">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-accentSecondary">Business snapshot</p>
+              <h2 className="mt-2 text-xl font-semibold text-white">The business at a glance</h2>
+            </div>
+            <Link
+              href={hasCoreAccess ? "/business" : getPricingHref("core")}
+              className="text-sm font-semibold text-slate-200 transition hover:text-white"
+            >
+              {hasCoreAccess ? "Open business" : "Unlock business"}
+            </Link>
+          </div>
+
+          <div className="mt-4 grid gap-3">
+            <SnapshotRow label="Selected service" value={panel.serviceType} />
+            <SnapshotRow label="Core offer" value={panel.starterOffer} />
+            <SnapshotRow label="Starting price" value={panel.priceFloor} />
+            <SnapshotRow label="Target customer" value={panel.targetCustomer} />
+            <SnapshotRow label="Current focus" value={panel.focusThisWeek} />
+          </div>
+
+          <div className="mt-5 rounded-[18px] border border-white/10 bg-black/20 px-4 py-4">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-muted">Workspace strength</p>
+              <span className="text-sm font-semibold text-white">{businessStrength.percentage}%</span>
+            </div>
+            <div className="mt-3 h-2 overflow-hidden rounded-full bg-slate-950">
+              <div
+                className="h-full rounded-full bg-gradient-to-r from-accent to-accentSecondary transition-all duration-500"
+                style={{ width: `${businessStrength.percentage}%` }}
+              />
+            </div>
+            <p className="mt-3 text-sm leading-6 text-muted">{businessStrength.summary}</p>
+          </div>
+        </div>
+
+        <div className="panel-surface overflow-hidden p-6">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-accentSecondary">Benchmark snapshot</p>
+              <h2 className="mt-2 text-xl font-semibold text-white">This week's live numbers</h2>
+            </div>
+            <Link
+              href={hasCoreAccess ? "/benchmarks" : getPricingHref("core")}
+              className="text-sm font-semibold text-slate-200 transition hover:text-white"
+            >
+              {hasCoreAccess ? "Open benchmarks" : "Unlock benchmarks"}
+            </Link>
+          </div>
+
+          <div className="mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+            <KpiStat label="Leads" value={String(kpis.leads)} />
+            <KpiStat label="Estimates" value={String(kpis.quotes)} />
+            <KpiStat label="Jobs booked" value={String(kpis.jobs)} />
+            <KpiStat label="Completed" value={String(kpis.completed)} />
+            <KpiStat label="Revenue" value={`$${Number(kpis.revenue || 0).toLocaleString()}`} />
+            <KpiStat label="Reviews" value={String(kpis.reviews)} />
+          </div>
+
+          <div className="mt-5 rounded-[18px] border border-white/10 bg-black/20 px-4 py-4">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-muted">Benchmark read</p>
+            <p className="mt-2 break-words text-sm leading-6 text-slate-100">
+              {hasBenchmarkData ? getBenchmarkSummary(kpis) : "No benchmark entries yet. Add this week's activity so the dashboard can show where the business is actually moving."}
+            </p>
+          </div>
+        </div>
+      </section>
+
+      {hasCoreAccess && shouldShowAnchorSystemsCard(panel, kpis) ? (
+        <div className="mt-6">
+          <BusinessFlowPreviewCard
+            businessName={panel.businessName || panel.serviceType}
+            coreOffer={panel.starterOffer}
+            leadSourcePlan={panel.leadSourcePlan}
+          />
+        </div>
+      ) : null}
 
       <section className="mt-6 panel-surface p-6 sm:p-8">
         <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
@@ -166,14 +344,14 @@ export default function DashboardPage() {
       <section className="mt-6">
         {filteredBusinesses.length > 0 ? (
           <div className="grid gap-4 md:grid-cols-2 2xl:grid-cols-3">
-            {filteredBusinesses.map((business) => (
+            {filteredBusinesses.map((candidate) => (
               <BusinessCard
-                key={business.id}
-                business={business}
+                key={candidate.id}
+                business={candidate}
                 tagLabels={businessTagLabels}
                 onSelect={handleSelectBusiness}
                 tier={profile.tier}
-                isActiveBlueprint={activeBlueprintId === business.id}
+                isActiveBlueprint={activeBlueprintId === candidate.id}
               />
             ))}
           </div>
@@ -185,7 +363,7 @@ export default function DashboardPage() {
         )}
       </section>
 
-      {!hasTierAccess(profile.tier, "core") && (
+      {!hasCoreAccess && (
         <section className="mt-6 grid gap-4 xl:grid-cols-2">
           <LockedFeatureCard
             title="Core unlocks the full blueprint"

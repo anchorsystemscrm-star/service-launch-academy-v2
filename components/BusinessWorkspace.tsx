@@ -2,7 +2,14 @@
 
 import type { ReactNode } from "react";
 
+import Link from "next/link";
+
+import { BusinessFlowPreviewCard } from "@/components/BusinessFlowPreviewCard";
 import { BusinessPanelData, SubscriptionTier } from "@/types/business";
+import {
+  getBusinessSetupStrength,
+  shouldShowAnchorSystemsCard
+} from "@/utils/benchmarks";
 import { tierLabels } from "@/utils/access";
 import { BusinessPanelEditableField } from "@/utils/storage";
 
@@ -34,21 +41,24 @@ function formatUpdatedAt(updatedAt: string | null) {
 }
 
 function Section({
+  id,
   title,
   description,
-  children,
-  className = ""
+  helper,
+  children
 }: {
+  id: string;
   title: string;
   description: string;
+  helper?: string;
   children: ReactNode;
-  className?: string;
 }) {
   return (
-    <section className={`panel-surface w-full max-w-full overflow-hidden p-5 sm:p-6 ${className}`}>
+    <section id={id} className="panel-surface scroll-mt-36 w-full max-w-full overflow-hidden p-5 sm:p-6">
       <div className="max-w-3xl">
         <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-accentSecondary">{title}</p>
         <p className="mt-2 break-words text-sm leading-6 text-muted">{description}</p>
+        {helper ? <p className="mt-3 break-words text-xs leading-5 text-slate-300">{helper}</p> : null}
       </div>
       <div className="mt-5">{children}</div>
     </section>
@@ -119,18 +129,27 @@ function ReadOnlyValue({
     <div className="grid gap-2">
       <span className="text-[11px] font-semibold uppercase tracking-[0.16em] text-muted">{label}</span>
       <div className="rounded-[16px] border border-white/10 bg-black/20 px-4 py-3">
-        <p className="break-words text-sm text-white">{value || "Not set yet"}</p>
+        <p className="break-words text-sm leading-6 text-white">{value || "Not set yet"}</p>
         {helper ? <p className="mt-2 break-words text-xs leading-5 text-muted">{helper}</p> : null}
       </div>
     </div>
   );
 }
 
-function StatCard({ label, value }: { label: string; value: number }) {
+function StatCard({
+  label,
+  value,
+  hint
+}: {
+  label: string;
+  value: number;
+  hint?: string;
+}) {
   return (
     <div className="rounded-[18px] border border-white/10 bg-black/20 px-4 py-4">
       <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-muted">{label}</p>
       <p className="mt-2 text-2xl font-semibold text-white">{value}</p>
+      {hint ? <p className="mt-2 text-xs leading-5 text-muted">{hint}</p> : null}
     </div>
   );
 }
@@ -150,17 +169,51 @@ function StatusBadge({ label, active }: { label: string; active: boolean }) {
   );
 }
 
+function QuickActionButton({
+  label,
+  onClick
+}: {
+  label: string;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className="w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm font-semibold text-white transition hover:border-white/20 hover:bg-white/10 sm:w-auto"
+    >
+      {label}
+    </button>
+  );
+}
+
 export function BusinessWorkspace({
   panel,
   currentTier,
   updatedAt,
   onFieldChange
 }: BusinessWorkspaceProps) {
+  const strength = getBusinessSetupStrength(panel);
+  const shouldShowAnchorCard = shouldShowAnchorSystemsCard(panel, {
+    leads: panel.leads,
+    quotes: panel.quoted,
+    jobs: panel.booked,
+    completed: panel.completed,
+    revenue: 0,
+    reviews: 0
+  });
   const missingCritical = [
     !panel.phone ? "Phone" : null,
-    !panel.bookingMethod ? "Booking method" : null,
+    !panel.bookingMethod ? "Booking" : null,
     !panel.paymentMethod ? "Payments" : null
   ].filter(Boolean) as string[];
+
+  function jumpTo(id: string) {
+    const element = document.getElementById(id);
+    if (element) {
+      element.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  }
 
   return (
     <div className="mx-auto w-full max-w-7xl animate-fade-up">
@@ -182,34 +235,114 @@ export function BusinessWorkspace({
               <span className="rounded-full border border-white/10 bg-black/20 px-3 py-1 text-xs font-semibold uppercase tracking-[0.14em] text-white">
                 {tierLabels[currentTier]}
               </span>
+              <span className="rounded-full border border-white/10 bg-black/20 px-3 py-1 text-xs font-semibold uppercase tracking-[0.14em] text-white">
+                {panel.currentPhase}
+              </span>
             </div>
             <p className="text-xs leading-5 text-muted">{formatUpdatedAt(updatedAt)}</p>
           </div>
         </div>
       </section>
 
-      {missingCritical.length ? (
-        <section className="mt-6 w-full max-w-full overflow-hidden rounded-[22px] border border-accent/20 bg-accent/5 px-5 py-4">
-          <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
-            <div>
-              <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-accentSecondary">Missing now</p>
-              <p className="mt-1 break-words text-sm text-slate-100">Lock in the business basics so the workspace stays accurate.</p>
-            </div>
-            <div className="flex flex-wrap gap-2">
-              {missingCritical.map((item) => (
-                <span key={item} className="rounded-full border border-white/10 bg-black/20 px-3 py-1 text-xs font-semibold text-slate-200">
-                  {item}
-                </span>
-              ))}
-            </div>
+      <div className="mt-6 grid gap-6 xl:grid-cols-[minmax(0,1.2fr)_minmax(320px,0.8fr)]">
+        <section id="current-focus" className="panel-surface scroll-mt-36 w-full max-w-full overflow-hidden p-5 sm:p-6">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-accentSecondary">Current focus</p>
+          <h2 className="mt-2 text-xl font-semibold text-white">What matters right now</h2>
+          <p className="mt-2 break-words text-sm leading-6 text-muted">
+            Keep one priority visible here so the rest of the workspace supports the same move.
+          </p>
+          <div className="mt-5 grid gap-4">
+            <TextField
+              label="Focus This Week"
+              value={panel.focusThisWeek}
+              placeholder="Example: Finalize pressure washing pricing"
+              onChange={(value) => onFieldChange("focusThisWeek", value)}
+            />
+            <TextAreaField
+              label="Supporting Note"
+              value={panel.focusSupportNote}
+              placeholder="Why this matters, what needs to be decided, or what should be true when it is done."
+              rows={4}
+              onChange={(value) => onFieldChange("focusSupportNote", value)}
+            />
           </div>
         </section>
-      ) : null}
+
+        <section className="panel-surface w-full max-w-full overflow-hidden p-5 sm:p-6">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-accentSecondary">Business setup</p>
+          <h2 className="mt-2 text-xl font-semibold text-white">Business Setup: {strength.percentage}% complete</h2>
+          <p className="mt-2 break-words text-sm leading-6 text-muted">{strength.summary}</p>
+          <div className="mt-4 h-2 overflow-hidden rounded-full bg-slate-950">
+            <div
+              className="h-full rounded-full bg-gradient-to-r from-accent to-accentSecondary transition-all duration-500"
+              style={{ width: `${strength.percentage}%` }}
+            />
+          </div>
+          <div className="mt-4 grid gap-3">
+            <div className="rounded-[18px] border border-white/10 bg-black/20 px-4 py-4">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-muted">Workspace status</p>
+              <p className="mt-2 text-sm leading-6 text-slate-100">
+                {strength.completed}/{strength.total} core business foundations are documented.
+              </p>
+            </div>
+            {strength.missing.length ? (
+              <div className="rounded-[18px] border border-white/10 bg-black/20 px-4 py-4">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-muted">Still needs attention</p>
+                <div className="mt-3 flex flex-wrap gap-2">
+                  {strength.missing.slice(0, 4).map((item) => (
+                    <span key={item} className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs font-semibold text-slate-200">
+                      {item}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            ) : null}
+            {missingCritical.length ? (
+              <div className="rounded-[18px] border border-accent/20 bg-accent/5 px-4 py-4">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-accentSecondary">Missing now</p>
+                <div className="mt-3 flex flex-wrap gap-2">
+                  {missingCritical.map((item) => (
+                    <span key={item} className="rounded-full border border-white/10 bg-black/20 px-3 py-1 text-xs font-semibold text-slate-200">
+                      {item}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            ) : null}
+          </div>
+        </section>
+      </div>
+
+      <section className="panel-surface mt-6 w-full max-w-full overflow-hidden p-5 sm:p-6">
+        <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+          <div className="max-w-3xl">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-accentSecondary">Quick actions</p>
+            <p className="mt-2 break-words text-sm leading-6 text-muted">
+              Jump straight to the part of the workspace that needs attention instead of scrolling through everything.
+            </p>
+          </div>
+          <div className="flex w-full max-w-full flex-wrap gap-2 lg:w-auto">
+            <QuickActionButton label="Edit Pricing" onClick={() => jumpTo("offer-pricing")} />
+            <QuickActionButton label="Update Offer" onClick={() => jumpTo("offer-pricing")} />
+            <QuickActionButton label="Add Lead Source" onClick={() => jumpTo("lead-flow")} />
+            <QuickActionButton label="Update Target Customer" onClick={() => jumpTo("market-notes")} />
+            <QuickActionButton label="Add Sales Notes" onClick={() => jumpTo("lead-flow")} />
+            <Link
+              href="/ai-coach"
+              className="inline-flex w-full items-center justify-center rounded-2xl border border-accent/40 bg-accent/10 px-4 py-3 text-sm font-semibold text-white transition hover:border-accent/70 hover:bg-accent/15 sm:w-auto"
+            >
+              Open AI Coach
+            </Link>
+          </div>
+        </div>
+      </section>
 
       <div className="mt-6 grid w-full max-w-full gap-6">
         <Section
+          id="business-overview"
           title="Business Overview"
           description="Anchor the basics first. This should make it obvious what business is being built, where it operates, and how it is positioned."
+          helper="The selected service and service model are derived from the blueprint you chose. Use the editable fields to shape the real business around that starting point."
         >
           <div className="grid gap-4 lg:grid-cols-2">
             <TextField
@@ -227,7 +360,7 @@ export function BusinessWorkspace({
             <ReadOnlyValue
               label="Selected Service"
               value={panel.serviceType}
-              helper="This comes from the service model selected in your dashboard."
+              helper="This stays aligned with the service model selected in your dashboard."
             />
             <ReadOnlyValue
               label="Service Model"
@@ -251,8 +384,10 @@ export function BusinessWorkspace({
         </Section>
 
         <Section
+          id="offer-pricing"
           title="Offer + Pricing"
           description="Keep the sellable offer tight. This is where the core package, upsells, price floor, and pricing logic stay visible."
+          helper="These fields start with blueprint defaults. Tighten them until someone could read this section and confidently sell or quote the business."
         >
           <div className="grid gap-4 xl:grid-cols-2">
             <TextAreaField
@@ -285,7 +420,7 @@ export function BusinessWorkspace({
             <TextAreaField
               label="Pricing Notes"
               value={panel.pricingNotes}
-              placeholder="Document floor rules, travel rules, exclusions, or margin guardrails."
+              placeholder="Document floor rules, travel rules, exclusions, and margin guardrails."
               rows={5}
               onChange={(value) => onFieldChange("pricingNotes", value)}
             />
@@ -309,8 +444,10 @@ export function BusinessWorkspace({
         </Section>
 
         <Section
+          id="market-notes"
           title="Service Area + Market Notes"
           description="Keep the market view practical. Document who you serve, where to focus, and why customers should choose this business."
+          helper="This section should make outbound effort easier. If the target customer and local angle are vague here, outreach will usually be vague too."
         >
           <div className="grid gap-4 xl:grid-cols-2">
             <TextField
@@ -346,17 +483,18 @@ export function BusinessWorkspace({
         </Section>
 
         <Section
+          id="lead-flow"
           title="Lead Flow + Sales Process"
           description="Keep the pipeline simple. Track lead sources, how people book, and how you move them from inquiry to sold work."
+          helper="If this section is strong, the business should know where leads come from, how fast they are answered, and what happens before a job is booked."
         >
           <div className="grid gap-4">
             <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-              <StatCard label="Leads" value={panel.leads} />
-              <StatCard label="Quoted" value={panel.quoted} />
-              <StatCard label="Booked" value={panel.booked} />
-              <StatCard label="Completed" value={panel.completed} />
+              <StatCard label="Leads" value={panel.leads} hint="From Benchmarks" />
+              <StatCard label="Quoted" value={panel.quoted} hint="From Benchmarks" />
+              <StatCard label="Booked" value={panel.booked} hint="From Benchmarks" />
+              <StatCard label="Completed" value={panel.completed} hint="From Benchmarks" />
             </div>
-            <p className="text-xs leading-5 text-muted">Pipeline counts pull from Benchmarks so this workspace reflects real operating activity.</p>
             <div className="grid gap-4 xl:grid-cols-2">
               <TextAreaField
                 label="Lead Source Plan"
@@ -365,17 +503,15 @@ export function BusinessWorkspace({
                 rows={4}
                 onChange={(value) => onFieldChange("leadSourcePlan", value)}
               />
-              <TextField
+              <ReadOnlyValue
                 label="Booking Method"
                 value={panel.bookingMethod}
-                placeholder="Phone, text, form, calendar link, or dispatch flow"
-                onChange={(value) => onFieldChange("bookingMethod", value)}
+                helper="This reflects what has been set up in your launch rails and benchmarks flow."
               />
-              <TextField
+              <ReadOnlyValue
                 label="Payment Method"
                 value={panel.paymentMethod}
-                placeholder="Invoice link, card reader, deposit + balance, etc."
-                onChange={(value) => onFieldChange("paymentMethod", value)}
+                helper="Keep the actual payment setup consistent in Benchmarks and Blueprint."
               />
               <TextAreaField
                 label="Sales Process Notes"
@@ -403,8 +539,10 @@ export function BusinessWorkspace({
         </Section>
 
         <Section
+          id="setup-stack"
           title="Setup + Stack"
           description="Keep the launch stack visible so the business can answer leads, book jobs, and collect payment without improvising."
+          helper="The status pills below show whether the basic rails are already in place. The editable notes are for how you want this stack to evolve."
         >
           <div className="grid gap-4">
             <div className="grid gap-3 lg:grid-cols-3">
@@ -413,11 +551,10 @@ export function BusinessWorkspace({
               <StatusBadge label="Payments" active={Boolean(panel.paymentMethod)} />
             </div>
             <div className="grid gap-4 xl:grid-cols-2">
-              <TextField
+              <ReadOnlyValue
                 label="Phone"
                 value={panel.phone}
-                placeholder="Business phone number or phone system notes"
-                onChange={(value) => onFieldChange("phone", value)}
+                helper="Pulled from your current setup progress."
               />
               <TextAreaField
                 label="CRM / Tools"
@@ -454,8 +591,10 @@ export function BusinessWorkspace({
         </Section>
 
         <Section
+          id="operations"
           title="Operations"
           description="Document how the work gets delivered so the business becomes easier to repeat, quote, schedule, and improve."
+          helper="Keep this practical. Another person should be able to understand how the work gets done without needing a long verbal explanation."
         >
           <div className="grid gap-4 xl:grid-cols-2">
             <TextAreaField
@@ -499,8 +638,10 @@ export function BusinessWorkspace({
         </Section>
 
         <Section
+          id="brand-messaging"
           title="Brand + Messaging"
           description="Keep the positioning tight. This is the place for the promise, tone, proof, and message direction that should shape everything customer-facing."
+          helper="These notes should help the business sound consistent across sales calls, websites, social posts, and follow-up."
         >
           <div className="grid gap-4 xl:grid-cols-2">
             <TextAreaField
@@ -527,7 +668,7 @@ export function BusinessWorkspace({
             <TextAreaField
               label="Trust Builders / Proof Notes"
               value={panel.trustBuildersNotes}
-              placeholder="What builds trust fast? Reviews, proof photos, guarantees, process clarity?"
+              placeholder="What builds trust fast? Reviews, proof photos, guarantees, or process clarity?"
               rows={4}
               onChange={(value) => onFieldChange("trustBuildersNotes", value)}
             />
@@ -544,8 +685,10 @@ export function BusinessWorkspace({
         </Section>
 
         <Section
+          id="goals-milestones"
           title="Goals + Milestones"
           description="Keep the targets visible so the business always has a short-term focus and a measured next milestone."
+          helper="These goals should be specific enough to guide the week, but simple enough that you actually revisit them."
         >
           <div className="grid gap-4 xl:grid-cols-2">
             <TextAreaField
@@ -568,12 +711,10 @@ export function BusinessWorkspace({
               placeholder="Target gross revenue, monthly target, or launch target"
               onChange={(value) => onFieldChange("revenueGoal", value)}
             />
-            <TextAreaField
-              label="Focus This Week"
-              value={panel.focusThisWeek}
-              placeholder="What is the one most important focus right now?"
-              rows={4}
-              onChange={(value) => onFieldChange("focusThisWeek", value)}
+            <ReadOnlyValue
+              label="Current Phase"
+              value={panel.currentPhase}
+              helper="This tracks the current blueprint phase based on your execution progress."
             />
             <div className="xl:col-span-2">
               <TextAreaField
@@ -587,9 +728,20 @@ export function BusinessWorkspace({
           </div>
         </Section>
 
+        {shouldShowAnchorCard ? (
+          <BusinessFlowPreviewCard
+            businessName={panel.businessName || panel.serviceType}
+            coreOffer={panel.starterOffer}
+            leadSourcePlan={panel.leadSourcePlan}
+            compact
+          />
+        ) : null}
+
         <Section
+          id="general-notes"
           title="General Notes"
           description="Use this as the catch-all workspace for anything that matters but does not fit neatly elsewhere."
+          helper="Loose ideas, reminders, customer language, and strategy notes all belong here if they help the business move faster."
         >
           <TextAreaField
             label="Open Notes"
