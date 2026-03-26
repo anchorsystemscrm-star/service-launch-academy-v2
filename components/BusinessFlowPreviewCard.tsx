@@ -44,7 +44,7 @@ export function BusinessFlowPreviewCard({
           <a
             href="https://anchorsystemscrm.com"
             target="_blank"
-            rel="noreferrer"
+            rel="noopener noreferrer"
             className="anchor-inline-cta w-full rounded-2xl px-4 py-3 text-center text-sm font-semibold text-white transition"
           >
             Run This Business on Anchor

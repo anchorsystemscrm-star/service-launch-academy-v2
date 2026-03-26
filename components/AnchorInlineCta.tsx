@@ -18,7 +18,7 @@ export function AnchorInlineCta({ body, ctaLabel, compact = false }: AnchorInlin
       <a
         href="https://anchorsystemscrm.com"
         target="_blank"
-        rel="noreferrer"
+        rel="noopener noreferrer"
         className="anchor-inline-cta mt-3 inline-flex w-full max-w-full items-center justify-center rounded-[16px] px-4 py-2.5 text-xs font-semibold uppercase tracking-[0.16em] text-white transition"
       >
         {ctaLabel}

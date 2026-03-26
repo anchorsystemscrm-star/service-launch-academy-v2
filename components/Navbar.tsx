@@ -24,7 +24,6 @@ interface NavbarProps {
 export function Navbar({ profile }: NavbarProps) {
   const pathname = usePathname();
   const router = useRouter();
-  const [modalOpen, setModalOpen] = useState(false);
   const [loggingOut, setLoggingOut] = useState(false);
   const mobileNavRef = useRef<HTMLDivElement | null>(null);
   const normalizedPathname = pathname ?? "";
@@ -187,13 +186,14 @@ export function Navbar({ profile }: NavbarProps) {
               Pipeline, follow-up automation, scheduling, invoicing, and review requests in one
               premium operating layer.
             </p>
-            <button
-              type="button"
-              onClick={() => setModalOpen(true)}
+            <a
+              href="https://anchorsystemscrm.com"
+              target="_blank"
+              rel="noopener noreferrer"
               className="mt-4 w-full rounded-xl border border-accentSecondary/40 bg-accentSecondary/10 px-4 py-3 text-sm font-semibold text-white transition hover:border-accentSecondary/70 hover:bg-accentSecondary/15"
             >
               Run This Business on Anchor
-            </button>
+            </a>
           </div>
         </div>
       </aside>
@@ -226,13 +226,14 @@ export function Navbar({ profile }: NavbarProps) {
               >
                 Pricing
               </Link>
-              <button
-                type="button"
-                onClick={() => setModalOpen(true)}
+              <a
+                href="https://anchorsystemscrm.com"
+                target="_blank"
+                rel="noopener noreferrer"
                 className="hidden rounded-xl border border-accentSecondary/40 bg-accentSecondary/10 px-4 py-2.5 text-sm font-semibold text-white transition hover:border-accentSecondary/70 hover:bg-accentSecondary/15 sm:inline-flex"
               >
                 Anchor Systems
-              </button>
+              </a>
               <button
                 type="button"
                 onClick={handleLogout}
@@ -259,55 +260,6 @@ export function Navbar({ profile }: NavbarProps) {
           </div>
         </div>
       </header>
-
-      {modalOpen && (
-        <div
-          className="fixed inset-0 z-[70] flex items-center justify-center bg-slate-950/80 p-4 backdrop-blur-sm"
-          onClick={() => setModalOpen(false)}
-        >
-          <div
-            className="pointer-events-auto w-full max-w-2xl rounded-[28px] border border-accent/30 bg-panel-gradient p-6 shadow-premium"
-            onClick={(event) => event.stopPropagation()}
-          >
-            <div className="flex items-start justify-between gap-4">
-              <div>
-                <h2 className="text-xl font-semibold text-white">Run This Business on Anchor</h2>
-                <p className="mt-2 max-w-xl text-sm leading-6 text-muted">
-                  Anchor Systems is the CRM layer for this playbook. It helps operators capture
-                  leads, automate follow-up, schedule work, and send invoices without juggling
-                  multiple tools.
-                </p>
-              </div>
-              <button
-                type="button"
-                onClick={() => setModalOpen(false)}
-                className="flex h-10 w-10 items-center justify-center rounded-full border border-white/10 bg-white/5 text-lg text-white transition hover:border-white/20 hover:bg-white/10"
-                aria-label="Close modal"
-              >
-                ×
-              </button>
-            </div>
-
-            <div className="mt-6 grid gap-3 sm:grid-cols-2">
-              {[
-                "Pipeline management for every lead and quote",
-                "Missed-call text-back so opportunities are not lost",
-                "Automated follow-up reminders and nurture sequences",
-                "Calendar scheduling with confirmations and reminders",
-                "Invoices, payment tracking, and review request workflows",
-                "A clean operating system for launch-stage service teams"
-              ].map((point) => (
-                <div
-                  key={point}
-                  className="rounded-2xl border border-white/10 bg-white/5 p-4 text-sm text-slate-200"
-                >
-                  {point}
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      )}
     </>
   );
 }
