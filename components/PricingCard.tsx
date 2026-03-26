@@ -8,9 +8,12 @@ import { getCheckoutHref, isExternalHref, tierLabels } from "@/utils/access";
 interface PricingCardProps {
   plan: SubscriptionTier;
   audience: string;
+  price: string;
+  priceSuffix: string;
   description: string;
   features: string[];
   callout?: string;
+  priceNote?: string;
   ctaLabel: string;
   ctaHref?: string;
   current?: boolean;
@@ -21,9 +24,12 @@ interface PricingCardProps {
 export function PricingCard({
   plan,
   audience,
+  price,
+  priceSuffix,
   description,
   features,
   callout,
+  priceNote,
   ctaLabel,
   ctaHref,
   current = false,
@@ -65,6 +71,19 @@ export function PricingCard({
           {tierLabels[plan]}
         </p>
         <h2 className="mt-3 text-2xl font-semibold text-white">{audience}</h2>
+        <div className="mt-4">
+          <div className="flex items-end gap-2">
+            <span className={`text-4xl font-semibold tracking-tight ${isPro ? "text-white" : "text-slate-100"}`}>
+              {price}
+            </span>
+            <span className="pb-1 text-sm font-medium text-muted">{priceSuffix}</span>
+          </div>
+          {priceNote ? (
+            <p className={`mt-2 text-sm ${isPro ? "font-medium text-slate-100" : "text-slate-300"}`}>
+              {priceNote}
+            </p>
+          ) : null}
+        </div>
         <p className="mt-3 text-sm leading-6 text-muted">{description}</p>
         {callout ? (
           <div className={`mt-4 rounded-[18px] border px-4 py-3 text-sm font-medium ${

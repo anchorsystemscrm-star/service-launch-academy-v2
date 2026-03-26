@@ -9,13 +9,18 @@ import { getCheckoutHref, getPricingHref, tierDescriptions, tierLabels } from "@
 const planContent: Array<{
   plan: SubscriptionTier;
   audience: string;
+  price: string;
+  priceSuffix: string;
   description: string;
   features: string[];
   callout?: string;
+  priceNote?: string;
 }> = [
   {
     plan: "preview",
     audience: "Explore the opportunity",
+    price: "Free",
+    priceSuffix: "",
     description: "Built for founders who are still deciding which service business fits their market, skills, and economics.",
     features: [
       `Browse all ${businesses.length} service opportunities`,
@@ -27,6 +32,8 @@ const planContent: Array<{
   {
     plan: "core",
     audience: "Launch with a real operating system",
+    price: "$97",
+    priceSuffix: "/ year",
     description: "For operators ready to move beyond browsing and build the business with full manual execution guidance.",
     features: [
       "Full blueprint and weekly execution roadmap",
@@ -38,6 +45,8 @@ const planContent: Array<{
   {
     plan: "pro",
     audience: "Unlock AI-guided execution",
+    price: "$197",
+    priceSuffix: "/ year",
     description: "For operators who want the full blueprint plus integrated AI help for pricing, marketing, sales, and operations.",
     features: [
       "Everything in Core",
@@ -46,11 +55,14 @@ const planContent: Array<{
       "Faster drafting for scripts, follow-up, pricing, and marketing",
       "Less guesswork and faster execution"
     ],
-    callout: "Best for most users who want AI support and faster execution"
+    callout: "Best for most users who want AI support and faster execution",
+    priceNote: "Most popular choice"
   },
   {
     plan: "elite",
     audience: "Systemize and scale",
+    price: "$497",
+    priceSuffix: "/ year",
     description: "For advanced operators who want premium systemization content and visibility into Anchor Systems integrations.",
     features: [
       "Everything in Pro",
@@ -137,9 +149,12 @@ export function PricingPageContent({ focusedPlan, currentTier }: PricingPageCont
               key={item.plan}
               plan={item.plan}
               audience={item.audience}
+              price={item.price}
+              priceSuffix={item.priceSuffix}
               description={item.description}
               features={item.features}
               callout={item.callout}
+              priceNote={item.priceNote}
               ctaLabel={ctaLabel}
               ctaHref={current ? "/dashboard" : getCheckoutHref(item.plan)}
               current={current}
