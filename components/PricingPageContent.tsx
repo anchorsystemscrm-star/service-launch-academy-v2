@@ -11,6 +11,7 @@ const planContent: Array<{
   audience: string;
   description: string;
   features: string[];
+  callout?: string;
 }> = [
   {
     plan: "preview",
@@ -26,7 +27,7 @@ const planContent: Array<{
   {
     plan: "core",
     audience: "Launch with a real operating system",
-    description: "For operators ready to move beyond browsing and actually build the business with step-by-step operating guidance.",
+    description: "For operators ready to move beyond browsing and build the business with full manual execution guidance.",
     features: [
       "Full blueprint and weekly execution roadmap",
       "Setup guidance, app stack, pricing, offers, and operations",
@@ -36,14 +37,16 @@ const planContent: Array<{
   },
   {
     plan: "pro",
-    audience: "Launch with guided execution help",
-    description: "For operators who want the full blueprint plus prompt-driven AI help for pricing, marketing, sales, and operations.",
+    audience: "Unlock AI-guided execution",
+    description: "For operators who want the full blueprint plus integrated AI help for pricing, marketing, sales, and operations.",
     features: [
       "Everything in Core",
       "AI Coach for guided execution help",
       "Service-specific prompt starters by category",
-      "Faster drafting for scripts, follow-up, pricing, and marketing"
-    ]
+      "Faster drafting for scripts, follow-up, pricing, and marketing",
+      "Less guesswork and faster execution"
+    ],
+    callout: "Best for most users who want AI support and faster execution"
   },
   {
     plan: "elite",
@@ -77,8 +80,7 @@ export function PricingPageContent({ focusedPlan, currentTier }: PricingPageCont
               <p className="text-sm font-semibold uppercase tracking-[0.18em] text-accent">Pricing</p>
               <h1 className="mt-3 text-3xl font-semibold text-white sm:text-4xl">A clear path from exploration to execution.</h1>
               <p className="mt-4 max-w-3xl text-base leading-7 text-muted">
-                Preview helps users compare service opportunities. Core unlocks the real launch operating system. Pro adds
-                guided AI help. Elite layers in advanced systems and Anchor Systems visibility.
+                Preview helps users explore service opportunities. Core unlocks the full launch operating system. Pro unlocks AI-guided execution and is the best fit for most users. Elite adds advanced systems and Anchor Systems integration previews.
               </p>
             </div>
 
@@ -115,7 +117,8 @@ export function PricingPageContent({ focusedPlan, currentTier }: PricingPageCont
       <section className="mt-6 grid gap-5 xl:grid-cols-4">
         {planContent.map((item) => {
           const current = currentTier === item.plan;
-          const highlighted = focusedPlan === item.plan || item.plan === "core";
+          const highlighted = focusedPlan === item.plan || item.plan === "pro";
+          const recommended = item.plan === "pro";
           const ctaLabel =
             item.plan === "preview"
               ? current
@@ -136,10 +139,12 @@ export function PricingPageContent({ focusedPlan, currentTier }: PricingPageCont
               audience={item.audience}
               description={item.description}
               features={item.features}
+              callout={item.callout}
               ctaLabel={ctaLabel}
               ctaHref={current ? "/dashboard" : getCheckoutHref(item.plan)}
               current={current}
               highlighted={highlighted}
+              recommended={recommended}
             />
           );
         })}
@@ -153,7 +158,7 @@ export function PricingPageContent({ focusedPlan, currentTier }: PricingPageCont
             {[
               "Preview: opportunity discovery and fit only",
               "Core: full launch blueprint and operating setup",
-              "Pro: AI Coach and guided prompt suggestions",
+              "Pro: AI Coach and guided execution support",
               "Elite: advanced systems and Anchor integration previews"
             ].map((item) => (
               <div key={item} className="rounded-[24px] border border-white/10 bg-white/5 p-4 text-sm text-slate-200">
