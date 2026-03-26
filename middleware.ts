@@ -11,6 +11,7 @@ export function middleware(request: NextRequest) {
   const tierCookie = request.cookies.get("sla-tier")?.value;
 
   const profile = {
+    userId: null,
     selectedBusinessId,
     tier: normalizeSubscriptionTier(tierCookie)
   } as const;

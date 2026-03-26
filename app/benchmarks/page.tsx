@@ -2,40 +2,25 @@
 
 import { KPIInputs } from "@/components/KPIInputs";
 import { LockedFeatureCard } from "@/components/LockedFeatureCard";
-import { businesses } from "@/data/businesses";
+import { WorkspaceSelectionEmptyState } from "@/components/WorkspaceSelectionEmptyState";
+import { SubscriptionTier } from "@/types/business";
 import { getCheckoutHref, getPricingHref, hasTierAccess, tierLabels } from "@/utils/access";
-import { defaultKpiData, getFallbackBusiness, getTrackStatus, milestoneTemplate, buildBlueprint } from "@/utils/benchmarks";
+import { defaultKpiData, getBusinessById, getTrackStatus, milestoneTemplate, buildBlueprint } from "@/utils/benchmarks";
 import { getCompletedWeeks } from "@/utils/benchmarks";
 import { useAccessProfile, useBlueprintProgress, useKpiState } from "@/utils/storage";
 
-export default function BenchmarksPage() {
-  const { profile } = useAccessProfile();
-  const business = getFallbackBusiness(profile.selectedBusinessId);
+function BenchmarksWorkspace({ businessId, tier }: { businessId: string; tier: SubscriptionTier }) {
+  const business = getBusinessById(businessId);
+
+  if (!business) {
+    return null;
+  }
+
   const { progress } = useBlueprintProgress(business.id, business.executionPlan);
   const { kpis, setKpis } = useKpiState(business.id, defaultKpiData);
-  const hasCoreAccess = hasTierAccess(profile.tier, "core");
-
   const completedWeeks = getCompletedWeeks(progress);
   const trackStatus = getTrackStatus(business, progress, kpis);
   const currentPhase = buildBlueprint(business).find((phase) => phase.title === trackStatus.phaseTitle);
-
-  if (!hasCoreAccess) {
-    return (
-      <div className="mx-auto max-w-5xl animate-fade-up">
-        <LockedFeatureCard
-          title="Benchmarks unlock with Core"
-          requiredTier="core"
-          description="Preview is for exploring service opportunities. KPI tracking, on-track indicators, and weekly scorecards unlock in Core."
-          bullets={[
-            "Weekly lead, quote, jobs won, revenue, and review tracking",
-            "Phase-aware benchmark targets and on-track status",
-            "Timeline visibility to keep launch execution disciplined"
-          ]}
-          ctaHref={getCheckoutHref("core")}
-        />
-      </div>
-    );
-  }
 
   return (
     <div className="mx-auto max-w-7xl animate-fade-up">
@@ -51,7 +36,7 @@ export default function BenchmarksPage() {
         <div className="flex flex-col gap-2">
           <p className="text-sm text-muted">Selected business: {business.name}</p>
           <p className="text-sm text-slate-200">Current phase: {trackStatus.phaseTitle}</p>
-          <p className="text-sm text-slate-200">Access tier: {tierLabels[profile.tier]}</p>
+          <p className="text-sm text-slate-200">Access tier: {tierLabels[tier]}</p>
           <p className="text-xs uppercase tracking-[0.18em] text-muted">Typical ranges; results vary.</p>
         </div>
 
@@ -110,4 +95,40 @@ export default function BenchmarksPage() {
       </section>
     </div>
   );
+}
+
+export default function BenchmarksPage() {
+  const { profile } = useAccessProfile();
+  const business = getBusinessById(profile.selectedBusinessId);
+  const hasCoreAccess = hasTierAccess(profile.tier, "core");
+
+  if (!hasCoreAccess) {
+    return (
+      <div className="mx-auto max-w-5xl animate-fade-up">
+        <LockedFeatureCard
+          title="Benchmarks unlock with Core"
+          requiredTier="core"
+          description="Preview is for exploring service opportunities. KPI tracking, on-track indicators, and weekly scorecards unlock in Core."
+          bullets={[
+            "Weekly lead, quote, jobs won, revenue, and review tracking",
+            "Phase-aware benchmark targets and on-track status",
+            "Timeline visibility to keep launch execution disciplined"
+          ]}
+          ctaHref={getCheckoutHref("core")}
+        />
+      </div>
+    );
+  }
+
+  if (!business) {
+    return (
+      <WorkspaceSelectionEmptyState
+        eyebrow="Benchmarks"
+        title="Choose a business before tracking KPI progress"
+        description="Benchmark data is now isolated per account and per selected business. Pick a service from Dashboard first so this page tracks your own leads, quotes, jobs, revenue, and reviews."
+      />
+    );
+  }
+
+  return <BenchmarksWorkspace businessId={business.id} tier={profile.tier} />;
 }

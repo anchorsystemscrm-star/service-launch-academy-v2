@@ -132,10 +132,6 @@ export function getBusinessById(id?: string | null): Business | undefined {
   return businesses.find((business) => business.id === id);
 }
 
-export function getFallbackBusiness(id?: string | null): Business {
-  return getBusinessById(id) ?? businesses[0];
-}
-
 export function filterBusinesses(list: Business[], query: string, filters: string[]): Business[] {
   const normalizedQuery = query.trim().toLowerCase();
 

@@ -5,7 +5,14 @@ import { usePathname, useRouter } from "next/navigation";
 
 import { getSupabaseBrowserClient, isSupabaseConfigured } from "@/lib/supabaseClient";
 import { canAccessPath, getFirstAvailableAppPath } from "@/utils/access";
-import { clearAccessCookie, readClientAccessProfile, setAccessCookie, syncTierFromSession, useAccessProfile } from "@/utils/storage";
+import {
+  clearAccessCookie,
+  clearScopedClientState,
+  readClientAccessProfile,
+  setAccessCookie,
+  syncTierFromSession,
+  useAccessProfile
+} from "@/utils/storage";
 
 import { Navbar } from "./Navbar";
 
@@ -37,6 +44,7 @@ export function AppShell({ children }: PropsWithChildren) {
           setAccessCookie(data.session.access_token, data.session.expires_at);
           syncTierFromSession(data.session);
         } else {
+          clearScopedClientState();
           clearAccessCookie();
           if (!isLoginPage) {
             router.replace("/login");
@@ -46,6 +54,7 @@ export function AppShell({ children }: PropsWithChildren) {
         setSessionResolved(true);
       })
       .catch(() => {
+        clearScopedClientState();
         clearAccessCookie();
         setSessionResolved(true);
         if (!isLoginPage) {
@@ -60,6 +69,7 @@ export function AppShell({ children }: PropsWithChildren) {
         setAccessCookie(session.access_token, session.expires_at);
         syncTierFromSession(session);
       } else {
+        clearScopedClientState();
         clearAccessCookie();
       }
 

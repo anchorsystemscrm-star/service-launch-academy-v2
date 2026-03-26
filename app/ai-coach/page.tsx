@@ -5,9 +5,10 @@ import { useSearchParams } from "next/navigation";
 
 import { CoachComposer } from "@/components/ai-coach/CoachComposer";
 import { CoachResponseRenderer } from "@/components/ai-coach/CoachResponseRenderer";
+import { WorkspaceSelectionEmptyState } from "@/components/WorkspaceSelectionEmptyState";
 import { CoachAction, CoachMode } from "@/lib/ai/coachTypes";
 import { LockedFeatureCard } from "@/components/LockedFeatureCard";
-import { defaultKpiData, getBenchmarkSummary, getFallbackBusiness, getPhaseIndexByProgress } from "@/utils/benchmarks";
+import { defaultKpiData, getBenchmarkSummary, getBusinessById, getPhaseIndexByProgress } from "@/utils/benchmarks";
 import {
   canSaveCoachOutput,
   canUseCoachMode,
@@ -30,25 +31,32 @@ import {
 } from "@/utils/storage";
 import { CoachResponse } from "@/lib/ai/coachTypes";
 
-export default function AICoachPage() {
+function AICoachWorkspace({ businessId }: { businessId: string }) {
   const isDev = process.env.NODE_ENV !== "production";
   const searchParams = useSearchParams();
   const { profile } = useAccessProfile();
-  const business = getFallbackBusiness(profile.selectedBusinessId);
-  const { progress, taskProgress } = useBlueprintProgress(business.id, business.executionPlan);
-  const { kpis } = useKpiState(business.id, defaultKpiData);
-  const { panel: businessPanel } = useBusinessPanel(business, progress, taskProgress, kpis);
-  const currentPhase = business.blueprintPhases[getPhaseIndexByProgress(progress)];
+  const business = getBusinessById(businessId);
+
+  if (!business) {
+    return null;
+  }
+
+  const activeBusiness = business;
+
+  const { progress, taskProgress } = useBlueprintProgress(activeBusiness.id, activeBusiness.executionPlan);
+  const { kpis } = useKpiState(activeBusiness.id, defaultKpiData);
+  const { panel: businessPanel } = useBusinessPanel(activeBusiness, progress, taskProgress, kpis);
+  const currentPhase = activeBusiness.blueprintPhases[getPhaseIndexByProgress(progress)];
   const initialMessage = createCoachMessage({
     role: "assistant",
     buildStage: "pricing",
     content:
-      `You're coaching for ${business.name}. Ask for pricing, scripts, checklists, SOPs, follow-up plans, or creative assets.\n` +
+      `You're coaching for ${activeBusiness.name}. Ask for pricing, scripts, checklists, SOPs, follow-up plans, or creative assets.\n` +
       "The coach will use your current business and blueprint phase as context."
   });
-  const { messages, replaceMessages } = useCoachConversation(business.id, initialMessage);
-  const { summary, setSummary } = useCoachSummary(business.id);
-  const { savedOutputs, saveOutput, deleteOutput } = useSavedCoachOutputs(business.id);
+  const { messages, replaceMessages } = useCoachConversation(activeBusiness.id, initialMessage);
+  const { summary, setSummary } = useCoachSummary(activeBusiness.id);
+  const { savedOutputs, saveOutput, deleteOutput } = useSavedCoachOutputs(activeBusiness.id);
   const [isLoading, setIsLoading] = useState(false);
   const [loadingMode, setLoadingMode] = useState<CoachMode | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -61,7 +69,7 @@ export default function AICoachPage() {
   const hasProAccess = hasTierAccess(profile.tier, "pro");
   const hasEliteAccess = hasTierAccess(profile.tier, "elite");
 
-  const completedTasks = business.executionPlan.flatMap((stage, stageIndex) =>
+  const completedTasks = activeBusiness.executionPlan.flatMap((stage, stageIndex) =>
     stage.checklist
       .filter((_, taskIndex) => taskProgress[stageIndex]?.[taskIndex])
       .map((item) => item.title)
@@ -71,39 +79,39 @@ export default function AICoachPage() {
     {
       label: "Build Pricing",
       mode: "pricing" as const,
-      prompt: `Build a premium 3-tier pricing plan for ${business.name} around "${business.recommended_first_offer}".`
+      prompt: `Build a premium 3-tier pricing plan for ${activeBusiness.name} around "${activeBusiness.recommended_first_offer}".`
     },
     {
       label: "Write Script",
       mode: "script" as const,
-      prompt: `Write a sales script for ${business.name} that sells "${business.recommended_first_offer}" without sounding generic.`
+      prompt: `Write a sales script for ${activeBusiness.name} that sells "${activeBusiness.recommended_first_offer}" without sounding generic.`
     },
     {
       label: "Generate Checklist",
       mode: "checklist" as const,
-      prompt: `Create a tactical launch checklist for my current ${business.name} phase.`
+      prompt: `Create a tactical launch checklist for my current ${activeBusiness.name} phase.`
     },
     {
       label: "Follow-Up Plan",
       mode: "followup" as const,
-      prompt: `Create a quote follow-up sequence for ${business.name} leads that did not book right away.`
+      prompt: `Create a quote follow-up sequence for ${activeBusiness.name} leads that did not book right away.`
     },
     {
       label: "Marketing Plan",
       mode: "marketing" as const,
-      prompt: `Build a 14-day local marketing plan for ${business.name} using realistic lead channels.`,
+      prompt: `Build a 14-day local marketing plan for ${activeBusiness.name} using realistic lead channels.`,
       locked: !canUseCoachMode(profile.tier, "marketing")
     },
     {
       label: "SOP Builder",
       mode: "sop" as const,
-      prompt: `Build an intake-to-invoice SOP for my ${business.name} business.`,
+      prompt: `Build an intake-to-invoice SOP for my ${activeBusiness.name} business.`,
       locked: !canUseCoachMode(profile.tier, "sop")
     },
     {
       label: "Generate Logo",
       mode: "image" as const,
-      prompt: `Generate a premium logo concept for my ${business.name} business.`,
+      prompt: `Generate a premium logo concept for my ${activeBusiness.name} business.`,
       locked: !canUseCoachMode(profile.tier, "image")
     }
   ];
@@ -177,13 +185,13 @@ export default function AICoachPage() {
           message: trimmed,
           requestedMode,
           context: {
-            businessId: business.id,
+            businessId: activeBusiness.id,
             businessName: businessPanel.businessName || undefined,
-            businessType: businessPanel.serviceType || business.name,
+            businessType: businessPanel.serviceType || activeBusiness.name,
             businessDescription: businessPanel.businessDescription || undefined,
             serviceModel: businessPanel.serviceModel || undefined,
             phase: currentPhase.title,
-            entryOffer: businessPanel.starterOffer || business.recommended_first_offer,
+            entryOffer: businessPanel.starterOffer || activeBusiness.recommended_first_offer,
             secondaryOffer: businessPanel.secondaryOffer || undefined,
             keyInclusions: businessPanel.keyInclusions || undefined,
             serviceArea: businessPanel.serviceArea || undefined,
@@ -211,7 +219,7 @@ export default function AICoachPage() {
             quotedCount: businessPanel.quoted,
             bookedCount: businessPanel.booked,
             completedCount: businessPanel.completed,
-            budgetRange: business.startup_cost_range,
+            budgetRange: activeBusiness.startup_cost_range,
             accessTier: profile.tier,
             completedTasks,
             selectedCategory: requestedMode,
@@ -319,19 +327,20 @@ export default function AICoachPage() {
     }
 
     const saved = createSavedCoachOutput({
-      businessId: business.id,
+      userId: profile.userId,
+      businessId: activeBusiness.id,
       businessContext: {
-        businessId: business.id,
+        businessId: activeBusiness.id,
         businessName: businessPanel.businessName || undefined,
-        businessType: businessPanel.serviceType || business.name,
+        businessType: businessPanel.serviceType || activeBusiness.name,
         phase: currentPhase.title,
-        entryOffer: business.recommended_first_offer,
+        entryOffer: activeBusiness.recommended_first_offer,
         serviceArea: businessPanel.serviceArea || undefined,
         priceFloor: businessPanel.priceFloor || undefined,
         phone: businessPanel.phone || undefined,
         bookingMethod: businessPanel.bookingMethod || undefined,
         paymentMethod: businessPanel.paymentMethod || undefined,
-        budgetRange: business.startup_cost_range,
+        budgetRange: activeBusiness.startup_cost_range,
         accessTier: profile.tier,
         completedTasks
       },
@@ -339,7 +348,7 @@ export default function AICoachPage() {
       buildStage: activeResponse.buildStage,
       title:
         activeResponse.title ||
-        `${business.name} ${activeResponse.mode ? activeResponse.mode.charAt(0).toUpperCase() + activeResponse.mode.slice(1) : "Coach"} Output`,
+        `${activeBusiness.name} ${activeResponse.mode ? activeResponse.mode.charAt(0).toUpperCase() + activeResponse.mode.slice(1) : "Coach"} Output`,
       prompt:
         "prompt" in activeResponse
           ? activeResponse.prompt
@@ -390,24 +399,6 @@ export default function AICoachPage() {
       }
     });
   }, [autoPrompt, autoPromptMode, hasProAccess]);
-
-  if (!hasProAccess) {
-    return (
-      <div className="mx-auto max-w-5xl animate-fade-up">
-        <LockedFeatureCard
-          title="AI Coach unlocks with Pro"
-          requiredTier="pro"
-          description="Core gives you the full playbook. Pro adds tactical AI help so pricing, scripts, follow-up, and launch decisions stop feeling blank."
-          bullets={[
-            `Build structured pricing for ${business.name}`,
-            `Generate scripts and checklists for ${business.recommended_first_offer}`,
-            "Use Elite to unlock SOP planning, marketing strategy, and image generation"
-          ]}
-          ctaHref={getCheckoutHref("pro")}
-        />
-      </div>
-    );
-  }
 
   return (
     <div className="mx-auto w-full max-w-7xl overflow-x-hidden animate-fade-up">
@@ -554,7 +545,7 @@ export default function AICoachPage() {
               <div className="grid w-full max-w-full grid-cols-1 gap-3 sm:grid-cols-2">
                 <div className="w-full max-w-full rounded-[20px] border border-white/10 bg-white/5 p-4">
                   <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted">Selected business</p>
-                  <p className="mt-2 break-words text-sm text-white">{business.name}</p>
+                  <p className="mt-2 break-words text-sm text-white">{activeBusiness.name}</p>
                 </div>
                 <div className="w-full max-w-full rounded-[20px] border border-white/10 bg-white/5 p-4">
                   <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted">Current phase</p>
@@ -562,7 +553,7 @@ export default function AICoachPage() {
                 </div>
                 <div className="w-full max-w-full rounded-[20px] border border-white/10 bg-white/5 p-4">
                   <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted">Entry offer</p>
-                  <p className="mt-2 break-words text-sm text-white">{business.recommended_first_offer}</p>
+                  <p className="mt-2 break-words text-sm text-white">{activeBusiness.recommended_first_offer}</p>
                 </div>
                 <div className="w-full max-w-full rounded-[20px] border border-white/10 bg-white/5 p-4">
                   <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted">Access tier</p>
@@ -634,4 +625,40 @@ export default function AICoachPage() {
       </div>
     </div>
   );
+}
+
+export default function AICoachPage() {
+  const { profile } = useAccessProfile();
+  const business = getBusinessById(profile.selectedBusinessId);
+  const hasProAccess = hasTierAccess(profile.tier, "pro");
+
+  if (!hasProAccess) {
+    return (
+      <div className="mx-auto max-w-5xl animate-fade-up">
+        <LockedFeatureCard
+          title="AI Coach unlocks with Pro"
+          requiredTier="pro"
+          description="Core gives you the full playbook. Pro adds tactical AI help so pricing, scripts, follow-up, and launch decisions stop feeling blank."
+          bullets={[
+            "Build structured pricing for your selected service",
+            "Generate scripts and checklists based on your actual business workspace",
+            "Use Elite to unlock SOP planning, marketing strategy, and image generation"
+          ]}
+          ctaHref={getCheckoutHref("pro")}
+        />
+      </div>
+    );
+  }
+
+  if (!business) {
+    return (
+      <WorkspaceSelectionEmptyState
+        eyebrow="AI Coach"
+        title="Choose a business before opening AI Coach"
+        description="AI Coach is now scoped to the authenticated user's selected business. Pick a service from Dashboard first so the prompts, memory, and saved outputs stay tied to your own workspace."
+      />
+    );
+  }
+
+  return <AICoachWorkspace businessId={business.id} />;
 }

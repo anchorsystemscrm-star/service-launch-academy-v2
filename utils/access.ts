@@ -2,6 +2,7 @@ import { SubscriptionTier } from "@/types/business";
 import { CoachMode } from "@/lib/ai/coachTypes";
 
 export interface AccessProfile {
+  userId: string | null;
   selectedBusinessId: string | null;
   tier: SubscriptionTier;
 }

@@ -10,7 +10,16 @@ import { MobileBlueprintFocus } from "@/components/MobileBlueprintFocus";
 import { PhaseCard } from "@/components/PhaseCard";
 import { ProgressTracker } from "@/components/ProgressTracker";
 import { ScriptCard } from "@/components/ScriptCard";
-import { getCheckoutHref, getPricingHref, getUpgradeMessage, hasTierAccess, isExternalHref, tierLabels } from "@/utils/access";
+import { WorkspaceSelectionEmptyState } from "@/components/WorkspaceSelectionEmptyState";
+import {
+  AccessProfile,
+  getCheckoutHref,
+  getPricingHref,
+  getUpgradeMessage,
+  hasTierAccess,
+  isExternalHref,
+  tierLabels
+} from "@/utils/access";
 import {
   buildBlueprint,
   buildScripts,
@@ -18,7 +27,7 @@ import {
   getBlueprintAnchorStage,
   getChecklistCompletion,
   getExecutionStageStatus,
-  getFallbackBusiness,
+  getBusinessById,
   milestoneTemplate
 } from "@/utils/benchmarks";
 import { useAccessProfile, useActiveBlueprint, useBlueprintProgress, useBlueprintTaskOutputState } from "@/utils/storage";
@@ -33,17 +42,23 @@ const tabs = [
   { id: "anchor", label: "Anchor Setup", minTier: "elite" }
 ] as const;
 
-export default function BlueprintPage() {
-  const { profile } = useAccessProfile();
+function BlueprintWorkspace({ businessId, profile }: { businessId: string; profile: AccessProfile }) {
   const { activeBlueprintId, setActiveBlueprintId } = useActiveBlueprint();
-  const business = getFallbackBusiness(profile.selectedBusinessId);
-  const { progress, taskProgress, setWeekComplete, setTaskComplete } = useBlueprintProgress(business.id, business.executionPlan);
-  const { outputMap: taskOutputMap, setTaskHasOutput } = useBlueprintTaskOutputState(business.id);
+  const business = getBusinessById(businessId);
+
+  if (!business) {
+    return null;
+  }
+
+  const activeBusiness = business;
+
+  const { progress, taskProgress, setWeekComplete, setTaskComplete } = useBlueprintProgress(activeBusiness.id, activeBusiness.executionPlan);
+  const { outputMap: taskOutputMap, setTaskHasOutput } = useBlueprintTaskOutputState(activeBusiness.id);
   const [activeTab, setActiveTab] = useState<(typeof tabs)[number]["id"]>("plan");
 
-  const phases = buildBlueprint(business);
-  const scripts = buildScripts(business);
-  const isActive = activeBlueprintId === business.id;
+  const phases = buildBlueprint(activeBusiness);
+  const scripts = buildScripts(activeBusiness);
+  const isActive = activeBlueprintId === activeBusiness.id;
   const hasCoreAccess = hasTierAccess(profile.tier, "core");
   const hasProAccess = hasTierAccess(profile.tier, "pro");
   const canAccessAnchor = hasTierAccess(profile.tier, "elite");
@@ -51,7 +66,7 @@ export default function BlueprintPage() {
   const checklistStats = getChecklistCompletion(taskProgress);
   const anchorStage = getBlueprintAnchorStage(taskProgress, taskOutputMap);
   const visibleTabs = tabs.filter((tab) => tab.id !== "anchor" || anchorStage >= 4);
-  const stageStatuses = business.executionPlan.map((stage, stageIndex) => ({
+  const stageStatuses = activeBusiness.executionPlan.map((stage, stageIndex) => ({
     stage,
     stageIndex,
     status: getExecutionStageStatus(progress, taskProgress, stageIndex)
@@ -93,28 +108,28 @@ export default function BlueprintPage() {
             <h2 className="text-xl font-semibold text-white">At a glance</h2>
             <div className="mt-4 grid gap-3 text-sm text-slate-200">
               <div className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 break-words">
-                <span className="text-muted">Summary:</span> {business.teaser}
+                <span className="text-muted">Summary:</span> {activeBusiness.teaser}
               </div>
               <div className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 break-words">
-                <span className="text-muted">Best for:</span> {business.bestFitOperatorType}
+                <span className="text-muted">Best for:</span> {activeBusiness.bestFitOperatorType}
               </div>
               <div className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 break-words">
-                <span className="text-muted">Startup range:</span> {business.startup_cost_range}
+                <span className="text-muted">Startup range:</span> {activeBusiness.startup_cost_range}
               </div>
               <div className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 break-words">
-                <span className="text-muted">90-day revenue:</span> {business.revenue_90_range}
+                <span className="text-muted">90-day revenue:</span> {activeBusiness.revenue_90_range}
               </div>
               <div className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 break-words">
-                <span className="text-muted">Recurring potential:</span> {business.recurringRevenuePotential}
+                <span className="text-muted">Recurring potential:</span> {activeBusiness.recurringRevenuePotential}
               </div>
             </div>
           </section>
 
           <section className="panel-surface w-full max-w-full overflow-hidden p-6">
             <h2 className="text-xl font-semibold text-white">Why this business works</h2>
-            <p className="mt-4 text-sm leading-6 text-muted">{business.whyAttractive}</p>
+            <p className="mt-4 text-sm leading-6 text-muted">{activeBusiness.whyAttractive}</p>
             <ul className="mt-4 grid gap-2 pl-5 text-sm leading-6 text-slate-200">
-              {business.pros.map((item) => (
+              {activeBusiness.pros.map((item) => (
                 <li key={item}>{item}</li>
               ))}
             </ul>
@@ -122,7 +137,7 @@ export default function BlueprintPage() {
         </div>
 
         <div className="grid gap-6">
-          {business.previewTeasers.map((teaser) => (
+          {activeBusiness.previewTeasers.map((teaser) => (
             <LockedFeatureCard
               key={teaser.title}
               title={teaser.title}
@@ -140,7 +155,7 @@ export default function BlueprintPage() {
               pricing design, lead generation systems, and the weekly launch plan.
             </p>
             <div className="mt-6 grid gap-3 md:grid-cols-2">
-              {business.goodFor.map((item) => (
+              {activeBusiness.goodFor.map((item) => (
                 <div key={item} className="rounded-[24px] border border-white/10 bg-white/5 p-4 text-sm text-slate-200 break-words">
                   {item}
                 </div>
@@ -182,7 +197,7 @@ export default function BlueprintPage() {
         <div className="mt-3 flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
           <div className="min-w-0 max-w-full">
             <h1 className="text-3xl font-semibold text-white sm:text-4xl">90-day blueprint</h1>
-            <p className="mt-3 break-words text-base leading-7 text-muted">Selected: {business.name}</p>
+            <p className="mt-3 break-words text-base leading-7 text-muted">Selected: {activeBusiness.name}</p>
           </div>
 
           <label className="flex w-full max-w-full flex-wrap items-center justify-between gap-4 rounded-[20px] border border-white/10 bg-white/5 px-5 py-4 xl:w-auto">
@@ -194,7 +209,7 @@ export default function BlueprintPage() {
               type="button"
               role="switch"
               aria-checked={isActive}
-              onClick={() => setActiveBlueprintId(isActive ? null : business.id)}
+              onClick={() => setActiveBlueprintId(isActive ? null : activeBusiness.id)}
               className={`relative h-8 w-14 rounded-full border transition ${
                 isActive ? "border-accentSecondary/60 bg-accentSecondary/25" : "border-white/10 bg-white/10"
               }`}
@@ -226,28 +241,28 @@ export default function BlueprintPage() {
       <div className="mt-6 grid w-full max-w-full gap-6 overflow-x-hidden lg:grid-cols-[320px_minmax(0,1fr)] xl:grid-cols-[360px_minmax(0,1fr)]">
         <div className="hidden min-w-0 max-w-full gap-6 lg:grid">
           <section className="panel-surface w-full max-w-full overflow-hidden p-6">
-            <h2 className="text-lg font-semibold text-white">{business.name}</h2>
+            <h2 className="text-lg font-semibold text-white">{activeBusiness.name}</h2>
             <div className="mt-4 grid gap-3 text-sm text-slate-200">
               <div className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3">
-                <span className="text-muted">Summary:</span> {business.summary}
+                <span className="text-muted">Summary:</span> {activeBusiness.summary}
               </div>
               <div className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3">
-                <span className="text-muted">Startup Cost:</span> {business.startup_cost_range}
+                <span className="text-muted">Startup Cost:</span> {activeBusiness.startup_cost_range}
               </div>
               <div className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3">
-                <span className="text-muted">90 Days (Gross):</span> {business.revenue_90_range}
+                <span className="text-muted">90 Days (Gross):</span> {activeBusiness.revenue_90_range}
               </div>
               <div className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3">
-                <span className="text-muted">1 Year (Gross):</span> {business.revenue_1yr_range}
+                <span className="text-muted">1 Year (Gross):</span> {activeBusiness.revenue_1yr_range}
               </div>
               <div className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3">
-                <span className="text-muted">Margin Range:</span> {business.margin_range}
+                <span className="text-muted">Margin Range:</span> {activeBusiness.margin_range}
               </div>
               <div className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3">
-                <span className="text-muted">Difficulty:</span> {business.difficulty}
+                <span className="text-muted">Difficulty:</span> {activeBusiness.difficulty}
               </div>
               <div className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3">
-                <span className="text-muted">Recommended First Offer:</span> {business.recommended_first_offer}
+                <span className="text-muted">Recommended First Offer:</span> {activeBusiness.recommended_first_offer}
               </div>
             </div>
             <p className="mt-4 text-xs uppercase tracking-[0.18em] text-muted">Typical ranges; results vary.</p>
@@ -256,7 +271,7 @@ export default function BlueprintPage() {
           <ProgressTracker
             progress={progress}
             taskProgress={taskProgress}
-            executionPlan={business.executionPlan}
+            executionPlan={activeBusiness.executionPlan}
             onToggleWeek={setWeekComplete}
           />
         </div>
@@ -318,8 +333,8 @@ export default function BlueprintPage() {
               </div>
 
               <MobileBlueprintFocus
-                businessId={business.id}
-                executionPlan={business.executionPlan}
+                businessId={activeBusiness.id}
+                executionPlan={activeBusiness.executionPlan}
                 phases={phases}
                 progress={progress}
                 taskProgress={taskProgress}
@@ -422,7 +437,7 @@ export default function BlueprintPage() {
                   <div className="min-w-0 max-w-full">
                     <p className="text-sm font-semibold text-white">Required items</p>
                     <ul className="mt-3 grid gap-2 pl-5 text-sm leading-6 text-slate-200">
-                      {business.startupRequirements.requiredItems.map((item) => (
+                      {activeBusiness.startupRequirements.requiredItems.map((item) => (
                         <li key={item}>{item}</li>
                       ))}
                     </ul>
@@ -430,7 +445,7 @@ export default function BlueprintPage() {
                   <div className="min-w-0 max-w-full">
                     <p className="text-sm font-semibold text-white">Optional upgrades</p>
                     <ul className="mt-3 grid gap-2 pl-5 text-sm leading-6 text-slate-200">
-                      {business.startupRequirements.optionalItems.map((item) => (
+                      {activeBusiness.startupRequirements.optionalItems.map((item) => (
                         <li key={item}>{item}</li>
                       ))}
                     </ul>
@@ -441,7 +456,7 @@ export default function BlueprintPage() {
                   <div className="min-w-0 max-w-full">
                     <p className="text-sm font-semibold text-white">Vehicle needs</p>
                     <ul className="mt-3 grid gap-2 pl-5 text-sm leading-6 text-slate-200">
-                      {business.startupRequirements.vehicleNeeds.map((item) => (
+                      {activeBusiness.startupRequirements.vehicleNeeds.map((item) => (
                         <li key={item}>{item}</li>
                       ))}
                     </ul>
@@ -449,7 +464,7 @@ export default function BlueprintPage() {
                   <div className="min-w-0 max-w-full">
                     <p className="text-sm font-semibold text-white">Core tools and equipment</p>
                     <ul className="mt-3 grid gap-2 pl-5 text-sm leading-6 text-slate-200">
-                      {business.startupRequirements.tools.map((item) => (
+                      {activeBusiness.startupRequirements.tools.map((item) => (
                         <li key={item}>{item}</li>
                       ))}
                     </ul>
@@ -460,7 +475,7 @@ export default function BlueprintPage() {
               <section className="w-full max-w-full overflow-hidden rounded-[24px] border border-white/10 bg-white/5 p-5">
                 <h3 className="text-lg font-semibold text-white">Software / apps / tools stack</h3>
                 <div className="mt-4 grid gap-3">
-                  {business.softwareStack.map((item) => (
+                  {activeBusiness.softwareStack.map((item) => (
                     <div key={`${item.category}-${item.tool}`} className="w-full max-w-full overflow-hidden rounded-[20px] border border-white/10 bg-slate-950/40 p-4">
                       <div className="flex flex-wrap items-center justify-between gap-3">
                         <p className="text-sm font-semibold text-white">{item.category}</p>
@@ -478,7 +493,7 @@ export default function BlueprintPage() {
               <section className="w-full max-w-full overflow-hidden rounded-[24px] border border-white/10 bg-white/5 p-5">
                 <h3 className="text-lg font-semibold text-white">Startup budget buckets</h3>
                 <div className="mt-4 grid gap-3 md:grid-cols-2">
-                  {business.startupRequirements.budgetBuckets.map((bucket) => (
+                  {activeBusiness.startupRequirements.budgetBuckets.map((bucket) => (
                     <div key={bucket.label} className="w-full max-w-full overflow-hidden rounded-[20px] border border-white/10 bg-slate-950/40 p-4">
                       <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted">{bucket.label}</p>
                       <p className="mt-2 text-sm font-semibold text-white">{bucket.range}</p>
@@ -497,31 +512,31 @@ export default function BlueprintPage() {
                 <div className="mt-4 grid gap-4 lg:grid-cols-3">
                   <div className="w-full max-w-full overflow-hidden rounded-[20px] border border-white/10 bg-slate-950/40 p-4">
                     <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted">Starter</p>
-                    <p className="mt-2 break-words text-sm text-white">{business.offerPricing.starterOffer}</p>
+                    <p className="mt-2 break-words text-sm text-white">{activeBusiness.offerPricing.starterOffer}</p>
                   </div>
                   <div className="w-full max-w-full overflow-hidden rounded-[20px] border border-white/10 bg-slate-950/40 p-4">
                     <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted">Standard</p>
-                    <p className="mt-2 break-words text-sm text-white">{business.offerPricing.standardOffer}</p>
+                    <p className="mt-2 break-words text-sm text-white">{activeBusiness.offerPricing.standardOffer}</p>
                   </div>
                   <div className="w-full max-w-full overflow-hidden rounded-[20px] border border-white/10 bg-slate-950/40 p-4">
                     <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted">Premium</p>
-                    <p className="mt-2 break-words text-sm text-white">{business.offerPricing.premiumOffer}</p>
+                    <p className="mt-2 break-words text-sm text-white">{activeBusiness.offerPricing.premiumOffer}</p>
                   </div>
                 </div>
                 <div className="mt-5 grid gap-4 lg:grid-cols-2">
                   <div className="min-w-0 max-w-full">
                     <p className="text-sm font-semibold text-white">Add-ons and upsells</p>
                     <ul className="mt-3 grid gap-2 pl-5 text-sm leading-6 text-slate-200">
-                      {[...business.offerPricing.addOns, ...business.offerPricing.sampleUpsells].map((item) => (
+                      {[...activeBusiness.offerPricing.addOns, ...activeBusiness.offerPricing.sampleUpsells].map((item) => (
                         <li key={item}>{item}</li>
                       ))}
                     </ul>
                   </div>
                   <div className="min-w-0 max-w-full">
                     <p className="text-sm font-semibold text-white">Pricing notes</p>
-                    <p className="mt-3 break-words text-sm leading-6 text-muted">{business.offerPricing.minimumPriceGuidance}</p>
+                    <p className="mt-3 break-words text-sm leading-6 text-muted">{activeBusiness.offerPricing.minimumPriceGuidance}</p>
                     <ul className="mt-3 grid gap-2 pl-5 text-sm leading-6 text-slate-200">
-                      {business.offerPricing.pricingNotes.map((item) => (
+                      {activeBusiness.offerPricing.pricingNotes.map((item) => (
                         <li key={item}>{item}</li>
                       ))}
                     </ul>
@@ -546,14 +561,14 @@ export default function BlueprintPage() {
                 <h3 className="text-lg font-semibold text-white">Customer acquisition</h3>
                 <div className="mt-4 grid gap-4 lg:grid-cols-2">
                   {[
-                    { title: "Best first lead sources", items: business.acquisitionPlan.bestFirstLeadSources },
-                    { title: "Online sources", items: business.acquisitionPlan.onlineSources },
-                    { title: "Offline sources", items: business.acquisitionPlan.offlineSources },
-                    { title: "Local outreach ideas", items: business.acquisitionPlan.localOutreachIdeas },
-                    { title: "Referral ideas", items: business.acquisitionPlan.referralIdeas },
-                    { title: "Neighborhood marketing", items: business.acquisitionPlan.neighborhoodMarketingIdeas },
-                    { title: "Social proof ideas", items: business.acquisitionPlan.socialProofIdeas },
-                    { title: "Before / after content", items: business.acquisitionPlan.beforeAfterContentIdeas }
+                    { title: "Best first lead sources", items: activeBusiness.acquisitionPlan.bestFirstLeadSources },
+                    { title: "Online sources", items: activeBusiness.acquisitionPlan.onlineSources },
+                    { title: "Offline sources", items: activeBusiness.acquisitionPlan.offlineSources },
+                    { title: "Local outreach ideas", items: activeBusiness.acquisitionPlan.localOutreachIdeas },
+                    { title: "Referral ideas", items: activeBusiness.acquisitionPlan.referralIdeas },
+                    { title: "Neighborhood marketing", items: activeBusiness.acquisitionPlan.neighborhoodMarketingIdeas },
+                    { title: "Social proof ideas", items: activeBusiness.acquisitionPlan.socialProofIdeas },
+                    { title: "Before / after content", items: activeBusiness.acquisitionPlan.beforeAfterContentIdeas }
                   ].map(({ title, items }) => (
                     <div key={title} className="w-full max-w-full overflow-hidden rounded-[20px] border border-white/10 bg-slate-950/40 p-4">
                       <p className="text-sm font-semibold text-white">{title}</p>
@@ -571,14 +586,14 @@ export default function BlueprintPage() {
                 <h3 className="text-lg font-semibold text-white">Operations setup</h3>
                 <div className="mt-4 grid gap-4 lg:grid-cols-2">
                   {[
-                    { title: "Lead response", items: business.operationsSetup.leadResponseProcess },
-                    { title: "Quoting", items: business.operationsSetup.quotingProcess },
-                    { title: "Scheduling", items: business.operationsSetup.schedulingProcess },
-                    { title: "Job prep", items: business.operationsSetup.jobPrep },
-                    { title: "Completion checklist", items: business.operationsSetup.completionChecklist },
-                    { title: "Invoicing", items: business.operationsSetup.invoicing },
-                    { title: "Review requests", items: business.operationsSetup.reviewRequestProcess },
-                    { title: "Follow-up", items: business.operationsSetup.followUpProcess }
+                    { title: "Lead response", items: activeBusiness.operationsSetup.leadResponseProcess },
+                    { title: "Quoting", items: activeBusiness.operationsSetup.quotingProcess },
+                    { title: "Scheduling", items: activeBusiness.operationsSetup.schedulingProcess },
+                    { title: "Job prep", items: activeBusiness.operationsSetup.jobPrep },
+                    { title: "Completion checklist", items: activeBusiness.operationsSetup.completionChecklist },
+                    { title: "Invoicing", items: activeBusiness.operationsSetup.invoicing },
+                    { title: "Review requests", items: activeBusiness.operationsSetup.reviewRequestProcess },
+                    { title: "Follow-up", items: activeBusiness.operationsSetup.followUpProcess }
                   ].map(({ title, items }) => (
                     <div key={title} className="w-full max-w-full overflow-hidden rounded-[20px] border border-white/10 bg-slate-950/40 p-4">
                       <p className="text-sm font-semibold text-white">{title}</p>
@@ -598,12 +613,12 @@ export default function BlueprintPage() {
             <div className="mt-6 grid gap-6">
               <section className="w-full max-w-full overflow-hidden rounded-[24px] border border-white/10 bg-white/5 p-5">
                 <h3 className="text-lg font-semibold text-white">Licensing guidance</h3>
-                <p className="mt-4 break-words text-sm leading-6 text-muted">{business.licensingGuidance.disclaimer}</p>
+                <p className="mt-4 break-words text-sm leading-6 text-muted">{activeBusiness.licensingGuidance.disclaimer}</p>
                 <div className="mt-4 grid gap-4 lg:grid-cols-2">
                   <div className="min-w-0 max-w-full">
                     <p className="text-sm font-semibold text-white">Where to check</p>
                     <ul className="mt-3 grid gap-2 pl-5 text-sm leading-6 text-slate-200">
-                      {business.licensingGuidance.whereToCheck.map((item) => (
+                      {activeBusiness.licensingGuidance.whereToCheck.map((item) => (
                         <li key={item}>{item}</li>
                       ))}
                     </ul>
@@ -611,7 +626,7 @@ export default function BlueprintPage() {
                   <div className="min-w-0 max-w-full">
                     <p className="text-sm font-semibold text-white">Checklist</p>
                     <ul className="mt-3 grid gap-2 pl-5 text-sm leading-6 text-slate-200">
-                      {business.licensingGuidance.checklist.map((item) => (
+                      {activeBusiness.licensingGuidance.checklist.map((item) => (
                         <li key={item}>{item}</li>
                       ))}
                     </ul>
@@ -621,7 +636,7 @@ export default function BlueprintPage() {
                   <div className="min-w-0 max-w-full">
                     <p className="text-sm font-semibold text-white">Common categories</p>
                     <ul className="mt-3 grid gap-2 pl-5 text-sm leading-6 text-slate-200">
-                      {business.licensingGuidance.commonCategories.map((item) => (
+                      {activeBusiness.licensingGuidance.commonCategories.map((item) => (
                         <li key={item}>{item}</li>
                       ))}
                     </ul>
@@ -629,7 +644,7 @@ export default function BlueprintPage() {
                   <div className="min-w-0 max-w-full">
                     <p className="text-sm font-semibold text-white">Questions for local agencies</p>
                     <ul className="mt-3 grid gap-2 pl-5 text-sm leading-6 text-slate-200">
-                      {business.licensingGuidance.agencyPrompts.map((item) => (
+                      {activeBusiness.licensingGuidance.agencyPrompts.map((item) => (
                         <li key={item}>{item}</li>
                       ))}
                     </ul>
@@ -641,10 +656,10 @@ export default function BlueprintPage() {
                 <h3 className="text-lg font-semibold text-white">Insurance guidance</h3>
                 <div className="mt-4 grid gap-4 lg:grid-cols-2">
                   {[
-                    ["General liability", business.insuranceGuidance.generalLiability],
-                    ["Commercial auto", business.insuranceGuidance.commercialAuto],
-                    ["Workers comp", business.insuranceGuidance.workersComp],
-                    ["Equipment coverage", business.insuranceGuidance.equipmentCoverage]
+                    ["General liability", activeBusiness.insuranceGuidance.generalLiability],
+                    ["Commercial auto", activeBusiness.insuranceGuidance.commercialAuto],
+                    ["Workers comp", activeBusiness.insuranceGuidance.workersComp],
+                    ["Equipment coverage", activeBusiness.insuranceGuidance.equipmentCoverage]
                   ].map(([title, copy]) => (
                     <div key={title} className="w-full max-w-full overflow-hidden rounded-[20px] border border-white/10 bg-slate-950/40 p-4">
                       <p className="text-sm font-semibold text-white">{title}</p>
@@ -656,7 +671,7 @@ export default function BlueprintPage() {
                   <div className="min-w-0 max-w-full">
                     <p className="text-sm font-semibold text-white">Questions to ask your agent</p>
                     <ul className="mt-3 grid gap-2 pl-5 text-sm leading-6 text-slate-200">
-                      {business.insuranceGuidance.questionsToAsk.map((item) => (
+                      {activeBusiness.insuranceGuidance.questionsToAsk.map((item) => (
                         <li key={item}>{item}</li>
                       ))}
                     </ul>
@@ -664,7 +679,7 @@ export default function BlueprintPage() {
                   <div className="min-w-0 max-w-full">
                     <p className="text-sm font-semibold text-white">Documents to keep on file</p>
                     <ul className="mt-3 grid gap-2 pl-5 text-sm leading-6 text-slate-200">
-                      {business.insuranceGuidance.documentsToKeep.map((item) => (
+                      {activeBusiness.insuranceGuidance.documentsToKeep.map((item) => (
                         <li key={item}>{item}</li>
                       ))}
                     </ul>
@@ -678,11 +693,11 @@ export default function BlueprintPage() {
             <div className="mt-6 grid gap-6">
               {(
                 [
-                  ["setup", business.promptSuggestions.setup],
-                  ["pricing", business.promptSuggestions.pricing],
-                  ["marketing", business.promptSuggestions.marketing],
-                  ["operations", business.promptSuggestions.operations],
-                  ["sales", business.promptSuggestions.sales]
+                  ["setup", activeBusiness.promptSuggestions.setup],
+                  ["pricing", activeBusiness.promptSuggestions.pricing],
+                  ["marketing", activeBusiness.promptSuggestions.marketing],
+                  ["operations", activeBusiness.promptSuggestions.operations],
+                  ["sales", activeBusiness.promptSuggestions.sales]
                 ] as const
               ).map(([category, prompts]) => (
                 <section key={category} className="w-full max-w-full overflow-hidden rounded-[24px] border border-white/10 bg-white/5 p-5">
@@ -779,4 +794,21 @@ export default function BlueprintPage() {
       )}
     </div>
   );
+}
+
+export default function BlueprintPage() {
+  const { profile } = useAccessProfile();
+  const business = getBusinessById(profile.selectedBusinessId);
+
+  if (!business) {
+    return (
+      <WorkspaceSelectionEmptyState
+        eyebrow="Blueprint"
+        title="Choose a business before opening the blueprint"
+        description="Blueprint progress is now fully isolated to the authenticated user and selected service. Pick a business from Dashboard first so this roadmap loads your own workspace instead of any shared fallback data."
+      />
+    );
+  }
+
+  return <BlueprintWorkspace businessId={business.id} profile={profile} />;
 }

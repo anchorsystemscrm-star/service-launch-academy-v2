@@ -1,18 +1,38 @@
 "use client";
 
 import { LockedFeatureCard } from "@/components/LockedFeatureCard";
+import { WorkspaceSelectionEmptyState } from "@/components/WorkspaceSelectionEmptyState";
 import { BusinessWorkspace } from "@/components/BusinessWorkspace";
+import { SubscriptionTier } from "@/types/business";
 import { hasTierAccess } from "@/utils/access";
-import { defaultKpiData, getFallbackBusiness } from "@/utils/benchmarks";
+import { defaultKpiData, getBusinessById } from "@/utils/benchmarks";
 import { useAccessProfile, useBlueprintProgress, useBusinessPanel, useKpiState } from "@/utils/storage";
 
-export default function BusinessPage() {
-  const { profile } = useAccessProfile();
-  const business = getFallbackBusiness(profile.selectedBusinessId);
+function BusinessWorkspacePage({ businessId, tier }: { businessId: string; tier: SubscriptionTier }) {
+  const business = getBusinessById(businessId);
+
+  if (!business) {
+    return null;
+  }
+
   const { progress, taskProgress } = useBlueprintProgress(business.id, business.executionPlan);
   const { kpis } = useKpiState(business.id, defaultKpiData);
   const { panel, updatedAt, setField } = useBusinessPanel(business, progress, taskProgress, kpis);
+
+  return (
+    <BusinessWorkspace
+      panel={panel}
+      currentTier={tier}
+      updatedAt={updatedAt}
+      onFieldChange={setField}
+    />
+  );
+}
+
+export default function BusinessPage() {
+  const { profile } = useAccessProfile();
   const hasCoreAccess = hasTierAccess(profile.tier, "core");
+  const business = getBusinessById(profile.selectedBusinessId);
 
   if (!hasCoreAccess) {
     return (
@@ -31,12 +51,15 @@ export default function BusinessPage() {
     );
   }
 
-  return (
-    <BusinessWorkspace
-      panel={panel}
-      currentTier={profile.tier}
-      updatedAt={updatedAt}
-      onFieldChange={setField}
-    />
-  );
+  if (!business) {
+    return (
+      <WorkspaceSelectionEmptyState
+        eyebrow="Business"
+        title="Choose a business before opening the workspace"
+        description="Your Business workspace is now fully account-scoped. Pick a service from Dashboard first so this page loads your own offer, pricing, setup, and notes instead of shared fallback data."
+      />
+    );
+  }
+
+  return <BusinessWorkspacePage businessId={business.id} tier={profile.tier} />;
 }

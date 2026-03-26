@@ -23,6 +23,7 @@ import { AccessProfile, normalizeSubscriptionTier } from "@/utils/access";
 import { getPhaseIndexByProgress } from "@/utils/benchmarks";
 
 export const STORAGE_KEYS = {
+  currentUserId: "sla_current_user_id",
   selectedBusiness: "sla_selected_business",
   activeBlueprint: "sla_active_blueprint",
   progressMap: "sla_progress_map",
@@ -44,6 +45,33 @@ const COOKIE_KEYS = {
 } as const;
 
 const STORAGE_EVENT = "sla:storage-change";
+const USER_SCOPED_STORAGE_KEYS = new Set<string>([
+  STORAGE_KEYS.selectedBusiness,
+  STORAGE_KEYS.activeBlueprint,
+  STORAGE_KEYS.progressMap,
+  STORAGE_KEYS.milestoneMap,
+  STORAGE_KEYS.kpiMap,
+  STORAGE_KEYS.chatMap,
+  STORAGE_KEYS.coachConversationMap,
+  STORAGE_KEYS.coachSummaryMap,
+  STORAGE_KEYS.coachSavedOutputMap,
+  STORAGE_KEYS.businessPanelMap,
+  STORAGE_KEYS.blueprintTaskOutputMap,
+  STORAGE_KEYS.subscriptionTier
+]);
+const LEGACY_SHARED_STORAGE_KEYS = Array.from(USER_SCOPED_STORAGE_KEYS);
+
+function getCurrentStorageUserId() {
+  return readStorage<string | null>(STORAGE_KEYS.currentUserId, null);
+}
+
+function getScopedStorageKey(baseKey: string, userId = getCurrentStorageUserId()) {
+  if (!USER_SCOPED_STORAGE_KEYS.has(baseKey)) {
+    return baseKey;
+  }
+
+  return `${baseKey}:${userId ?? "anonymous"}`;
+}
 
 function readStorage<T>(key: string, fallback: T): T {
   if (typeof window === "undefined") {
@@ -69,6 +97,33 @@ function writeStorage<T>(key: string, value: T) {
   } catch (error) {
     console.warn(`Failed to persist storage key "${key}"`, error);
   }
+}
+
+function removeStorageKey(key: string) {
+  if (typeof window === "undefined") {
+    return;
+  }
+
+  try {
+    window.localStorage.removeItem(key);
+    window.dispatchEvent(new CustomEvent(STORAGE_EVENT, { detail: { key } }));
+  } catch (error) {
+    console.warn(`Failed to remove storage key "${key}"`, error);
+  }
+}
+
+function clearLegacySharedStorage() {
+  if (typeof window === "undefined") {
+    return;
+  }
+
+  LEGACY_SHARED_STORAGE_KEYS.forEach((key) => {
+    try {
+      window.localStorage.removeItem(key);
+    } catch (error) {
+      console.warn(`Failed to clear legacy storage key "${key}"`, error);
+    }
+  });
 }
 
 function setCookie(name: string, value: string, maxAgeSeconds = 60 * 60 * 24 * 365) {
@@ -100,6 +155,25 @@ export function clearAccessCookie() {
   clearCookie(COOKIE_KEYS.accessToken);
 }
 
+export function clearScopedClientState(userId = getCurrentStorageUserId()) {
+  if (typeof window === "undefined") {
+    clearCookie(COOKIE_KEYS.selectedBusiness);
+    clearCookie(COOKIE_KEYS.subscriptionTier);
+    return;
+  }
+
+  if (userId) {
+    USER_SCOPED_STORAGE_KEYS.forEach((baseKey) => {
+      removeStorageKey(getScopedStorageKey(baseKey, userId));
+    });
+  }
+
+  removeStorageKey(STORAGE_KEYS.currentUserId);
+  clearLegacySharedStorage();
+  clearCookie(COOKIE_KEYS.selectedBusiness);
+  clearCookie(COOKIE_KEYS.subscriptionTier);
+}
+
 export function setSelectedBusinessCookie(value: string | null) {
   if (value) {
     setCookie(COOKIE_KEYS.selectedBusiness, value);
@@ -120,16 +194,27 @@ function extractTierFromSession(session: Session | null | undefined): Subscripti
 }
 
 export function syncTierFromSession(session: Session | null | undefined) {
+  const userId = session?.user?.id ?? null;
   const tier = extractTierFromSession(session);
-  writeStorage(STORAGE_KEYS.subscriptionTier, tier);
+
+  if (userId) {
+    writeStorage(STORAGE_KEYS.currentUserId, userId);
+    writeStorage(getScopedStorageKey(STORAGE_KEYS.subscriptionTier, userId), tier);
+  }
+
+  clearLegacySharedStorage();
   setTierCookie(tier);
   return tier;
 }
 
 export function readClientAccessProfile(): AccessProfile {
+  const userId = getCurrentStorageUserId();
   return {
-    selectedBusinessId: readStorage<string | null>(STORAGE_KEYS.selectedBusiness, null),
-    tier: normalizeSubscriptionTier(readStorage<SubscriptionTier>(STORAGE_KEYS.subscriptionTier, "preview"))
+    userId,
+    selectedBusinessId: readStorage<string | null>(getScopedStorageKey(STORAGE_KEYS.selectedBusiness, userId), null),
+    tier: normalizeSubscriptionTier(
+      readStorage<SubscriptionTier>(getScopedStorageKey(STORAGE_KEYS.subscriptionTier, userId), "preview")
+    )
   };
 }
 
@@ -139,19 +224,25 @@ export function usePersistentState<T>(key: string, fallback: T) {
 
   useEffect(() => {
     const syncFromStorage = () => {
-      setValue(readStorage(key, fallback));
+      setValue(readStorage(getScopedStorageKey(key), fallback));
       setHydrated(true);
     };
 
     const handleStorage = (event: StorageEvent) => {
-      if (!event.key || event.key === key) {
+      const scopedKey = getScopedStorageKey(key);
+      if (!event.key || event.key === scopedKey || event.key === STORAGE_KEYS.currentUserId) {
         syncFromStorage();
       }
     };
 
     const handleCustomStorage = (event: Event) => {
       const customEvent = event as CustomEvent<{ key?: string }>;
-      if (!customEvent.detail?.key || customEvent.detail.key === key) {
+      const scopedKey = getScopedStorageKey(key);
+      if (
+        !customEvent.detail?.key ||
+        customEvent.detail.key === scopedKey ||
+        customEvent.detail.key === STORAGE_KEYS.currentUserId
+      ) {
         syncFromStorage();
       }
     };
@@ -169,7 +260,7 @@ export function usePersistentState<T>(key: string, fallback: T) {
   function updateValue(next: T | ((previous: T) => T)) {
     setValue((previous) => {
       const resolved = next instanceof Function ? next(previous) : next;
-      writeStorage(key, resolved);
+      writeStorage(getScopedStorageKey(key), resolved);
       return resolved;
     });
   }
@@ -215,6 +306,7 @@ export function useAccessProfile() {
   return {
     hydrated: tierState.hydrated && businessState.hydrated,
     profile: {
+      userId: getCurrentStorageUserId(),
       selectedBusinessId: businessState.selectedBusinessId,
       tier: tierState.tier
     },

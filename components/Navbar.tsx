@@ -16,7 +16,7 @@ import {
   tierLabels
 } from "@/utils/access";
 import { getSupabaseBrowserClient, isSupabaseConfigured } from "@/lib/supabaseClient";
-import { clearAccessCookie } from "@/utils/storage";
+import { clearAccessCookie, clearScopedClientState } from "@/utils/storage";
 
 interface NavbarProps {
   profile: AccessProfile;
@@ -41,6 +41,7 @@ export function Navbar({ profile }: NavbarProps) {
         await supabase.auth.signOut();
       }
     } finally {
+      clearScopedClientState(profile.userId);
       clearAccessCookie();
       router.replace("/login");
       router.refresh();

@@ -8,15 +8,15 @@ import { BusinessCard } from "@/components/BusinessCard";
 import { BusinessFlowPreviewCard } from "@/components/BusinessFlowPreviewCard";
 import { LockedFeatureCard } from "@/components/LockedFeatureCard";
 import { businessTagLabels, businesses } from "@/data/businesses";
-import { getCheckoutHref, getPricingHref, hasTierAccess, tierLabels } from "@/utils/access";
+import { AccessProfile, getCheckoutHref, getPricingHref, hasTierAccess, tierLabels } from "@/utils/access";
 import {
   defaultKpiData,
   filterBusinesses,
   getBenchmarkSummary,
+  getBusinessById,
   getBusinessSetupStrength,
   getDashboardAIRecommendations,
   getDashboardNextBestAction,
-  getFallbackBusiness,
   shouldShowAnchorSystemsCard
 } from "@/utils/benchmarks";
 import {
@@ -60,70 +60,37 @@ function KpiStat({ label, value }: { label: string; value: string }) {
   );
 }
 
-export default function DashboardPage() {
-  const router = useRouter();
-  const { profile, setSelectedBusinessId } = useAccessProfile();
-  const { activeBlueprintId } = useActiveBlueprint();
-  const [query, setQuery] = useState("");
-  const [filters, setFilters] = useState<string[]>([]);
+function DashboardWorkspaceCards({
+  profile,
+  businessId
+}: {
+  profile: AccessProfile;
+  businessId: string;
+}) {
+  const business = getBusinessById(businessId);
 
-  const business = getFallbackBusiness(profile.selectedBusinessId);
+  if (!business) {
+    return null;
+  }
+
   const { progress, taskProgress } = useBlueprintProgress(business.id, business.executionPlan);
   const { kpis } = useKpiState(business.id, defaultKpiData);
   const { panel } = useBusinessPanel(business, progress, taskProgress, kpis);
-  const filteredBusinesses = filterBusinesses(businesses, query, filters);
   const hasCoreAccess = hasTierAccess(profile.tier, "core");
   const hasProAccess = hasTierAccess(profile.tier, "pro");
   const businessStrength = getBusinessSetupStrength(panel);
   const nextAction = getDashboardNextBestAction(panel, kpis, profile.tier);
   const aiRecommendations = getDashboardAIRecommendations(panel, kpis);
   const hasBenchmarkData =
-    kpis.leads > 0 || kpis.quotes > 0 || kpis.jobs > 0 || kpis.completed > 0 || Number(kpis.revenue) > 0 || kpis.reviews > 0;
-
-  function toggleFilter(filterId: string) {
-    setFilters((current) =>
-      current.includes(filterId) ? current.filter((item) => item !== filterId) : [...current, filterId]
-    );
-  }
-
-  function handleSelectBusiness(businessId: string) {
-    setSelectedBusinessId(businessId);
-    router.push("/blueprint");
-  }
+    kpis.leads > 0 ||
+    kpis.quotes > 0 ||
+    kpis.jobs > 0 ||
+    kpis.completed > 0 ||
+    Number(kpis.revenue) > 0 ||
+    kpis.reviews > 0;
 
   return (
-    <div className="mx-auto max-w-7xl animate-fade-up">
-      <section className="panel-surface overflow-hidden p-6 sm:p-8">
-        <div className="grid gap-8 xl:grid-cols-[1.2fr_0.8fr] xl:items-end">
-          <div>
-            <p className="text-sm font-semibold uppercase tracking-[0.18em] text-accent">Command Center</p>
-            <h1 className="mt-3 text-3xl font-semibold text-white sm:text-4xl">Run the launch like an operating system.</h1>
-            <p className="mt-4 max-w-3xl text-base leading-7 text-muted">
-              Dashboard is the command center. Blueprint tells you how to execute, Business captures what you are
-              building, Benchmarks shows whether the work is moving, and AI Coach helps tighten the next decision.
-            </p>
-            <p className="mt-3 text-sm text-slate-300">
-              Selected business: {business.name}. Typical ranges vary by operator, market, and execution quality.
-            </p>
-          </div>
-
-          <div className="grid gap-4 rounded-[28px] border border-white/10 bg-white/5 p-5 sm:grid-cols-3">
-            <div>
-              <p className="text-3xl font-semibold text-white">{businesses.length}</p>
-              <p className="mt-2 text-sm text-muted">Launch-ready business models</p>
-            </div>
-            <div>
-              <p className="text-3xl font-semibold text-white">{businessStrength.percentage}%</p>
-              <p className="mt-2 text-sm text-muted">Business setup completion</p>
-            </div>
-            <div>
-              <p className="text-3xl font-semibold text-white">{tierLabels[profile.tier]}</p>
-              <p className="mt-2 text-sm text-muted">Current access tier</p>
-            </div>
-          </div>
-        </div>
-      </section>
-
+    <>
       <section className="mt-6 grid gap-4 xl:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)]">
         <div className="panel-surface overflow-hidden p-6">
           <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-accentSecondary">Next best action</p>
@@ -241,7 +208,9 @@ export default function DashboardPage() {
           <div className="mt-5 rounded-[18px] border border-white/10 bg-black/20 px-4 py-4">
             <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-muted">Benchmark read</p>
             <p className="mt-2 break-words text-sm leading-6 text-slate-100">
-              {hasBenchmarkData ? getBenchmarkSummary(kpis) : "No benchmark entries yet. Add this week's activity so the dashboard can show where the business is actually moving."}
+              {hasBenchmarkData
+                ? getBenchmarkSummary(kpis)
+                : "No benchmark entries yet. Add this week's activity so the dashboard can show where the business is actually moving."}
             </p>
           </div>
         </div>
@@ -256,6 +225,115 @@ export default function DashboardPage() {
           />
         </div>
       ) : null}
+    </>
+  );
+}
+
+function DashboardEmptyWorkspace({ tier }: { tier: AccessProfile["tier"] }) {
+  return (
+    <section className="mt-6 grid gap-4 xl:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)]">
+      <div className="panel-surface overflow-hidden p-6">
+        <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-accentSecondary">Next best action</p>
+        <h2 className="mt-2 text-2xl font-semibold text-white">Choose the business you want to build</h2>
+        <p className="mt-3 max-w-2xl break-words text-sm leading-6 text-muted">
+          Your dashboard is user-scoped now, so it only shows workspace data for the service you actively choose. Pick one below to start a fresh business workspace.
+        </p>
+        <div className="mt-5 flex flex-wrap gap-3">
+          <a
+            href="#business-catalog"
+            className="inline-flex items-center justify-center rounded-2xl border border-accent/40 bg-accent/10 px-4 py-3 text-sm font-semibold text-white transition hover:border-accent/80 hover:bg-accent/20"
+          >
+            Pick a service
+          </a>
+          <Link
+            href={getPricingHref()}
+            className="inline-flex items-center justify-center rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm font-semibold text-white transition hover:border-white/20 hover:bg-white/10"
+          >
+            Compare plans
+          </Link>
+        </div>
+      </div>
+
+      <div className="panel-surface overflow-hidden p-6">
+        <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-accentSecondary">Workspace state</p>
+        <h2 className="mt-2 text-xl font-semibold text-white">No business selected yet</h2>
+        <div className="mt-4 grid gap-3">
+          <SnapshotRow label="Selected service" value="" />
+          <SnapshotRow label="Core offer" value="" />
+          <SnapshotRow label="Starting price" value="" />
+          <SnapshotRow label="Target customer" value="" />
+          <SnapshotRow label="Current focus" value="" />
+        </div>
+        <p className="mt-4 text-sm leading-6 text-muted">
+          Access tier: {tierLabels[tier]}. The dashboard will start filling with your own workspace data after you select a business.
+        </p>
+      </div>
+    </section>
+  );
+}
+
+export default function DashboardPage() {
+  const router = useRouter();
+  const { profile, setSelectedBusinessId } = useAccessProfile();
+  const { activeBlueprintId } = useActiveBlueprint();
+  const [query, setQuery] = useState("");
+  const [filters, setFilters] = useState<string[]>([]);
+
+  const selectedBusiness = getBusinessById(profile.selectedBusinessId);
+  const filteredBusinesses = filterBusinesses(businesses, query, filters);
+  const hasCoreAccess = hasTierAccess(profile.tier, "core");
+
+  function toggleFilter(filterId: string) {
+    setFilters((current) =>
+      current.includes(filterId) ? current.filter((item) => item !== filterId) : [...current, filterId]
+    );
+  }
+
+  function handleSelectBusiness(businessId: string) {
+    setSelectedBusinessId(businessId);
+    router.push("/blueprint");
+  }
+
+  return (
+    <div className="mx-auto max-w-7xl animate-fade-up">
+      <section className="panel-surface overflow-hidden p-6 sm:p-8">
+        <div className="grid gap-8 xl:grid-cols-[1.2fr_0.8fr] xl:items-end">
+          <div>
+            <p className="text-sm font-semibold uppercase tracking-[0.18em] text-accent">Command Center</p>
+            <h1 className="mt-3 text-3xl font-semibold text-white sm:text-4xl">Run the launch like an operating system.</h1>
+            <p className="mt-4 max-w-3xl text-base leading-7 text-muted">
+              Dashboard is the command center. Blueprint tells you how to execute, Business captures what you are
+              building, Benchmarks shows whether the work is moving, and AI Coach helps tighten the next decision.
+            </p>
+            <p className="mt-3 text-sm text-slate-300">
+              {selectedBusiness
+                ? `Selected business: ${selectedBusiness.name}. Typical ranges vary by operator, market, and execution quality.`
+                : "No service is selected yet. Pick a business below to start a user-scoped workspace with clean, account-specific data."}
+            </p>
+          </div>
+
+          <div className="grid gap-4 rounded-[28px] border border-white/10 bg-white/5 p-5 sm:grid-cols-3">
+            <div>
+              <p className="text-3xl font-semibold text-white">{businesses.length}</p>
+              <p className="mt-2 text-sm text-muted">Launch-ready business models</p>
+            </div>
+            <div>
+              <p className="text-3xl font-semibold text-white">{selectedBusiness ? "Live" : "Empty"}</p>
+              <p className="mt-2 text-sm text-muted">Workspace state</p>
+            </div>
+            <div>
+              <p className="text-3xl font-semibold text-white">{tierLabels[profile.tier]}</p>
+              <p className="mt-2 text-sm text-muted">Current access tier</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {selectedBusiness ? (
+        <DashboardWorkspaceCards profile={profile} businessId={selectedBusiness.id} />
+      ) : (
+        <DashboardEmptyWorkspace tier={profile.tier} />
+      )}
 
       <section className="mt-6 panel-surface p-6 sm:p-8">
         <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
@@ -306,7 +384,7 @@ export default function DashboardPage() {
         </div>
       </section>
 
-      <section className="mt-6 panel-surface p-6 sm:p-8">
+      <section id="business-catalog" className="mt-6 panel-surface p-6 sm:p-8">
         <div className="grid gap-4 lg:grid-cols-[1fr_auto] lg:items-center">
           <label className="grid gap-2">
             <span className="text-xs font-semibold uppercase tracking-[0.16em] text-muted">Search Businesses</span>
