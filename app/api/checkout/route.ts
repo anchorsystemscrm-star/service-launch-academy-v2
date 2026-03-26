@@ -1,6 +1,9 @@
 import Stripe from "stripe";
 import { NextRequest, NextResponse } from "next/server";
 
+export const dynamic = "force-dynamic";
+export const runtime = "nodejs";
+
 const PRICE_IDS = {
   core: process.env.STRIPE_CORE_PRICE_ID,
   pro: process.env.STRIPE_PRO_PRICE_ID,
