@@ -541,54 +541,53 @@ function getDerivedBusinessPanelData(
   taskProgress: boolean[][],
   kpis: KPIData
 ): BusinessPanelData {
-  const railsReady = hasCompletedTask(taskProgress, business.executionPlan, "Set the commercial rails");
   const completedTasks = taskProgress.reduce((sum, stage) => sum + stage.filter(Boolean).length, 0);
   const currentPhase = business.blueprintPhases[Math.min(getPhaseIndexByProgress(progress), business.blueprintPhases.length - 1)];
 
   return {
     businessName: "",
     serviceType: business.name,
-    businessDescription: business.summary,
+    businessDescription: "",
     ownerName: "",
     serviceModel: deriveServiceModel(business),
     serviceArea: "",
-    starterOffer: business.offerPricing.starterOffer,
-    secondaryOffer: deriveSecondaryOffer(business),
-    priceFloor: extractSuggestedPriceFloor(business.offerPricing.minimumPriceGuidance),
-    keyInclusions: deriveKeyInclusions(business.offerPricing.starterOffer),
-    pricingNotes: business.offerPricing.pricingNotes.slice(0, 3).join("\n"),
-    packageIdeas: [business.offerPricing.standardOffer, business.offerPricing.premiumOffer].filter(Boolean).join("\n"),
-    idealTicketSizeNotes: business.margin_range ? `Protect margin in the ${business.margin_range} range while keeping the entry offer easy to sell.` : "",
-    targetCustomer: business.goodFor[0] ?? "",
-    marketNotes: [business.demandLevel, business.seasonality].filter(Boolean).join("\n"),
-    territoryNotes: business.acquisitionPlan.neighborhoodMarketingIdeas.slice(0, 2).join("\n"),
-    competitionNotes: business.bestFitOperatorType,
-    leadSourcePlan: business.acquisitionPlan.bestFirstLeadSources.slice(0, 4).join("\n"),
-    phone: railsReady ? "Business phone live" : "",
-    bookingMethod: railsReady ? "Phone + text intake" : "",
-    paymentMethod: railsReady ? "Invoice link or card on completion" : "",
-    salesProcessNotes: business.operationsSetup.quotingProcess.slice(0, 2).join("\n"),
-    followUpNotes: business.operationsSetup.followUpProcess.slice(0, 2).join("\n"),
-    objectionHandlingNotes: business.scripts[1]?.body ?? business.scripts[0]?.body ?? "",
-    crmTools: deriveCrmTools(business),
-    websiteFunnelNotes: business.softwareStack.find((item) => item.category === "Website")?.notes ?? "",
-    automationNotes: business.advancedSystems.slice(0, 3).join("\n"),
-    setupNotes: business.startupRequirements.requiredItems.slice(0, 4).join("\n"),
-    schedulingNotes: business.operationsSetup.schedulingProcess.slice(0, 2).join("\n"),
-    fulfillmentNotes: business.operationsSetup.jobPrep.slice(0, 2).join("\n"),
-    equipmentNotes: business.startupRequirements.equipment.slice(0, 4).join("\n"),
-    hiringNotes: business.teamModel,
-    operationsNotes: business.operationsSetup.completionChecklist.slice(0, 2).join("\n"),
-    brandPositioningNotes: business.whyAttractive,
-    headlineOfferNotes: business.recommended_first_offer,
-    toneMessagingNotes: "Premium, clear, trustworthy, and direct. Avoid discount language and vague claims.",
-    trustBuildersNotes: business.acquisitionPlan.socialProofIdeas.slice(0, 3).join("\n"),
-    brandNotes: business.acquisitionPlan.googleBusinessProfileGuidance.slice(0, 2).join("\n"),
-    goal30Day: deriveThirtyDayGoal(business),
-    goal90Day: `Push toward ${business.revenue_90_range} in gross revenue while tightening quote speed and delivery.`,
-    revenueGoal: business.revenue_90_range,
-    milestoneNotes: currentPhase?.successLooksLike ?? "",
-    focusThisWeek: deriveCurrentExecutionFocus(business, taskProgress),
+    starterOffer: "",
+    secondaryOffer: "",
+    priceFloor: "",
+    keyInclusions: "",
+    pricingNotes: "",
+    packageIdeas: "",
+    idealTicketSizeNotes: "",
+    targetCustomer: "",
+    marketNotes: "",
+    territoryNotes: "",
+    competitionNotes: "",
+    leadSourcePlan: "",
+    phone: "",
+    bookingMethod: "",
+    paymentMethod: "",
+    salesProcessNotes: "",
+    followUpNotes: "",
+    objectionHandlingNotes: "",
+    crmTools: "",
+    websiteFunnelNotes: "",
+    automationNotes: "",
+    setupNotes: "",
+    schedulingNotes: "",
+    fulfillmentNotes: "",
+    equipmentNotes: "",
+    hiringNotes: "",
+    operationsNotes: "",
+    brandPositioningNotes: "",
+    headlineOfferNotes: "",
+    toneMessagingNotes: "",
+    trustBuildersNotes: "",
+    brandNotes: "",
+    goal30Day: "",
+    goal90Day: "",
+    revenueGoal: "",
+    milestoneNotes: "",
+    focusThisWeek: "",
     focusSupportNote: "",
     generalNotes: "",
     currentPhase: currentPhase?.title ?? business.blueprintPhases[0]?.title ?? "Phase 1",
@@ -637,11 +636,23 @@ export function useBusinessPanel(business: Business, progress: boolean[], taskPr
     }));
   }
 
+  function setFields(nextValues: Partial<Record<BusinessPanelEditableField, string>>) {
+    setValue((previous) => ({
+      ...previous,
+      [business.id]: {
+        ...(previous[business.id] ?? {}),
+        ...nextValues,
+        updatedAt: new Date().toISOString()
+      }
+    }));
+  }
+
   return {
     hydrated,
     panel,
     updatedAt,
-    setField
+    setField,
+    setFields
   };
 }
 

@@ -239,6 +239,21 @@ canvas {
   }
 }
 
+@keyframes upgrade-glow-pulse {
+  0%,
+  100% {
+    box-shadow: 0 0 0 rgba(83, 180, 255, 0), 0 18px 40px rgba(7, 13, 23, 0.22);
+  }
+
+  50% {
+    box-shadow: 0 0 0 1px rgba(83, 180, 255, 0.12), 0 0 26px rgba(83, 180, 255, 0.16), 0 18px 46px rgba(7, 13, 23, 0.28);
+  }
+}
+
+.upgrade-glow {
+  animation: upgrade-glow-pulse 3.6s ease-in-out infinite;
+}
+
 @keyframes blueprint-toast-in {
   0% {
     opacity: 0;

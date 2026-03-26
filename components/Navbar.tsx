@@ -30,7 +30,28 @@ export function Navbar({ profile }: NavbarProps) {
   const mobileNavRef = useRef<HTMLDivElement | null>(null);
   const normalizedPathname = pathname ?? "";
   const coreCheckoutHref = getCheckoutHref("core");
+  const proCheckoutHref = getCheckoutHref("pro");
   const currentLabel = navItems.find((item) => normalizedPathname.startsWith(item.href))?.label ?? "Workspace";
+  const recommendedUpgrade =
+    profile.tier === "preview"
+      ? {
+          label: "Recommended Next Step",
+          headline: "Unlock the Full System",
+          subtext: "Access Blueprint, Business workspace, and Benchmarks",
+          buttonLabel: "Upgrade to Core",
+          href: coreCheckoutHref,
+          glow: true
+        }
+      : profile.tier === "core"
+        ? {
+            label: "Recommended Upgrade",
+            headline: "Activate AI Coach",
+            subtext: "Get guided execution, pricing help, and sales scripts",
+            buttonLabel: "Upgrade to Pro",
+            href: proCheckoutHref,
+            glow: true
+          }
+        : null;
 
   async function handleLogout() {
     setLoggingOut(true);
@@ -119,9 +140,9 @@ export function Navbar({ profile }: NavbarProps) {
             />
           </div>
 
-          <div className="mt-5 rounded-[24px] border border-white/10 bg-white/5 p-4">
+          <div className={`mt-5 rounded-[24px] border bg-white/5 p-4 ${recommendedUpgrade?.glow ? "border-accent/30 upgrade-glow" : "border-white/10"}`}>
             <p className="text-xs font-semibold uppercase tracking-[0.16em] text-muted">
-              Access Tier
+              {recommendedUpgrade?.label ?? "Access Tier"}
             </p>
             <div className="mt-3 flex items-center justify-between gap-3">
               <span className="rounded-full border border-accent/30 bg-accent/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.14em] text-white">
@@ -134,24 +155,27 @@ export function Navbar({ profile }: NavbarProps) {
                 Dashboard
               </Link>
             </div>
-            <p className="mt-3 text-sm leading-6 text-muted">
-              {tierDescriptions[profile.tier]}
+            <p className="mt-3 text-lg font-semibold text-white">
+              {recommendedUpgrade?.headline ?? tierLabels[profile.tier]}
+            </p>
+            <p className="mt-2 text-sm leading-6 text-muted">
+              {recommendedUpgrade?.subtext ?? tierDescriptions[profile.tier]}
             </p>
             <div className="mt-4 flex flex-col gap-2">
-              <Link
-                href={getPricingHref()}
-                className="inline-flex items-center justify-center rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm font-semibold text-white transition hover:border-white/20 hover:bg-white/10"
-              >
-                Compare Plans
-              </Link>
-
-              {profile.tier === "preview" && (
+              {recommendedUpgrade ? (
                 <a
-                  href={coreCheckoutHref}
-                  className="inline-flex items-center justify-center rounded-2xl border border-accent/40 bg-accent/10 px-4 py-3 text-sm font-semibold text-white transition hover:border-accent/80 hover:bg-accent/20"
+                  href={recommendedUpgrade.href}
+                  className="inline-flex items-center justify-center rounded-2xl border border-accent/50 bg-accent/15 px-4 py-3 text-sm font-semibold text-white shadow-[0_10px_30px_rgba(83,180,255,0.18)] transition hover:border-accent/80 hover:bg-accent/20"
                 >
-                  Upgrade to Core
+                  {recommendedUpgrade.buttonLabel}
                 </a>
+              ) : (
+                <Link
+                  href={getPricingHref()}
+                  className="inline-flex items-center justify-center rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm font-semibold text-white transition hover:border-white/20 hover:bg-white/10"
+                >
+                  Compare Plans
+                </Link>
               )}
             </div>
           </div>

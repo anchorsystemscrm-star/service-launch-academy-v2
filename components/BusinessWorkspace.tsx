@@ -5,19 +5,18 @@ import type { ReactNode } from "react";
 import Link from "next/link";
 
 import { BusinessFlowPreviewCard } from "@/components/BusinessFlowPreviewCard";
-import { BusinessPanelData, SubscriptionTier } from "@/types/business";
-import {
-  getBusinessSetupStrength,
-  shouldShowAnchorSystemsCard
-} from "@/utils/benchmarks";
+import { Business, BusinessPanelData, SubscriptionTier } from "@/types/business";
 import { tierLabels } from "@/utils/access";
+import { getBusinessSetupStrength, shouldShowAnchorSystemsCard } from "@/utils/benchmarks";
 import { BusinessPanelEditableField } from "@/utils/storage";
 
 interface BusinessWorkspaceProps {
+  business: Business;
   panel: BusinessPanelData;
   currentTier: SubscriptionTier;
   updatedAt: string | null;
   onFieldChange: (field: BusinessPanelEditableField, value: string) => void;
+  onFieldsChange: (fields: Partial<Record<BusinessPanelEditableField, string>>) => void;
 }
 
 function formatUpdatedAt(updatedAt: string | null) {
@@ -38,6 +37,15 @@ function formatUpdatedAt(updatedAt: string | null) {
     hour: "numeric",
     minute: "2-digit"
   })}`;
+}
+
+function getCoachHref(prompt: string, mode: "general" | "pricing" | "checklist" | "marketing" | "sop" | "followup" = "general") {
+  const params = new URLSearchParams({
+    autoprompt: prompt,
+    mode
+  });
+
+  return `/ai-coach?${params.toString()}`;
 }
 
 function Section({
@@ -187,11 +195,58 @@ function QuickActionButton({
   );
 }
 
+function SuggestionBlock({
+  title,
+  preview,
+  onUse,
+  coachHref
+}: {
+  title: string;
+  preview: string[];
+  onUse: () => void;
+  coachHref: string;
+}) {
+  return (
+    <div className="rounded-[20px] border border-accent/20 bg-accent/5 p-4">
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div className="min-w-0 max-w-3xl">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-accentSecondary">Blueprint suggestion</p>
+          <p className="mt-2 text-sm font-semibold text-white">{title}</p>
+          <div className="mt-3 grid gap-2 text-sm leading-6 text-slate-100">
+            {preview.map((item) => (
+              <p key={item} className="break-words">
+                {item}
+              </p>
+            ))}
+          </div>
+        </div>
+        <div className="flex w-full flex-col gap-2 sm:w-auto">
+          <button
+            type="button"
+            onClick={onUse}
+            className="inline-flex items-center justify-center rounded-2xl border border-accent/40 bg-accent/10 px-4 py-3 text-sm font-semibold text-white transition hover:border-accent/80 hover:bg-accent/20"
+          >
+            Use Blueprint Suggestion
+          </button>
+          <Link
+            href={coachHref}
+            className="inline-flex items-center justify-center rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm font-semibold text-white transition hover:border-white/20 hover:bg-white/10"
+          >
+            Draft with AI Coach
+          </Link>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export function BusinessWorkspace({
+  business,
   panel,
   currentTier,
   updatedAt,
-  onFieldChange
+  onFieldChange,
+  onFieldsChange
 }: BusinessWorkspaceProps) {
   const strength = getBusinessSetupStrength(panel);
   const shouldShowAnchorCard = shouldShowAnchorSystemsCard(panel, {
@@ -223,8 +278,7 @@ export function BusinessWorkspace({
           <div className="max-w-3xl">
             <h1 className="text-3xl font-semibold text-white sm:text-4xl">Your Business</h1>
             <p className="mt-3 break-words text-base leading-7 text-muted">
-              This is the central workspace for the business you are building. Keep the offer, pricing, market notes,
-              setup, and operating decisions here so Blueprint, Benchmarks, and AI Coach stay aligned.
+              Build this workspace as the business gets more real. Blueprint gives the reference material, AI Coach helps draft it, and this page becomes the version you actually want to run.
             </p>
           </div>
           <div className="grid gap-2 rounded-[22px] border border-white/10 bg-white/5 px-5 py-4 text-sm text-slate-200">
@@ -282,7 +336,7 @@ export function BusinessWorkspace({
             <div className="rounded-[18px] border border-white/10 bg-black/20 px-4 py-4">
               <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-muted">Workspace status</p>
               <p className="mt-2 text-sm leading-6 text-slate-100">
-                {strength.completed}/{strength.total} core business foundations are documented.
+                {strength.completed}/{strength.total} foundational fields are documented from your actual workspace, not template values.
               </p>
             </div>
             {strength.missing.length ? (
@@ -299,7 +353,7 @@ export function BusinessWorkspace({
             ) : null}
             {missingCritical.length ? (
               <div className="rounded-[18px] border border-accent/20 bg-accent/5 px-4 py-4">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-accentSecondary">Missing now</p>
+                <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-accentSecondary">Missing</p>
                 <div className="mt-3 flex flex-wrap gap-2">
                   {missingCritical.map((item) => (
                     <span key={item} className="rounded-full border border-white/10 bg-black/20 px-3 py-1 text-xs font-semibold text-slate-200">
@@ -341,10 +395,30 @@ export function BusinessWorkspace({
         <Section
           id="business-overview"
           title="Business Overview"
-          description="Anchor the basics first. This should make it obvious what business is being built, where it operates, and how it is positioned."
-          helper="The selected service and service model are derived from the blueprint you chose. Use the editable fields to shape the real business around that starting point."
+          description="Start with the basics. This should make it clear what service is being built, where it operates, and how you want to describe it."
+          helper="Use Blueprint guidance or AI Coach to draft this section. The reference context below is not saved until you type or accept a suggestion."
         >
-          <div className="grid gap-4 lg:grid-cols-2">
+          <div className="grid gap-4 xl:grid-cols-2">
+            <ReadOnlyValue
+              label="Selected Service"
+              value={panel.serviceType}
+              helper="This comes from the service selected in your dashboard."
+            />
+            <ReadOnlyValue
+              label="Suggested Service Model"
+              value={panel.serviceModel}
+              helper="Reference only. Use this operating shape when you define offers, staffing, and delivery."
+            />
+            <ReadOnlyValue
+              label="Current Phase"
+              value={panel.currentPhase}
+              helper="Derived from your Blueprint progress."
+            />
+            <ReadOnlyValue
+              label="Reference Description"
+              value={business.summary}
+              helper="This is the service summary from the selected blueprint. It is not saved into your workspace."
+            />
             <TextField
               label="Business Name"
               value={panel.businessName}
@@ -356,16 +430,6 @@ export function BusinessWorkspace({
               value={panel.ownerName}
               placeholder="Who is running this?"
               onChange={(value) => onFieldChange("ownerName", value)}
-            />
-            <ReadOnlyValue
-              label="Selected Service"
-              value={panel.serviceType}
-              helper="This stays aligned with the service model selected in your dashboard."
-            />
-            <ReadOnlyValue
-              label="Service Model"
-              value={panel.serviceModel}
-              helper="Use this as the operating shape for pricing, staffing, and delivery."
             />
             <TextField
               label="Location"
@@ -387,27 +451,50 @@ export function BusinessWorkspace({
           id="offer-pricing"
           title="Offer + Pricing"
           description="Keep the sellable offer tight. This is where the core package, upsells, price floor, and pricing logic stay visible."
-          helper="These fields start with blueprint defaults. Tighten them until someone could read this section and confidently sell or quote the business."
+          helper="Use Blueprint guidance or AI Coach to draft this section. Nothing here counts as complete until you create it or explicitly accept a suggestion."
         >
-          <div className="grid gap-4 xl:grid-cols-2">
+          <SuggestionBlock
+            title="Reference offer direction"
+            preview={[
+              `Starter offer: ${business.offerPricing.starterOffer}`,
+              `Reference floor: ${business.offerPricing.minimumPriceGuidance}`,
+              `Reference upsells: ${business.offerPricing.addOns.slice(0, 3).join(", ")}`
+            ]}
+            onUse={() =>
+              onFieldsChange({
+                starterOffer: business.offerPricing.starterOffer,
+                secondaryOffer: [business.offerPricing.standardOffer, `Upsells: ${business.offerPricing.addOns.slice(0, 3).join(", ")}`]
+                  .filter(Boolean)
+                  .join("\n"),
+                priceFloor: business.offerPricing.minimumPriceGuidance.match(/\$[\d,]+(?:-\$?[\d,]+)?/)?.[0] ?? business.offerPricing.minimumPriceGuidance,
+                keyInclusions: business.offerPricing.starterOffer,
+                pricingNotes: business.offerPricing.pricingNotes.slice(0, 3).join("\n"),
+                packageIdeas: [business.offerPricing.standardOffer, business.offerPricing.premiumOffer].filter(Boolean).join("\n"),
+                idealTicketSizeNotes: business.margin_range ? `Protect margin in the ${business.margin_range} range while keeping the entry offer easy to sell.` : ""
+              })
+            }
+            coachHref={getCoachHref(`Draft a premium core offer, upsells, and starting price for my ${business.name} business using the current blueprint as reference.`, "pricing")}
+          />
+
+          <div className="mt-4 grid gap-4 xl:grid-cols-2">
             <TextAreaField
               label="Core Offer"
               value={panel.starterOffer}
-              placeholder="What is the main offer you want to sell first?"
+              placeholder={`Blueprint reference: ${business.offerPricing.starterOffer}`}
               rows={4}
               onChange={(value) => onFieldChange("starterOffer", value)}
             />
             <TextAreaField
               label="Secondary Offer / Upsells"
               value={panel.secondaryOffer}
-              placeholder="List the next package and upsells."
+              placeholder={`Reference upsells: ${business.offerPricing.addOns.slice(0, 3).join(", ")}`}
               rows={4}
               onChange={(value) => onFieldChange("secondaryOffer", value)}
             />
             <TextField
               label="Starting Price / Entry Price"
               value={panel.priceFloor}
-              placeholder="Set the minimum price or entry range"
+              placeholder={`Reference: ${business.offerPricing.minimumPriceGuidance}`}
               onChange={(value) => onFieldChange("priceFloor", value)}
             />
             <TextAreaField
@@ -420,7 +507,7 @@ export function BusinessWorkspace({
             <TextAreaField
               label="Pricing Notes"
               value={panel.pricingNotes}
-              placeholder="Document floor rules, travel rules, exclusions, and margin guardrails."
+              placeholder="Use Blueprint guidance or AI Coach to draft floor rules, exclusions, and margin guardrails."
               rows={5}
               onChange={(value) => onFieldChange("pricingNotes", value)}
             />
@@ -447,13 +534,31 @@ export function BusinessWorkspace({
           id="market-notes"
           title="Service Area + Market Notes"
           description="Keep the market view practical. Document who you serve, where to focus, and why customers should choose this business."
-          helper="This section should make outbound effort easier. If the target customer and local angle are vague here, outreach will usually be vague too."
+          helper="Use Blueprint guidance or AI Coach to draft this section. Keep the saved version specific to your own market, not just the service template."
         >
-          <div className="grid gap-4 xl:grid-cols-2">
+          <SuggestionBlock
+            title="Reference market direction"
+            preview={[
+              `Reference customer: ${business.goodFor[0] ?? "Best-fit customer still needs to be defined"}`,
+              `Demand context: ${[business.demandLevel, business.seasonality].filter(Boolean).join(" | ")}`,
+              `Operator fit: ${business.bestFitOperatorType}`
+            ]}
+            onUse={() =>
+              onFieldsChange({
+                targetCustomer: business.goodFor[0] ?? "",
+                marketNotes: [business.demandLevel, business.seasonality].filter(Boolean).join("\n"),
+                territoryNotes: business.acquisitionPlan.neighborhoodMarketingIdeas.slice(0, 2).join("\n"),
+                competitionNotes: business.bestFitOperatorType
+              })
+            }
+            coachHref={getCoachHref(`Draft a target customer profile, market notes, and local differentiation plan for my ${business.name} business.`, "marketing")}
+          />
+
+          <div className="mt-4 grid gap-4 xl:grid-cols-2">
             <TextField
               label="Target Customer"
               value={panel.targetCustomer}
-              placeholder="Who is the best-fit customer?"
+              placeholder={`Reference: ${business.goodFor[0] ?? "Best-fit customer"}`}
               onChange={(value) => onFieldChange("targetCustomer", value)}
             />
             <TextAreaField
@@ -486,9 +591,27 @@ export function BusinessWorkspace({
           id="lead-flow"
           title="Lead Flow + Sales Process"
           description="Keep the pipeline simple. Track lead sources, how people book, and how you move them from inquiry to sold work."
-          helper="If this section is strong, the business should know where leads come from, how fast they are answered, and what happens before a job is booked."
+          helper="Use Blueprint guidance or AI Coach to draft this section. The stats below come from Benchmarks, but the actual sales process notes are yours to build."
         >
-          <div className="grid gap-4">
+          <SuggestionBlock
+            title="Reference lead and sales direction"
+            preview={[
+              `Lead sources: ${business.acquisitionPlan.bestFirstLeadSources.slice(0, 3).join(", ")}`,
+              `Quote process: ${business.operationsSetup.quotingProcess[0] ?? "Build this process"}`,
+              `Follow-up: ${business.operationsSetup.followUpProcess[0] ?? "Build this process"}`
+            ]}
+            onUse={() =>
+              onFieldsChange({
+                leadSourcePlan: business.acquisitionPlan.bestFirstLeadSources.slice(0, 4).join("\n"),
+                salesProcessNotes: business.operationsSetup.quotingProcess.slice(0, 2).join("\n"),
+                followUpNotes: business.operationsSetup.followUpProcess.slice(0, 2).join("\n"),
+                objectionHandlingNotes: business.scripts[1]?.body ?? business.scripts[0]?.body ?? ""
+              })
+            }
+            coachHref={getCoachHref(`Draft a lead source plan, sales process, and follow-up flow for my ${business.name} business using the current blueprint as reference.`, "followup")}
+          />
+
+          <div className="mt-4 grid gap-4">
             <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
               <StatCard label="Leads" value={panel.leads} hint="From Benchmarks" />
               <StatCard label="Quoted" value={panel.quoted} hint="From Benchmarks" />
@@ -503,15 +626,17 @@ export function BusinessWorkspace({
                 rows={4}
                 onChange={(value) => onFieldChange("leadSourcePlan", value)}
               />
-              <ReadOnlyValue
+              <TextField
                 label="Booking Method"
                 value={panel.bookingMethod}
-                helper="This reflects what has been set up in your launch rails and benchmarks flow."
+                placeholder="Example: phone + text intake, form + call back, online scheduler"
+                onChange={(value) => onFieldChange("bookingMethod", value)}
               />
-              <ReadOnlyValue
+              <TextField
                 label="Payment Method"
                 value={panel.paymentMethod}
-                helper="Keep the actual payment setup consistent in Benchmarks and Blueprint."
+                placeholder="Example: invoice link, card on file, deposit invoice"
+                onChange={(value) => onFieldChange("paymentMethod", value)}
               />
               <TextAreaField
                 label="Sales Process Notes"
@@ -542,19 +667,41 @@ export function BusinessWorkspace({
           id="setup-stack"
           title="Setup + Stack"
           description="Keep the launch stack visible so the business can answer leads, book jobs, and collect payment without improvising."
-          helper="The status pills below show whether the basic rails are already in place. The editable notes are for how you want this stack to evolve."
+          helper="Use Blueprint guidance or AI Coach to draft this section. Setup status can grow over time instead of appearing prebuilt on day one."
         >
-          <div className="grid gap-4">
+          <SuggestionBlock
+            title="Reference setup direction"
+            preview={[
+              `Suggested tools: ${business.softwareStack.slice(0, 3).map((item) => `${item.category}: ${item.tool}`).join(" | ")}`,
+              `Reference website note: ${business.softwareStack.find((item) => item.category === "Website")?.notes ?? "No website note yet"}`,
+              `Reference automation ideas: ${business.advancedSystems.slice(0, 2).join(" | ")}`
+            ]}
+            onUse={() =>
+              onFieldsChange({
+                crmTools: business.softwareStack
+                  .slice(0, 4)
+                  .map((item) => `${item.category}: ${item.tool}`)
+                  .join("\n"),
+                websiteFunnelNotes: business.softwareStack.find((item) => item.category === "Website")?.notes ?? "",
+                automationNotes: business.advancedSystems.slice(0, 3).join("\n"),
+                setupNotes: business.startupRequirements.requiredItems.slice(0, 4).join("\n")
+              })
+            }
+            coachHref={getCoachHref(`Draft a lean setup stack, tooling plan, and admin checklist for my ${business.name} business.`, "sop")}
+          />
+
+          <div className="mt-4 grid gap-4">
             <div className="grid gap-3 lg:grid-cols-3">
               <StatusBadge label="Phone" active={Boolean(panel.phone)} />
               <StatusBadge label="Booking" active={Boolean(panel.bookingMethod)} />
               <StatusBadge label="Payments" active={Boolean(panel.paymentMethod)} />
             </div>
             <div className="grid gap-4 xl:grid-cols-2">
-              <ReadOnlyValue
+              <TextField
                 label="Phone"
                 value={panel.phone}
-                helper="Pulled from your current setup progress."
+                placeholder="Business phone number or setup note"
+                onChange={(value) => onFieldChange("phone", value)}
               />
               <TextAreaField
                 label="CRM / Tools"
@@ -594,9 +741,28 @@ export function BusinessWorkspace({
           id="operations"
           title="Operations"
           description="Document how the work gets delivered so the business becomes easier to repeat, quote, schedule, and improve."
-          helper="Keep this practical. Another person should be able to understand how the work gets done without needing a long verbal explanation."
+          helper="Use Blueprint guidance or AI Coach to draft this section. Keep it practical enough that another person could understand the work without a long explanation."
         >
-          <div className="grid gap-4 xl:grid-cols-2">
+          <SuggestionBlock
+            title="Reference operating direction"
+            preview={[
+              `Scheduling: ${business.operationsSetup.schedulingProcess[0] ?? "Build this process"}`,
+              `Fulfillment: ${business.operationsSetup.jobPrep[0] ?? "Build this process"}`,
+              `Equipment reference: ${business.startupRequirements.equipment.slice(0, 3).join(", ")}`
+            ]}
+            onUse={() =>
+              onFieldsChange({
+                schedulingNotes: business.operationsSetup.schedulingProcess.slice(0, 2).join("\n"),
+                fulfillmentNotes: business.operationsSetup.jobPrep.slice(0, 2).join("\n"),
+                equipmentNotes: business.startupRequirements.equipment.slice(0, 4).join("\n"),
+                hiringNotes: business.teamModel,
+                operationsNotes: business.operationsSetup.completionChecklist.slice(0, 2).join("\n")
+              })
+            }
+            coachHref={getCoachHref(`Draft a lean operating process, scheduling standard, and fulfillment checklist for my ${business.name} business.`, "sop")}
+          />
+
+          <div className="mt-4 grid gap-4 xl:grid-cols-2">
             <TextAreaField
               label="Scheduling Notes"
               value={panel.schedulingNotes}
@@ -641,9 +807,28 @@ export function BusinessWorkspace({
           id="brand-messaging"
           title="Brand + Messaging"
           description="Keep the positioning tight. This is the place for the promise, tone, proof, and message direction that should shape everything customer-facing."
-          helper="These notes should help the business sound consistent across sales calls, websites, social posts, and follow-up."
+          helper="Use Blueprint guidance or AI Coach to draft this section. Treat the service notes as reference material until you adapt them into your actual brand."
         >
-          <div className="grid gap-4 xl:grid-cols-2">
+          <SuggestionBlock
+            title="Reference brand direction"
+            preview={[
+              `Positioning: ${business.whyAttractive}`,
+              `Reference headline: ${business.recommended_first_offer}`,
+              `Trust builders: ${business.acquisitionPlan.socialProofIdeas.slice(0, 2).join(" | ")}`
+            ]}
+            onUse={() =>
+              onFieldsChange({
+                brandPositioningNotes: business.whyAttractive,
+                headlineOfferNotes: business.recommended_first_offer,
+                toneMessagingNotes: "Premium, clear, trustworthy, and direct. Avoid discount language and vague claims.",
+                trustBuildersNotes: business.acquisitionPlan.socialProofIdeas.slice(0, 3).join("\n"),
+                brandNotes: business.acquisitionPlan.googleBusinessProfileGuidance.slice(0, 2).join("\n")
+              })
+            }
+            coachHref={getCoachHref(`Draft brand positioning, trust builders, and messaging direction for my ${business.name} business.`, "marketing")}
+          />
+
+          <div className="mt-4 grid gap-4 xl:grid-cols-2">
             <TextAreaField
               label="Brand Positioning Notes"
               value={panel.brandPositioningNotes}
@@ -688,9 +873,29 @@ export function BusinessWorkspace({
           id="goals-milestones"
           title="Goals + Milestones"
           description="Keep the targets visible so the business always has a short-term focus and a measured next milestone."
-          helper="These goals should be specific enough to guide the week, but simple enough that you actually revisit them."
+          helper="Use Blueprint guidance or AI Coach to draft this section. The benchmark ranges below are reference context, not saved goals until you choose them."
         >
-          <div className="grid gap-4 xl:grid-cols-2">
+          <SuggestionBlock
+            title="Reference goal direction"
+            preview={[
+              `30-day benchmark reference: ${business.phaseBenchmarks[1] ? `${business.phaseBenchmarks[1].leads[0]}-${business.phaseBenchmarks[1].leads[1]} leads and ${business.phaseBenchmarks[1].jobs[0]}-${business.phaseBenchmarks[1].jobs[1]} jobs` : "Define the first 30-day target"}`,
+              `90-day revenue reference: ${business.revenue_90_range}`,
+              `Current milestone reference: ${business.blueprintPhases[0]?.successLooksLike ?? "Define the next milestone"}`
+            ]}
+            onUse={() =>
+              onFieldsChange({
+                goal30Day: business.phaseBenchmarks[1]
+                  ? `Generate ${business.phaseBenchmarks[1].leads[0]}-${business.phaseBenchmarks[1].leads[1]} leads, send ${business.phaseBenchmarks[1].quotes[0]}-${business.phaseBenchmarks[1].quotes[1]} quotes, and close ${business.phaseBenchmarks[1].jobs[0]}-${business.phaseBenchmarks[1].jobs[1]} jobs.`
+                  : "",
+                goal90Day: `Push toward ${business.revenue_90_range} in gross revenue while tightening quote speed and delivery.`,
+                revenueGoal: business.revenue_90_range,
+                milestoneNotes: business.blueprintPhases[0]?.successLooksLike ?? ""
+              })
+            }
+            coachHref={getCoachHref(`Draft 30-day goals, 90-day goals, and milestone targets for my ${business.name} business based on the selected blueprint.`, "checklist")}
+          />
+
+          <div className="mt-4 grid gap-4 xl:grid-cols-2">
             <TextAreaField
               label="30-Day Goal"
               value={panel.goal30Day}
@@ -708,7 +913,7 @@ export function BusinessWorkspace({
             <TextField
               label="Revenue Goal"
               value={panel.revenueGoal}
-              placeholder="Target gross revenue, monthly target, or launch target"
+              placeholder={`Reference range: ${business.revenue_90_range}`}
               onChange={(value) => onFieldChange("revenueGoal", value)}
             />
             <ReadOnlyValue
@@ -731,7 +936,7 @@ export function BusinessWorkspace({
         {shouldShowAnchorCard ? (
           <BusinessFlowPreviewCard
             businessName={panel.businessName || panel.serviceType}
-            coreOffer={panel.starterOffer}
+            coreOffer={panel.starterOffer || business.recommended_first_offer}
             leadSourcePlan={panel.leadSourcePlan}
             compact
           />

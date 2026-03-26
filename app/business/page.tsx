@@ -17,14 +17,16 @@ function BusinessWorkspacePage({ businessId, tier }: { businessId: string; tier:
 
   const { progress, taskProgress } = useBlueprintProgress(business.id, business.executionPlan);
   const { kpis } = useKpiState(business.id, defaultKpiData);
-  const { panel, updatedAt, setField } = useBusinessPanel(business, progress, taskProgress, kpis);
+  const { panel, updatedAt, setField, setFields } = useBusinessPanel(business, progress, taskProgress, kpis);
 
   return (
     <BusinessWorkspace
+      business={business}
       panel={panel}
       currentTier={tier}
       updatedAt={updatedAt}
       onFieldChange={setField}
+      onFieldsChange={setFields}
     />
   );
 }

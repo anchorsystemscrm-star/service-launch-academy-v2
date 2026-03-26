@@ -407,18 +407,14 @@ export function getBenchmarkSummary(kpis: KPIData) {
 
 export function getBusinessSetupStrength(panel: BusinessPanelData): BusinessSetupStrength {
   const checklist = [
-    { key: "serviceType", label: "Selected service", complete: hasValue(panel.serviceType) },
+    { key: "businessName", label: "Business name", complete: hasValue(panel.businessName) },
+    { key: "serviceArea", label: "Location", complete: hasValue(panel.serviceArea) },
     { key: "starterOffer", label: "Core offer", complete: hasValue(panel.starterOffer) },
     { key: "priceFloor", label: "Starting price", complete: hasValue(panel.priceFloor) },
     { key: "targetCustomer", label: "Target customer", complete: hasValue(panel.targetCustomer) },
-    { key: "focusThisWeek", label: "Current focus", complete: hasValue(panel.focusThisWeek) },
     { key: "leadSourcePlan", label: "Lead source plan", complete: hasValue(panel.leadSourcePlan) },
-    { key: "serviceArea", label: "Service area", complete: hasValue(panel.serviceArea) },
-    {
-      key: "ops",
-      label: "Setup or operations notes",
-      complete: hasValue(panel.setupNotes) || hasValue(panel.operationsNotes)
-    }
+    { key: "bookingMethod", label: "Booking method", complete: hasValue(panel.bookingMethod) },
+    { key: "paymentMethod", label: "Payment method", complete: hasValue(panel.paymentMethod) }
   ];
 
   const completed = checklist.filter((item) => item.complete).length;
@@ -433,8 +429,8 @@ export function getBusinessSetupStrength(panel: BusinessPanelData): BusinessSetu
     missing,
     summary:
       missing.length === 0
-        ? "Your workspace is taking shape and the core operating pieces are in place."
-        : `${missing.length} key section${missing.length === 1 ? "" : "s"} still need attention.`
+        ? "Your core business setup is documented and ready for refinement."
+        : `${missing.length} foundational field${missing.length === 1 ? "" : "s"} still need attention.`
   };
 }
 
