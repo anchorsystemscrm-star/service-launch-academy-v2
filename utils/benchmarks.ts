@@ -444,7 +444,7 @@ export function getDashboardNextBestAction(
       title: "Unlock your launch workspace",
       description: "Move from exploration into execution with the Business workspace, Blueprint, and Benchmarks.",
       href: "/pricing?plan=core",
-      ctaLabel: "Compare plans"
+      ctaLabel: "Compare Plans"
     };
   }
 

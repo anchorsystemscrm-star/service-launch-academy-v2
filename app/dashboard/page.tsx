@@ -99,7 +99,7 @@ function DashboardWorkspaceCards({
           <div className="mt-5 flex flex-wrap gap-3">
             <Link
               href={nextAction.href}
-              className="inline-flex items-center justify-center rounded-2xl border border-accent/40 bg-accent/10 px-4 py-3 text-sm font-semibold text-white transition hover:border-accent/80 hover:bg-accent/20"
+              className={`${nextAction.ctaLabel === "Compare Plans" ? "compare-plans-cta " : ""}inline-flex items-center justify-center rounded-2xl border border-accent/40 bg-accent/10 px-4 py-3 text-sm font-semibold text-white transition hover:border-accent/80 hover:bg-accent/20`}
             >
               {nextAction.ctaLabel}
             </Link>
@@ -247,9 +247,9 @@ function DashboardEmptyWorkspace({ tier }: { tier: AccessProfile["tier"] }) {
           </a>
           <Link
             href={getPricingHref()}
-            className="inline-flex items-center justify-center rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm font-semibold text-white transition hover:border-white/20 hover:bg-white/10"
+            className="compare-plans-cta inline-flex items-center justify-center rounded-2xl px-4 py-3 text-sm font-semibold text-white transition"
           >
-            Compare plans
+            Compare Plans
           </Link>
         </div>
       </div>
@@ -344,7 +344,7 @@ export default function DashboardPage() {
           <div className="flex flex-wrap gap-3">
             <Link
               href={getPricingHref()}
-              className="inline-flex rounded-2xl border border-accent/40 bg-accent/10 px-4 py-3 text-sm font-semibold text-white transition hover:border-accent/80 hover:bg-accent/20"
+              className="compare-plans-cta inline-flex rounded-2xl px-4 py-3 text-sm font-semibold text-white transition"
             >
               Compare Plans
             </Link>

@@ -7,7 +7,6 @@ import { usePathname, useRouter } from "next/navigation";
 import { BrandBlock } from "@/components/BrandBlock";
 import {
   AccessProfile,
-  getCheckoutHref,
   getPricingHref,
   getLockedCopy,
   hasTierAccess,
@@ -29,8 +28,6 @@ export function Navbar({ profile }: NavbarProps) {
   const [loggingOut, setLoggingOut] = useState(false);
   const mobileNavRef = useRef<HTMLDivElement | null>(null);
   const normalizedPathname = pathname ?? "";
-  const coreCheckoutHref = getCheckoutHref("core");
-  const proCheckoutHref = getCheckoutHref("pro");
   const currentLabel = navItems.find((item) => normalizedPathname.startsWith(item.href))?.label ?? "Workspace";
   const recommendedUpgrade =
     profile.tier === "preview"
@@ -38,8 +35,8 @@ export function Navbar({ profile }: NavbarProps) {
           label: "Recommended Next Step",
           headline: "Unlock the Full System",
           subtext: "Access Blueprint, Business workspace, and Benchmarks",
-          buttonLabel: "Upgrade to Core",
-          href: coreCheckoutHref,
+          buttonLabel: "Compare Plans",
+          href: getPricingHref(),
           glow: true
         }
       : profile.tier === "core"
@@ -47,8 +44,8 @@ export function Navbar({ profile }: NavbarProps) {
             label: "Recommended Upgrade",
             headline: "Activate AI Coach",
             subtext: "Get guided execution, pricing help, and sales scripts",
-            buttonLabel: "Upgrade to Pro",
-            href: proCheckoutHref,
+            buttonLabel: "Compare Plans",
+            href: getPricingHref(),
             glow: true
           }
         : null;
@@ -140,7 +137,7 @@ export function Navbar({ profile }: NavbarProps) {
             />
           </div>
 
-          <div className={`mt-5 rounded-[24px] border bg-white/5 p-4 ${recommendedUpgrade?.glow ? "border-accent/30 upgrade-glow" : "border-white/10"}`}>
+          <div className={`mt-5 rounded-[24px] border bg-white/5 p-4 ${recommendedUpgrade?.glow ? "border-accent/30 compare-plans-glow" : "border-white/10"}`}>
             <p className="text-xs font-semibold uppercase tracking-[0.16em] text-muted">
               {recommendedUpgrade?.label ?? "Access Tier"}
             </p>
@@ -165,14 +162,14 @@ export function Navbar({ profile }: NavbarProps) {
               {recommendedUpgrade ? (
                 <a
                   href={recommendedUpgrade.href}
-                  className="inline-flex items-center justify-center rounded-2xl border border-accent/50 bg-accent/15 px-4 py-3 text-sm font-semibold text-white shadow-[0_10px_30px_rgba(83,180,255,0.18)] transition hover:border-accent/80 hover:bg-accent/20"
+                  className="compare-plans-cta inline-flex items-center justify-center rounded-2xl px-4 py-3 text-sm font-semibold text-white transition"
                 >
                   {recommendedUpgrade.buttonLabel}
                 </a>
               ) : (
                 <Link
                   href={getPricingHref()}
-                  className="inline-flex items-center justify-center rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm font-semibold text-white transition hover:border-white/20 hover:bg-white/10"
+                  className="compare-plans-cta inline-flex items-center justify-center rounded-2xl px-4 py-3 text-sm font-semibold text-white transition"
                 >
                   Compare Plans
                 </Link>
