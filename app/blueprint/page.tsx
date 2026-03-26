@@ -343,8 +343,6 @@ function BlueprintWorkspace({ businessId, profile }: { businessId: string; profi
                 onToggleWeek={setWeekComplete}
                 onTaskOutputGenerated={setTaskHasOutput}
                 hasProAccess={hasProAccess}
-                canAccessAnchor={canAccessAnchor}
-                onOpenAnchor={() => setActiveTab("anchor")}
               />
 
               <section className="hidden w-full max-w-full overflow-hidden rounded-[24px] border border-white/10 bg-panel-gradient p-5 lg:block">
@@ -412,9 +410,6 @@ function BlueprintWorkspace({ businessId, profile }: { businessId: string; profi
                       status={status}
                       milestoneText={milestoneTemplate[Math.min(stageIndex, milestoneTemplate.length - 1)]}
                       hasAiAccess={hasProAccess}
-                      anchorStage={anchorStage}
-                      canAccessAnchor={canAccessAnchor}
-                      onOpenAnchor={() => setActiveTab("anchor")}
                       onTaskOutputGenerated={setTaskHasOutput}
                       onToggleTask={setTaskComplete}
                     />

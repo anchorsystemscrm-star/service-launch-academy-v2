@@ -48,8 +48,6 @@ interface MobileBlueprintFocusProps {
   onToggleWeek: (weekIndex: number, checked: boolean) => void;
   onTaskOutputGenerated: (taskId: string) => void;
   hasProAccess: boolean;
-  canAccessAnchor?: boolean;
-  onOpenAnchor?: () => void;
 }
 
 const stepRewardCopy = [
@@ -102,9 +100,7 @@ export function MobileBlueprintFocus({
   onToggleTask,
   onToggleWeek,
   onTaskOutputGenerated,
-  hasProAccess,
-  canAccessAnchor = false,
-  onOpenAnchor
+  hasProAccess
 }: MobileBlueprintFocusProps) {
   const [view, setView] = useState<MobileView>("focus");
   const [activeTask, setActiveTask] = useState<TaskPosition>(() => getFirstIncompletePosition(executionPlan, taskProgress));
@@ -472,12 +468,7 @@ export function MobileBlueprintFocus({
                   aiHref={getBlueprintTaskCoachHref(activeTaskItem.aiPrompt)}
                   hasAiAccess={hasProAccess}
                   aiUpgradeHref={getCheckoutHref("pro")}
-                  stageIndex={activeTask.stageIndex}
-                  anchorStage={anchorStage}
-                  canAccessAnchor={canAccessAnchor}
-                  anchorUpgradeHref={getCheckoutHref("elite")}
                   highlightPrimary={guidedAction === "generate_ai"}
-                  onAnchorAction={onOpenAnchor}
                   onPrimaryAction={() => onTaskOutputGenerated(activeTaskItem.id)}
                   compact
                 />
@@ -737,9 +728,6 @@ export function MobileBlueprintFocus({
                 status={status}
                 milestoneText={milestoneTemplate[Math.min(stageIndex, milestoneTemplate.length - 1)]}
                 hasAiAccess={hasProAccess}
-                anchorStage={anchorStage}
-                canAccessAnchor={canAccessAnchor}
-                onOpenAnchor={onOpenAnchor}
                 onTaskOutputGenerated={onTaskOutputGenerated}
                 onToggleTask={onToggleTask}
               />

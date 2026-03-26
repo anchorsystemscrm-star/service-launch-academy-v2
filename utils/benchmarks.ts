@@ -49,6 +49,11 @@ export interface WorkspaceRecommendation {
   href?: string;
 }
 
+export interface BlueprintAnchorCta {
+  body: string;
+  ctaLabel: string;
+}
+
 export type BlueprintGuidedAction = "generate_ai" | "mark_complete" | "next_step";
 export type BlueprintAnchorStage = 0 | 1 | 2 | 3 | 4;
 
@@ -305,6 +310,38 @@ export function getBlueprintOperationalNote(anchorStage: BlueprintAnchorStage): 
       return "Once you are juggling multiple leads, quotes, or follow-ups, missed details usually come from inconsistent tracking.";
     case 3:
       return "This becomes harder to manage manually once volume increases.";
+    default:
+      return null;
+  }
+}
+
+export function getBlueprintAnchorCta(item: ExecutionChecklistItem): BlueprintAnchorCta | null {
+  switch (item.title) {
+    case "Install the response standard":
+      return {
+        body: "At this stage, most operators start missing calls or forgetting the next reply. Anchor Systems installs the lead intake, missed-call text-back, and response workflow so every opportunity stays visible.",
+        ctaLabel: "See How Anchor Handles This"
+      };
+    case "Track quality, not just activity":
+      return {
+        body: "Once lead volume picks up, spreadsheets stop giving a clean picture of who was quoted, who went cold, and what needs the next touch. Anchor Systems turns this into a live pipeline instead of a memory problem.",
+        ctaLabel: "Turn This Into a Real System"
+      };
+    case "Run same-day quotes":
+      return {
+        body: "When quotes need to move fast, operators usually lose time between intake, follow-up, and booking. Anchor Systems keeps the quote path, reminders, and next action moving in one system.",
+        ctaLabel: "Run This Automatically in Anchor"
+      };
+    case "Install quote and review follow-up":
+      return {
+        body: "At this stage, open quotes and review asks usually start slipping. Anchor Systems runs the follow-up, booking reminders, and review requests automatically so the workflow does not depend on memory.",
+        ctaLabel: "Launch This in Anchor Systems"
+      };
+    case "Automate the obvious reminders":
+      return {
+        body: "Once reminders, confirmations, and follow-up need to fire consistently, this is where manual admin starts breaking. Anchor Systems handles the scheduling, reminder, and follow-up layer automatically.",
+        ctaLabel: "Run This Automatically in Anchor"
+      };
     default:
       return null;
   }

@@ -15,7 +15,7 @@ export function BusinessFlowPreviewCard({
   leadSourcePlan,
   compact = false
 }: BusinessFlowPreviewCardProps) {
-  const [view, setView] = useState<"simulation" | "anchor" | null>(null);
+  const [view, setView] = useState<"simulation" | null>(null);
   const trimmedOffer = coreOffer.trim() || "your core offer";
   const trimmedLeadSource = leadSourcePlan.trim().split("\n")[0] || "your first lead source";
 
@@ -41,13 +41,14 @@ export function BusinessFlowPreviewCard({
           >
             Test Your Business
           </button>
-          <button
-            type="button"
-            onClick={() => setView((current) => (current === "anchor" ? null : "anchor"))}
-            className="w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm font-semibold text-white transition hover:border-white/20 hover:bg-white/10"
+          <a
+            href="https://anchorsystemscrm.com"
+            target="_blank"
+            rel="noreferrer"
+            className="anchor-inline-cta w-full rounded-2xl px-4 py-3 text-center text-sm font-semibold text-white transition"
           >
-            See how Anchor fits this business
-          </button>
+            Run This Business on Anchor
+          </a>
         </div>
       </div>
 
@@ -75,18 +76,6 @@ export function BusinessFlowPreviewCard({
         </div>
       ) : null}
 
-      {view === "anchor" ? (
-        <div className="mt-5 rounded-[20px] border border-accent/20 bg-accent/5 p-5">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-accentSecondary">Anchor Systems</p>
-          <p className="mt-2 break-words text-sm leading-6 text-slate-100">
-            When the business is real enough to need tighter systems, Anchor becomes the execution layer for lead capture,
-            follow-up automation, scheduling, invoicing, pipeline visibility, and review requests.
-          </p>
-          <p className="mt-3 break-words text-sm leading-6 text-muted">
-            It fits best once the offer, lead process, and response expectations are already defined here in the workspace.
-          </p>
-        </div>
-      ) : null}
     </section>
   );
 }

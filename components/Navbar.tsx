@@ -192,7 +192,7 @@ export function Navbar({ profile }: NavbarProps) {
               onClick={() => setModalOpen(true)}
               className="mt-4 w-full rounded-xl border border-accentSecondary/40 bg-accentSecondary/10 px-4 py-3 text-sm font-semibold text-white transition hover:border-accentSecondary/70 hover:bg-accentSecondary/15"
             >
-              Run this on Anchor Systems
+              Run This Business on Anchor
             </button>
           </div>
         </div>
@@ -271,7 +271,7 @@ export function Navbar({ profile }: NavbarProps) {
           >
             <div className="flex items-start justify-between gap-4">
               <div>
-                <h2 className="text-xl font-semibold text-white">Run This on Anchor Systems</h2>
+                <h2 className="text-xl font-semibold text-white">Run This Business on Anchor</h2>
                 <p className="mt-2 max-w-xl text-sm leading-6 text-muted">
                   Anchor Systems is the CRM layer for this playbook. It helps operators capture
                   leads, automate follow-up, schedule work, and send invoices without juggling
