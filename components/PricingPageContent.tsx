@@ -4,7 +4,7 @@ import { BrandBlock } from "@/components/BrandBlock";
 import { PricingCard } from "@/components/PricingCard";
 import { businesses } from "@/data/businesses";
 import { SubscriptionTier } from "@/types/business";
-import { getCheckoutHref, getPricingHref, isExternalHref, tierDescriptions, tierLabels } from "@/utils/access";
+import { getCheckoutHref, getPricingHref, tierDescriptions, tierLabels } from "@/utils/access";
 
 const planContent: Array<{
   plan: SubscriptionTier;
@@ -150,8 +150,8 @@ export function PricingPageContent({ focusedPlan, currentTier }: PricingPageCont
         })}
       </section>
 
-      <section id="upgrade-request" className="mt-6 grid gap-6 xl:grid-cols-[1fr_0.9fr]">
-        <div className="panel-surface p-6 sm:p-8">
+      <section className="mt-6 panel-surface p-6 sm:p-8">
+        <div>
           <p className="text-sm font-semibold uppercase tracking-[0.16em] text-muted">What changes by tier</p>
           <h2 className="mt-3 text-2xl font-semibold text-white">Make the value ladder obvious.</h2>
           <div className="mt-6 grid gap-4 md:grid-cols-2">
@@ -164,38 +164,6 @@ export function PricingPageContent({ focusedPlan, currentTier }: PricingPageCont
               <div key={item} className="rounded-[24px] border border-white/10 bg-white/5 p-4 text-sm text-slate-200">
                 {item}
               </div>
-            ))}
-          </div>
-        </div>
-
-        <div className="panel-surface p-6 sm:p-8">
-          <p className="text-sm font-semibold uppercase tracking-[0.16em] text-muted">Upgrade actions</p>
-          <h2 className="mt-3 text-2xl font-semibold text-white">Stripe-ready CTA structure.</h2>
-          <p className="mt-4 text-sm leading-6 text-muted">
-            These buttons currently route to placeholder upgrade actions so the monetization flow is visible now. They can be
-            replaced with Stripe Checkout URLs or upgrade endpoints without changing the pricing UI.
-          </p>
-          <div className="mt-6 grid gap-3">
-            {(["core", "pro", "elite"] as SubscriptionTier[]).map((plan) => (
-              isExternalHref(getCheckoutHref(plan)) ? (
-                <a
-                  key={plan}
-                  href={getCheckoutHref(plan)}
-                  className="inline-flex items-center justify-between rounded-[24px] border border-white/10 bg-white/5 px-5 py-4 text-sm font-semibold text-white transition hover:border-accent/40 hover:bg-white/10"
-                >
-                  <span>Upgrade to {tierLabels[plan]}</span>
-                  <span className="text-muted">Stripe Checkout</span>
-                </a>
-              ) : (
-                <Link
-                  key={plan}
-                  href={getCheckoutHref(plan)}
-                  className="inline-flex items-center justify-between rounded-[24px] border border-white/10 bg-white/5 px-5 py-4 text-sm font-semibold text-white transition hover:border-accent/40 hover:bg-white/10"
-                >
-                  <span>Upgrade to {tierLabels[plan]}</span>
-                  <span className="text-muted">Select Plan</span>
-                </Link>
-              )
             ))}
           </div>
         </div>
